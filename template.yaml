@@ -5,6 +5,25 @@ Description: >-
 Transform:
   - AWS::Serverless-2016-10-31
 
+Parameters:
+  AccountId:
+    Type: String
+    Description: AWS account ID
+  Ruleset:
+    Type: String
+    Default: emails-inbound-service
+    AllowedValues:
+      - emails-inbound-service
+      - emails-inbound-service-test
+    Description: Ruleset to create
+  Subdomain:
+    Type: String
+    Default: bowland.link
+    AllowedValues:
+      - bowland.link
+      - test.bowland.link
+    Description: Subdomain to use for API
+
 Resources:
   EmailBucket:
     Type: AWS::S3::Bucket
@@ -13,9 +32,9 @@ Resources:
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - BucketKeyEnabled: false
-          - ServerSideEncryptionByDefault:
+            ServerSideEncryptionByDefault:
               SSEAlgorithm: 'AES256'
-      BucketName: emails-storage
+      BucketName: emails-service-storage
       LifecycleConfiguration:
         Rules:
           - Status: Enabled
@@ -29,8 +48,28 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
       Tags:
-        'created-by': 'emails-inbound-service'
-        'created-for': 'emails'
+        - Key: 'created-by'
+          Value: 'emails-inbound-service'
+        - Key: 'created-for'
+          Value: 'emails'
+
+  EmailBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref EmailBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:PutObject'
+            Effect: Allow
+            Resource: !Sub 'arn:aws:s3:::${EmailBucket}/*'
+            Principal:
+              Service: ses.amazonaws.com
+            Condition:
+              StringLike:
+                'aws:Referer':
+                  - !Ref AccountId
 
   IncomingEmailFunction:
     Type: AWS::Serverless::Function
@@ -41,7 +80,7 @@ Resources:
       Architectures:
         - x86_64
       MemorySize: 128
-      Timeout: 30
+      Timeout: 90
       Description: Incoming SES email
       Policies:
         - AWSLambdaBasicExecutionRole
@@ -63,9 +102,53 @@ Resources:
         'created-by': 'emails-inbound-service'
         'created-for': 'emails'
 
+  LambdaExecutePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt IncomingEmailFunction.Arn
+      Principal: ses.amazonaws.com
+      SourceAccount: !Ref AccountId
+
   IncomingEmailLogGroup:
     Type: AWS::Logs::LogGroup
     DependsOn: IncomingEmailFunction
     Properties:
       LogGroupName: !Sub /aws/lambda/${IncomingEmailFunction}
       RetentionInDays: 30
+
+  MXRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: !Sub 'Email target for ${Subdomain}'
+      HostedZoneName: bowland.link.
+      Name: !Ref Subdomain
+      ResourceRecords:
+        - '10 inbound-smtp.us-east-1.amazonaws.com'
+      TTL: 300
+      Type: 'MX'
+
+  # NOTE: Must be activated manually
+  ReceiptRuleSet:
+    Type: 'AWS::SES::ReceiptRuleSet'
+    Properties:
+      RuleSetName: !Ref Ruleset
+
+  ReceiptRule:
+    Type: AWS::SES::ReceiptRule
+    Properties:
+      Rule:
+        Actions:
+          - S3Action:
+              BucketName: !Ref EmailBucket
+              ObjectKeyPrefix: 'inbound/'
+          - LambdaAction:
+              FunctionArn: !GetAtt IncomingEmailFunction.Arn
+              InvocationType: 'Event'
+        Enabled: true
+        Name: !Sub 'rule-set-${Subdomain}'
+        Recipients:
+          - !Ref Subdomain
+        ScanEnabled: true
+      # This is not a typo, this should always be the active (production) rule set
+      RuleSetName: emails-inbound-service
