@@ -1,0 +1,68 @@
+{
+  "name": "emails-eminbound-service",
+  "author": "David Bowland",
+  "description": "Handles inbound emails from SES",
+  "version": "1.1.0",
+  "engines": {
+    "node": "^14.0.0"
+  },
+  "scripts": {
+    "build": "npm run clean && tsc && cp package*.json dist/ && cd dist/ && HUSKY=0 NODE_ENV=production npm ci",
+    "clean": "rm -rf dist coverage && NODE_ENV=test npm ci",
+    "lint": "prettier --write . && eslint --fix . --resolve-plugins-relative-to .",
+    "prepare": "if [ \"$HUSKY\" != \"0\" ]; then husky install ; fi",
+    "start": "npm run build && npm run quick-start",
+    "quick-start": "tsc && HUSKY=0 sam build && sam local invoke --event events/post-item.json",
+    "test": "npm run lint && jest --colors"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "prettier --write --ignore-unknown",
+      "eslint --resolve-plugins-relative-to . --fix",
+      "jest --colors --findRelatedTests --coverageThreshold '{}'"
+    ],
+    "**/*": [
+      "prettier --write --ignore-unknown"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidbowland/emails-inbound-service.git"
+  },
+  "bugs": {
+    "url": "https://github.com/davidbowland/emails-inbound-service/issues"
+  },
+  "homepage": "https://github.com/davidbowland/emails-inbound-service#readme",
+  "dependencies": {
+    "aws-sdk": "^2.923.0",
+    "axios": "^0.24.0",
+    "axios-retry": "^3.2.4",
+    "escape-html": "^1.0.3",
+    "mailparser": "^3.4.0",
+    "nodemailer": "^6.7.0",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.5",
+    "@babel/preset-env": "^7.16.5",
+    "@babel/preset-typescript": "^7.16.5",
+    "@types/aws-lambda": "^8.10.88",
+    "@types/jest": "^27.0.3",
+    "@types/mailparser": "^3.4.0",
+    "@types/node": "^15.14.9",
+    "@types/nodemailer": "^6.4.4",
+    "@types/uuid": "^8.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.8.0",
+    "@typescript-eslint/parser": "^5.8.0",
+    "babel-jest": "^27.4.5",
+    "eslint": "^8.5.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-jest": "^25.3.0",
+    "husky": "^7.0.4",
+    "jest": "^27.4.5",
+    "lint-staged": "^12.1.4",
+    "prettier": "^2.5.1",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4"
+  }
+}

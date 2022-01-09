@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  emails-inbound-service
+
+Transform:
+  - AWS::Serverless-2016-10-31
+
+Resources:
+  EmailBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - BucketKeyEnabled: false
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'AES256'
+      BucketName: emails-storage
+      LifecycleConfiguration:
+        Rules:
+          - Status: Enabled
+            ExpirationInDays: 365
+            Transitions:
+              - TransitionInDays: 30
+                StorageClass: STANDARD_IA
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        'created-by': 'emails-inbound-service'
+        'created-for': 'emails'
+
+  IncomingEmailFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/incoming-email.handleIncomingEmail
+      CodeUri: './dist'
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      MemorySize: 128
+      Timeout: 30
+      Description: Incoming SES email
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - S3CrudPolicy:
+            BucketName: !Ref EmailBucket
+      Environment:
+        Variables:
+          ACCOUNT_API_KEY_NAME: emails-ApiAp-Q78YXqNItYEF
+          ACCOUNT_API_URL: 'http://emails-account-api.bowland.link/'
+          EMAIL_API_KEY_NAME: emails-ApiAp-fiLUXC7EH0ik
+          EMAIL_API_URL: 'http://emails-email-api.bowland.link/'
+          EMAIL_BUCKET: !Ref EmailBucket
+          EMAIL_FROM: do-not-reply@bowland.link
+          EMAIL_REGION: us-east-1
+          ERROR_EMAIL: dbowland1+emails-service-error@gmail.com
+          QUEUE_API_KEY_NAME: emails-ApiAp-pIzQfk2pD24Q
+          QUEUE_API_URL: 'http://emails-queue-api.bowland.link/'
+      Tags:
+        'created-by': 'emails-inbound-service'
+        'created-for': 'emails'
+
+  IncomingEmailLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: IncomingEmailFunction
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${IncomingEmailFunction}
+      RetentionInDays: 30
