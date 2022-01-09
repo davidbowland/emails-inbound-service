@@ -124,7 +124,7 @@ jobs:
             --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
             --no-fail-on-empty-changeset \
             --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE} \
-            --parameter-overrides 'AccountId=${{ secrets.AWS_ACCOUNT_ID }} Ruleset=emails-inbound-service-test Subdomain=test.bowland.link'
+            --parameter-overrides 'AccountId=${{ secrets.AWS_ACCOUNT_ID }} Bucket=emails-service-storage-test Ruleset=emails-inbound-service-test Subdomain=test.bowland.link'
 
   build-and-package:
     name: Build and package lambda

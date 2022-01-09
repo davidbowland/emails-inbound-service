@@ -1,0 +1,37 @@
+import { getAttachmentId } from './attachments'
+import { simpleParser } from 'mailparser'
+import { getS3Object } from '../services/s3'
+import { Email, EmailAddress, EmailHeaders, ParsedMail } from '../types'
+
+const emptyAddress: EmailAddress = {
+  display: '',
+  value: [
+    {
+      address: '',
+      name: '',
+    },
+  ],
+}
+
+export const convertParsedContentsToEmail = (
+  messageId: string,
+  parsedMail: ParsedMail,
+  recipients: string[]
+): Email => ({
+  attachments: parsedMail.attachments.map(getAttachmentId),
+  bodyHtml: (parsedMail.html ?? parsedMail.textAsHtml) || '',
+  bodyText: parsedMail.text ?? '',
+  ccAddress: parsedMail.cc as unknown as EmailAddress,
+  fromAddress: (parsedMail.from ?? emptyAddress) as EmailAddress,
+  headers: parsedMail.headers as unknown as EmailHeaders,
+  id: parsedMail.messageId ?? messageId,
+  inReplyTo: parsedMail.inReplyTo,
+  references: typeof parsedMail.references === 'string' ? [parsedMail.references] : parsedMail.references ?? [],
+  replyToAddress: (parsedMail.replyTo ?? emptyAddress) as EmailAddress,
+  subject: parsedMail.subject,
+  toAddress: parsedMail.to as unknown as EmailAddress,
+  recipients,
+})
+
+export const getParsedMail = (messageId: string): Promise<ParsedMail> =>
+  getS3Object(`inbound/${messageId}`).then(simpleParser)

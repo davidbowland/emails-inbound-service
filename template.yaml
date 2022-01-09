@@ -9,6 +9,13 @@ Parameters:
   AccountId:
     Type: String
     Description: AWS account ID
+  Bucket:
+    Type: String
+    Default: emails-service-storage
+    AllowedValues:
+      - emails-service-storage
+      - emails-service-storage-test
+    Description: Ruleset to create
   Ruleset:
     Type: String
     Default: emails-inbound-service
@@ -34,7 +41,7 @@ Resources:
           - BucketKeyEnabled: false
             ServerSideEncryptionByDefault:
               SSEAlgorithm: 'AES256'
-      BucketName: emails-service-storage
+      BucketName: !Ref Bucket
       LifecycleConfiguration:
         Rules:
           - Status: Enabled
@@ -85,14 +92,20 @@ Resources:
       Policies:
         - AWSLambdaBasicExecutionRole
         - S3CrudPolicy:
-            BucketName: !Ref EmailBucket
+            BucketName: emails-service-storage
+        - Version: 2012-10-17
+          Statement:
+            - Action:
+                - 'apigateway:GET'
+              Effect: Allow
+              Resource: 'arn:aws:apigateway:us-east-1::/apikeys'
       Environment:
         Variables:
           ACCOUNT_API_KEY_NAME: emails-ApiAp-Q78YXqNItYEF
           ACCOUNT_API_URL: 'http://emails-account-api.bowland.link/'
           EMAIL_API_KEY_NAME: emails-ApiAp-fiLUXC7EH0ik
           EMAIL_API_URL: 'http://emails-email-api.bowland.link/'
-          EMAIL_BUCKET: !Ref EmailBucket
+          EMAIL_BUCKET: emails-service-storage
           EMAIL_FROM: do-not-reply@bowland.link
           EMAIL_REGION: us-east-1
           ERROR_EMAIL: dbowland1+emails-service-error@gmail.com
@@ -140,7 +153,7 @@ Resources:
       Rule:
         Actions:
           - S3Action:
-              BucketName: !Ref EmailBucket
+              BucketName: emails-service-storage
               ObjectKeyPrefix: 'inbound/'
           - LambdaAction:
               FunctionArn: !GetAtt IncomingEmailFunction.Arn

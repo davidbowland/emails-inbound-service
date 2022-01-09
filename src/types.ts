@@ -1,4 +1,7 @@
 export * from 'aws-lambda'
+export { AxiosResponse } from 'axios'
+export { AttachmentCommon, ParsedMail } from 'mailparser'
+export { Attachment } from 'nodemailer/lib/mailer'
 
 export interface AccountInboundPreference {
   forwardTargets?: string[] | Set<string>
