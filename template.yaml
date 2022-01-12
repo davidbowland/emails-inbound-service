@@ -9,27 +9,38 @@ Parameters:
   AccountId:
     Type: String
     Description: AWS account ID
-  Bucket:
+  Environment:
     Type: String
-    Default: emails-service-storage
+    Default: prod
     AllowedValues:
-      - emails-service-storage
-      - emails-service-storage-test
-    Description: Ruleset to create
-  Ruleset:
-    Type: String
-    Default: emails-inbound-service
-    AllowedValues:
-      - emails-inbound-service
-      - emails-inbound-service-test
-    Description: Ruleset to create
-  Subdomain:
-    Type: String
-    Default: bowland.link
-    AllowedValues:
-      - bowland.link
-      - test.bowland.link
-    Description: Subdomain to use for API
+      - prod
+      - test
+    Description: Environment for deploy
+
+Mappings:
+  EnvironmentMap:
+    prod:
+      accountApiKeyName: emails-ApiAp-XL6zNpBsD5MQ
+      accountApiUrl: 'http://emails-account-api.bowland.link/'
+      bucket: emails-service-storage
+      emailApiKeyName: emails-ApiAp-HAz9kJmN4UNJ
+      emailApiUrl: 'http://emails-email-api.bowland.link/'
+      emailFrom: do-not-reply@bowland.link
+      queueApiKeyName: emails-ApiAp-yI1gb3pwh6ea
+      queueApiUrl: 'http://emails-queue-api.bowland.link/'
+      ruleset: emails-inbound-service
+      subdomain: bowland.link
+    test:
+      accountApiKeyName: emails-ApiAp-xq9VocRbqmVA
+      accountApiUrl: 'http://emails-account-api-test.bowland.link/'
+      bucket: emails-service-storage-test
+      emailApiKeyName: emails-ApiAp-fnVptjdKbO5i
+      emailApiUrl: 'http://emails-email-api-test.bowland.link/'
+      emailFrom: do-not-reply@test.bowland.link
+      queueApiKeyName: emails-ApiAp-rWlNxvI1TJ8Y
+      queueApiUrl: 'http://emails-queue-api-test.bowland.link/'
+      ruleset: emails-inbound-service-test
+      subdomain: test.bowland.link
 
 Resources:
   EmailBucket:
@@ -41,7 +52,7 @@ Resources:
           - BucketKeyEnabled: false
             ServerSideEncryptionByDefault:
               SSEAlgorithm: 'AES256'
-      BucketName: !Ref Bucket
+      BucketName: !FindInMap [EnvironmentMap, !Ref Environment, bucket]
       LifecycleConfiguration:
         Rules:
           - Status: Enabled
@@ -92,7 +103,7 @@ Resources:
       Policies:
         - AWSLambdaBasicExecutionRole
         - S3CrudPolicy:
-            BucketName: emails-service-storage
+            BucketName: !Ref EmailBucket
         - Version: 2012-10-17
           Statement:
             - Action:
@@ -101,16 +112,16 @@ Resources:
               Resource: 'arn:aws:apigateway:us-east-1::/apikeys'
       Environment:
         Variables:
-          ACCOUNT_API_KEY_NAME: emails-ApiAp-Q78YXqNItYEF
-          ACCOUNT_API_URL: 'http://emails-account-api.bowland.link/'
-          EMAIL_API_KEY_NAME: emails-ApiAp-fiLUXC7EH0ik
-          EMAIL_API_URL: 'http://emails-email-api.bowland.link/'
-          EMAIL_BUCKET: emails-service-storage
-          EMAIL_FROM: do-not-reply@bowland.link
+          ACCOUNT_API_KEY_NAME: !FindInMap [EnvironmentMap, !Ref Environment, accountApiKeyName]
+          ACCOUNT_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, accountApiUrl]
+          EMAIL_API_KEY_NAME: !FindInMap [EnvironmentMap, !Ref Environment, emailApiKeyName]
+          EMAIL_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, emailApiUrl]
+          EMAIL_BUCKET: !Ref EmailBucket
+          EMAIL_FROM: !FindInMap [EnvironmentMap, !Ref Environment, emailFrom]
           EMAIL_REGION: us-east-1
           ERROR_EMAIL: dbowland1+emails-service-error@gmail.com
-          QUEUE_API_KEY_NAME: emails-ApiAp-pIzQfk2pD24Q
-          QUEUE_API_URL: 'http://emails-queue-api.bowland.link/'
+          QUEUE_API_KEY_NAME: !FindInMap [EnvironmentMap, !Ref Environment, queueApiKeyName]
+          QUEUE_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, queueApiUrl]
       Tags:
         'created-by': 'emails-inbound-service'
         'created-for': 'emails'
@@ -133,9 +144,11 @@ Resources:
   MXRecord:
     Type: AWS::Route53::RecordSet
     Properties:
-      Comment: !Sub 'Email target for ${Subdomain}'
+      Comment: !Sub
+        - 'Email target for ${Subdomain}'
+        - Subdomain: !FindInMap [EnvironmentMap, !Ref Environment, subdomain]
       HostedZoneName: bowland.link.
-      Name: !Ref Subdomain
+      Name: !FindInMap [EnvironmentMap, !Ref Environment, subdomain]
       ResourceRecords:
         - '10 inbound-smtp.us-east-1.amazonaws.com'
       TTL: 300
@@ -145,7 +158,7 @@ Resources:
   ReceiptRuleSet:
     Type: 'AWS::SES::ReceiptRuleSet'
     Properties:
-      RuleSetName: !Ref Ruleset
+      RuleSetName: !FindInMap [EnvironmentMap, !Ref Environment, ruleset]
 
   ReceiptRule:
     Type: AWS::SES::ReceiptRule
@@ -153,15 +166,17 @@ Resources:
       Rule:
         Actions:
           - S3Action:
-              BucketName: emails-service-storage
+              BucketName: !Ref EmailBucket
               ObjectKeyPrefix: 'inbound/'
           - LambdaAction:
               FunctionArn: !GetAtt IncomingEmailFunction.Arn
               InvocationType: 'Event'
         Enabled: true
-        Name: !Sub 'rule-set-${Subdomain}'
+        Name: !Sub
+          - 'rule-set-${Subdomain}'
+          - Subdomain: !FindInMap [EnvironmentMap, !Ref Environment, subdomain]
         Recipients:
-          - !Ref Subdomain
+          - !FindInMap [EnvironmentMap, !Ref Environment, subdomain]
         ScanEnabled: true
       # This is not a typo, this should always be the active (production) rule set
-      RuleSetName: emails-inbound-service
+      RuleSetName: !FindInMap [EnvironmentMap, 'prod', ruleset]
