@@ -80,7 +80,12 @@ describe('S3', () => {
 
     test('expect no metadata passed to S3 when omitted', async () => {
       await putS3Object(key, valueToPut)
-      expect(mockPutObject).toHaveBeenCalledWith({ Body: valueToPut, Bucket: emailBucket, Key: key, Metadata: {} })
+      expect(mockPutObject).toHaveBeenCalledWith({
+        Body: valueToPut,
+        Bucket: emailBucket,
+        Key: key,
+        Metadata: {},
+      })
     })
 
     test('expect reject when promise rejects', async () => {

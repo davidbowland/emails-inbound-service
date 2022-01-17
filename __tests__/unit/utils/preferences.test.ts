@@ -36,7 +36,10 @@ describe('preferences', () => {
 
     test('expect preferences merged', async () => {
       const result = await aggregatePreferences([defaultAccount, account1, account2])
-      expect(result).toEqual({ forwardTargets: new Set(accounts.default.inbound.forwardTargets), save: true })
+      expect(result).toEqual({
+        forwardTargets: new Set(accounts.default.inbound.forwardTargets),
+        save: true,
+      })
     })
   })
 })

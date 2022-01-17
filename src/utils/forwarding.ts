@@ -7,12 +7,13 @@ import { AttachmentCommon, AxiosResponse, Email } from '../types'
 
 const copyAttachments = (attachments: AttachmentCommon[], uuid: string): Promise<AttachmentCommon[]> =>
   Promise.all(
-    attachments.map((attachment) =>
-      copyS3Object(attachment.content, `queue/emails-service/${uuid}/${getAttachmentId(attachment)}`).then(() => ({
+    attachments.map(async (attachment) => {
+      await copyS3Object(attachment.content, `queue/emails-service/${uuid}/${getAttachmentId(attachment)}`)
+      return {
         ...attachment,
         content: `queue/emails-service/${uuid}/${getAttachmentId(attachment)}`,
-      }))
-    )
+      }
+    })
   )
 
 export const forwardEmail = (

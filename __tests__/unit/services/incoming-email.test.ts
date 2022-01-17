@@ -1,7 +1,7 @@
 import { accounts, attachment, email, messageId, parsedContents } from '../__mocks__'
 import { mocked } from 'jest-mock'
 import * as emails from '@services/emails'
-import { processReceivedEmail } from '@services/incoming-email-processing'
+import { processReceivedEmail } from '@services/incoming-email'
 import * as attachments from '@utils/attachments'
 import * as forwarding from '@utils/forwarding'
 import * as parser from '@utils/parser'
@@ -14,7 +14,7 @@ jest.mock('@utils/logging')
 jest.mock('@utils/parser')
 jest.mock('@utils/preferences')
 
-describe('email', () => {
+describe('incoming-email service', () => {
   describe('processReceivedEmail', () => {
     const recipients = ['e@mail.address']
 

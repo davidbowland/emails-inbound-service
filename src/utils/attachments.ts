@@ -13,14 +13,17 @@ const getAttachmentMetadata = (attachment: AttachmentCommon): StringObject => ({
 
 export const getAttachmentId = (attachment: AttachmentCommon): string => attachment.cid ?? attachment.checksum
 
-export const uploadAttachments = (messageId: string, emailAttachments: AttachmentCommon[]): Promise<unknown[]> =>
+export const uploadAttachments = (
+  messageId: string,
+  emailAttachments: AttachmentCommon[]
+): Promise<AttachmentCommon[]> =>
   Promise.all(
-    emailAttachments.map((attachment) =>
-      Promise.resolve(`inbound/${messageId}/${getAttachmentId(attachment)}`).then((s3Key) =>
-        putS3Object(s3Key, attachment.content, getAttachmentMetadata(attachment)).then(() => ({
-          ...attachment,
-          content: s3Key,
-        }))
-      )
-    )
+    emailAttachments.map(async (attachment) => {
+      const s3Key = `inbound/${messageId}/${getAttachmentId(attachment)}`
+      await putS3Object(s3Key, attachment.content, getAttachmentMetadata(attachment))
+      return {
+        ...attachment,
+        content: s3Key,
+      }
+    })
   )

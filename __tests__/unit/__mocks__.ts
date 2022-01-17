@@ -93,7 +93,10 @@ export const parsedContents = {
     { key: 'subject', line: 'Subject: P G Wodehouse' },
     { key: 'from', line: 'From: Person A <a@person.email>' },
     { key: 'to', line: 'To: Person B <b@person.email>' },
-    { key: 'content-type', line: 'Content-Type: multipart/alternative; boundary="00000000000054a3f30572b9c865"' },
+    {
+      key: 'content-type',
+      line: 'Content-Type: multipart/alternative; boundary="00000000000054a3f30572b9c865"',
+    },
   ],
   html: '<a href="http://www.gutenberg.org/files/8164/8164-h/8164-h.htm">http://www.gutenberg.org/files/8164/8164-h/8164-h.htm</a>\n',
   text: 'http://www.gutenberg.org/files/8164/8164-h/8164-h.htm\n',
