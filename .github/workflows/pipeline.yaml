@@ -44,7 +44,7 @@ jobs:
       - name: Install NPM 8
         run: npm install -g npm@8
       - name: Install and audit packages
-        run: npm ci && npm audit --audit-level=high
+        run: npm ci && npm audit --audit-level=critical
         env:
           NODE_ENV: test
       - name: Run tests
