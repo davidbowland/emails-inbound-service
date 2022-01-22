@@ -34,7 +34,7 @@ Mappings:
       accountApiKeyName: emails-ApiAp-xq9VocRbqmVA
       accountApiUrl: 'http://emails-account-api-test.bowland.link/'
       bucket: emails-service-storage-test
-      emailApiKeyName: emails-ApiAp-fnVptjdKbO5i
+      emailApiKeyName: emails-ApiAp-a5Ly063zKnCp
       emailApiUrl: 'http://emails-email-api-test.bowland.link/'
       emailFrom: do-not-reply@test.bowland.link
       queueApiKeyName: emails-ApiAp-rWlNxvI1TJ8Y
