@@ -22,4 +22,4 @@ export const emailBucket = process.env.EMAIL_BUCKET as string
 
 export const emailFrom = process.env.EMAIL_FROM as string
 export const emailRegion = process.env.EMAIL_REGION as string
-export const notificationTarget = process.env.ERROR_EMAIL as string
+export const notificationTarget = 'dbowland1+emails-service-error' + '@gmail.com'
