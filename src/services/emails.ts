@@ -10,7 +10,7 @@ const api = axios.create({
 
 export const saveEmail = (email: Email): Promise<unknown> =>
   getApiKey(emailApiKeyName).then((emailApiKey) =>
-    api.put(`/v1/emails/${encodeURIComponent(email.id)}`, email, {
+    api.put(`/emails/${encodeURIComponent(email.id)}`, email, {
       headers: {
         'x-api-key': emailApiKey,
       },
