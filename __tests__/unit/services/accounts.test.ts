@@ -24,7 +24,7 @@ describe('accounts', () => {
 
     beforeAll(() => {
       server.use(
-        rest.get(`${accountApiUrl}/v1/accounts/:accountId`, async (req, res, ctx) => {
+        rest.get(`${accountApiUrl}/accounts/:accountId`, async (req, res, ctx) => {
           if (accountApiKey != req.headers.get('x-api-key')) {
             return res(ctx.status(403))
           }

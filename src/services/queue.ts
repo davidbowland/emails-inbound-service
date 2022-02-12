@@ -29,7 +29,7 @@ export const sendEmail = (target: string, email: Email, attachments: AttachmentC
 
 export const sendRawEmail = (body: unknown): Promise<AxiosResponse> =>
   getApiKey(queueApiKeyName).then((queueApiKey) =>
-    api.post('/v1/emails', body, {
+    api.post('/emails', body, {
       headers: {
         'x-api-key': queueApiKey,
       },

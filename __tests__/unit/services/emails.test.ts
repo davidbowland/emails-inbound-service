@@ -14,7 +14,7 @@ describe('emails', () => {
 
     beforeAll(() => {
       server.use(
-        rest.put(`${emailApiUrl}/v1/emails/:id`, async (req, res, ctx) => {
+        rest.put(`${emailApiUrl}/emails/:id`, async (req, res, ctx) => {
           const { id } = req.params
           if (emailApiKey != req.headers.get('x-api-key')) {
             return res(ctx.status(403))

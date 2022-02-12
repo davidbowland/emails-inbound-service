@@ -15,7 +15,7 @@ describe('queue', () => {
 
     beforeAll(() => {
       server.use(
-        rest.post(`${queueApiUrl}/v1/emails`, async (req, res, ctx) => {
+        rest.post(`${queueApiUrl}/emails`, async (req, res, ctx) => {
           if (queueApiKey != req.headers.get('x-api-key')) {
             return res(ctx.status(403))
           }

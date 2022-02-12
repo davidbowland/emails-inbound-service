@@ -21,23 +21,23 @@ Mappings:
   EnvironmentMap:
     prod:
       accountApiKeyName: emails-ApiAp-XL6zNpBsD5MQ
-      accountApiUrl: 'http://emails-account-api.dbowland.com/'
+      accountApiUrl: 'https://emails-account-api.dbowland.com/v1'
       bucket: emails-service-storage
       domain: dbowland.com
       emailApiKeyName: emails-ApiAp-HAz9kJmN4UNJ
-      emailApiUrl: 'http://emails-email-api.dbowland.com/'
+      emailApiUrl: 'https://emails-email-api.dbowland.com/v1'
       queueApiKeyName: emails-ApiAp-yI1gb3pwh6ea
-      queueApiUrl: 'http://emails-queue-api.dbowland.com/'
+      queueApiUrl: 'https://emails-queue-api.dbowland.com/v1'
       ruleset: emails-inbound-service
     test:
       accountApiKeyName: emails-ApiAp-n43huA04RZ8a
-      accountApiUrl: 'http://emails-account-api.bowland.link/'
+      accountApiUrl: 'https://emails-account-api.bowland.link/v1'
       bucket: emails-service-storage-test
       domain: bowland.link
       emailApiKeyName: emails-ApiAp-PpyBTSu47hU9
-      emailApiUrl: 'http://emails-email-api.bowland.link/'
+      emailApiUrl: 'https://emails-email-api.bowland.link/v1'
       queueApiKeyName: emails-ApiAp-g89VosJ3mW61
-      queueApiUrl: 'http://emails-queue-api.bowland.link/'
+      queueApiUrl: 'https://emails-queue-api.bowland.link/v1'
       ruleset: emails-inbound-service-test
 
 Resources:

@@ -13,7 +13,7 @@ export const extractAccountFromAddress = (email: string): string => email.replac
 export const getAccountPreferences = (account: string, orDefault = true): Promise<AccountPreference> =>
   getApiKey(accountApiKeyName)
     .then((accountApiKey) =>
-      api.get(`/v1/accounts/${encodeURIComponent(account)}`, {
+      api.get(`/accounts/${encodeURIComponent(account)}`, {
         headers: { 'x-api-key': accountApiKey },
         params: { default: orDefault },
       })
