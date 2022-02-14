@@ -14,8 +14,8 @@ sam build --template ${SAM_TEMPLATE} --use-container
 
 # Deploy build lambda
 
-TESTING_ARTIFACTS_BUCKET=emails-lambda-source
-TESTING_CLOUDFORMATION_EXECUTION_ROLE="arn:aws:iam::$AWS_ACCOUNT_ID:role/aws-sam-cli-managed-email-CloudFormationExecutionR-QR3RDRYNZLSC"
+TESTING_ARTIFACTS_BUCKET=aws-sam-cli-managed-emails-inboun-artifactsbucket-hylrfx70ozc
+TESTING_CLOUDFORMATION_EXECUTION_ROLE="arn:aws:iam::$AWS_ACCOUNT_ID:role/aws-sam-cli-managed-email-CloudFormationExecutionR-1N6NV9QUS4M44"
 TESTING_STACK_NAME=emails-inbound-service-test
 sam deploy --stack-name ${TESTING_STACK_NAME} \
            --capabilities CAPABILITY_IAM \
