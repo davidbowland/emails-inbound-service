@@ -26,9 +26,10 @@ Mappings:
       domain: dbowland.com
       emailApiKeyName: emails-ApiAp-HAz9kJmN4UNJ
       emailApiUrl: 'https://emails-email-api.dbowland.com/v1'
+      errorTopic: arn:aws:sns:us-east-1:494887012091:error-topic
+      project: emails-inbound-service
       queueApiKeyName: emails-ApiAp-yI1gb3pwh6ea
       queueApiUrl: 'https://emails-queue-api.dbowland.com/v1'
-      ruleset: emails-inbound-service
     test:
       accountApiKeyName: emails-ApiAp-n43huA04RZ8a
       accountApiUrl: 'https://emails-account-api.bowland.link/v1'
@@ -36,11 +37,150 @@ Mappings:
       domain: bowland.link
       emailApiKeyName: emails-ApiAp-PpyBTSu47hU9
       emailApiUrl: 'https://emails-email-api.bowland.link/v1'
+      errorTopic: arn:aws:sns:us-east-1:494887012091:error-topic-test
+      project: emails-inbound-service-test
       queueApiKeyName: emails-ApiAp-g89VosJ3mW61
       queueApiUrl: 'https://emails-queue-api.bowland.link/v1'
-      ruleset: emails-inbound-service-test
 
 Resources:
+  # SES
+
+  # NOTE: Must be activated manually
+  ReceiptRuleSet:
+    Type: 'AWS::SES::ReceiptRuleSet'
+    Properties:
+      RuleSetName: !FindInMap [EnvironmentMap, !Ref Environment, project]
+
+  ReceiptRule:
+    Type: AWS::SES::ReceiptRule
+    DependsOn: [LambdaExecutePermission]
+    Properties:
+      Rule:
+        Actions:
+          - S3Action:
+              BucketName: !Ref EmailBucket
+              ObjectKeyPrefix: 'inbound/'
+          - LambdaAction:
+              FunctionArn: !GetAtt IncomingEmailProcessor.Arn
+              InvocationType: 'Event'
+        Enabled: true
+        Name: !Sub
+          - 'rule-set-${Domain}'
+          - Domain: !FindInMap [EnvironmentMap, !Ref Environment, domain]
+        Recipients:
+          - !FindInMap [EnvironmentMap, !Ref Environment, domain]
+        ScanEnabled: true
+      # This is not a typo, this should always be the active (production) rule set
+      RuleSetName: !FindInMap [EnvironmentMap, 'prod', project]
+
+  # Route 53
+
+  MXRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Comment: !Sub
+        - 'Email target for ${Domain}'
+        - Domain: !FindInMap [EnvironmentMap, !Ref Environment, domain]
+      HostedZoneName: !Sub
+        - '${Domain}.'
+        - Domain: !FindInMap [EnvironmentMap, !Ref Environment, domain]
+      Name: !FindInMap [EnvironmentMap, !Ref Environment, domain]
+      ResourceRecords:
+        - '10 inbound-smtp.us-east-1.amazonaws.com'
+      TTL: 300
+      Type: 'MX'
+
+  # Lambda
+
+  IncomingEmailProcessor:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/incoming-email.handleIncomingEmail
+      CodeUri: './dist'
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      MemorySize: 128
+      Timeout: 90
+      Description: Incoming SES email
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - S3CrudPolicy:
+            BucketName: !Ref EmailBucket
+        - Version: 2012-10-17
+          Statement:
+            - Action:
+                - 'apigateway:GET'
+              Effect: Allow
+              Resource: 'arn:aws:apigateway:us-east-1::/apikeys'
+      Environment:
+        Variables:
+          ACCOUNT_API_KEY_NAME: !FindInMap [EnvironmentMap, !Ref Environment, accountApiKeyName]
+          ACCOUNT_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, accountApiUrl]
+          EMAIL_API_KEY_NAME: !FindInMap [EnvironmentMap, !Ref Environment, emailApiKeyName]
+          EMAIL_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, emailApiUrl]
+          EMAIL_BUCKET: !Ref EmailBucket
+          EMAIL_FROM: !Sub
+            - 'do-not-reply@${Domain}'
+            - Domain: !FindInMap [EnvironmentMap, !Ref Environment, domain]
+          EMAIL_REGION: us-east-1
+          QUEUE_API_KEY_NAME: !FindInMap [EnvironmentMap, !Ref Environment, queueApiKeyName]
+          QUEUE_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, queueApiUrl]
+      Tags:
+        'created-by': 'emails-inbound-service'
+        'created-for': 'emails'
+
+  LambdaExecutePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt IncomingEmailProcessor.Arn
+      Principal: ses.amazonaws.com
+      SourceAccount: !Ref AccountId
+
+  # CloudWatch
+
+  IncomingEmailLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: IncomingEmailProcessor
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${IncomingEmailProcessor}
+      RetentionInDays: 30
+
+  ErrorMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    DependsOn: [IncomingEmailLogGroup]
+    Properties:
+      FilterPattern: '[timestamp, uuid, level="ERROR", message]'
+      LogGroupName: !Sub /aws/lambda/${IncomingEmailProcessor}
+      MetricTransformations:
+        - MetricValue: '1'
+          MetricNamespace: !Sub
+            - 'dbowland/${Project}'
+            - Project: !FindInMap [EnvironmentMap, !Ref Environment, project]
+          MetricName: ErrorCount
+
+  ErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmActions:
+        - !FindInMap [EnvironmentMap, !Ref Environment, errorTopic]
+      AlarmDescription: Error alarm for emails-inbound-service
+      AlarmName: !FindInMap [EnvironmentMap, !Ref Environment, project]
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      MetricName: ErrorCount
+      Namespace: !Sub
+        - 'dbowland/${Project}'
+        - Project: !FindInMap [EnvironmentMap, !Ref Environment, project]
+      Period: 60
+      Statistic: Maximum
+      Threshold: 1
+      TreatMissingData: notBreaching
+
+  # S3
+
   EmailBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -86,98 +226,3 @@ Resources:
               StringLike:
                 'aws:Referer':
                   - !Ref AccountId
-
-  IncomingEmailFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: handlers/incoming-email.handleIncomingEmail
-      CodeUri: './dist'
-      Runtime: nodejs14.x
-      Architectures:
-        - x86_64
-      MemorySize: 128
-      Timeout: 90
-      Description: Incoming SES email
-      Policies:
-        - AWSLambdaBasicExecutionRole
-        - S3CrudPolicy:
-            BucketName: !Ref EmailBucket
-        - Version: 2012-10-17
-          Statement:
-            - Action:
-                - 'apigateway:GET'
-              Effect: Allow
-              Resource: 'arn:aws:apigateway:us-east-1::/apikeys'
-      Environment:
-        Variables:
-          ACCOUNT_API_KEY_NAME: !FindInMap [EnvironmentMap, !Ref Environment, accountApiKeyName]
-          ACCOUNT_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, accountApiUrl]
-          EMAIL_API_KEY_NAME: !FindInMap [EnvironmentMap, !Ref Environment, emailApiKeyName]
-          EMAIL_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, emailApiUrl]
-          EMAIL_BUCKET: !Ref EmailBucket
-          EMAIL_FROM: !Sub
-            - 'do-not-reply@${Domain}'
-            - Domain: !FindInMap [EnvironmentMap, !Ref Environment, domain]
-          EMAIL_REGION: us-east-1
-          QUEUE_API_KEY_NAME: !FindInMap [EnvironmentMap, !Ref Environment, queueApiKeyName]
-          QUEUE_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, queueApiUrl]
-      Tags:
-        'created-by': 'emails-inbound-service'
-        'created-for': 'emails'
-
-  LambdaExecutePermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: 'lambda:InvokeFunction'
-      FunctionName: !GetAtt IncomingEmailFunction.Arn
-      Principal: ses.amazonaws.com
-      SourceAccount: !Ref AccountId
-
-  IncomingEmailLogGroup:
-    Type: AWS::Logs::LogGroup
-    DependsOn: IncomingEmailFunction
-    Properties:
-      LogGroupName: !Sub /aws/lambda/${IncomingEmailFunction}
-      RetentionInDays: 30
-
-  MXRecord:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      Comment: !Sub
-        - 'Email target for ${Domain}'
-        - Domain: !FindInMap [EnvironmentMap, !Ref Environment, domain]
-      HostedZoneName: !Sub
-        - '${Domain}.'
-        - Domain: !FindInMap [EnvironmentMap, !Ref Environment, domain]
-      Name: !FindInMap [EnvironmentMap, !Ref Environment, domain]
-      ResourceRecords:
-        - '10 inbound-smtp.us-east-1.amazonaws.com'
-      TTL: 300
-      Type: 'MX'
-
-  # NOTE: Must be activated manually
-  ReceiptRuleSet:
-    Type: 'AWS::SES::ReceiptRuleSet'
-    Properties:
-      RuleSetName: !FindInMap [EnvironmentMap, !Ref Environment, ruleset]
-
-  ReceiptRule:
-    Type: AWS::SES::ReceiptRule
-    Properties:
-      Rule:
-        Actions:
-          - S3Action:
-              BucketName: !Ref EmailBucket
-              ObjectKeyPrefix: 'inbound/'
-          - LambdaAction:
-              FunctionArn: !GetAtt IncomingEmailFunction.Arn
-              InvocationType: 'Event'
-        Enabled: true
-        Name: !Sub
-          - 'rule-set-${Domain}'
-          - Domain: !FindInMap [EnvironmentMap, !Ref Environment, domain]
-        Recipients:
-          - !FindInMap [EnvironmentMap, !Ref Environment, domain]
-        ScanEnabled: true
-      # This is not a typo, this should always be the active (production) rule set
-      RuleSetName: !FindInMap [EnvironmentMap, 'prod', ruleset]
