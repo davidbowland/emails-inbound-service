@@ -1,7 +1,7 @@
 import escape from 'escape-html'
 
 import { emailFrom, notificationTarget } from '../config'
-import { log, logError } from './logging'
+import { logError } from './logging'
 import { sendRawEmail } from '../services/queue'
 import { SESEventRecord } from '../types'
 
@@ -13,7 +13,8 @@ const getErrorText = (record: SESEventRecord, error: Error): string =>
   )}\n\nAt ${new Date().toISOString()} encountered error: ${escape(error as unknown as string)}\n${escape(error.stack)}`
 
 export const sendErrorEmail = (record: SESEventRecord, error: Error): Promise<string> =>
-  Promise.resolve(getErrorText(record, error))
+  logError(error)
+    .then(() => getErrorText(record, error))
     .then((text) => ({
       from: emailFrom,
       sender: emailFrom,
@@ -24,6 +25,5 @@ export const sendErrorEmail = (record: SESEventRecord, error: Error): Promise<st
       html: `<p>${text.replace(/\n/g, '<br>')}</p>`,
     }))
     .then(sendRawEmail)
-    .then(() => log(error))
     .catch(logError)
     .then(() => `${error}`)

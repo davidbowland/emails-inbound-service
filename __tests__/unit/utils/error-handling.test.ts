@@ -20,6 +20,11 @@ describe('error-handling', () => {
       mocked(logging).logError.mockResolvedValue(undefined)
     })
 
+    test('expect sendErrorEmail logs error', async () => {
+      await sendErrorEmail(record, error)
+      expect(mocked(logging).logError).toHaveBeenCalledWith(error)
+    })
+
     test('expect sendErrorEmail called with error information', async () => {
       await sendErrorEmail(record, error)
       expect(mockSendRawEmail).toHaveBeenCalledWith(
