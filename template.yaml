@@ -6,9 +6,6 @@ Transform:
   - AWS::Serverless-2016-10-31
 
 Parameters:
-  AccountId:
-    Type: String
-    Description: AWS account ID
   Environment:
     Type: String
     Default: prod
@@ -136,7 +133,7 @@ Resources:
       Action: 'lambda:InvokeFunction'
       FunctionName: !GetAtt IncomingEmailProcessor.Arn
       Principal: ses.amazonaws.com
-      SourceAccount: !Ref AccountId
+      SourceAccount: !Ref AWS::AccountId
 
   # CloudWatch
 
@@ -225,4 +222,4 @@ Resources:
             Condition:
               StringLike:
                 'aws:Referer':
-                  - !Ref AccountId
+                  - !Ref AWS::AccountId

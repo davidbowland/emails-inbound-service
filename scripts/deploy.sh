@@ -23,4 +23,4 @@ sam deploy --stack-name ${TESTING_STACK_NAME} \
            --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
            --no-fail-on-empty-changeset \
            --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE} \
-           --parameter-overrides "AccountId=$AWS_ACCOUNT_ID Environment=test"
+           --parameter-overrides "Environment=test"
