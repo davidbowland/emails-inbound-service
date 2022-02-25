@@ -23,7 +23,7 @@ Mappings:
       domain: dbowland.com
       emailApiKeyName: emails-ApiAp-HAz9kJmN4UNJ
       emailApiUrl: 'https://emails-email-api.dbowland.com/v1'
-      errorTopic: arn:aws:sns:us-east-1:494887012091:error-topic
+      logStreamFunction: log-subscriber
       project: emails-inbound-service
       queueApiKeyName: emails-ApiAp-yI1gb3pwh6ea
       queueApiUrl: 'https://emails-queue-api.dbowland.com/v1'
@@ -34,7 +34,7 @@ Mappings:
       domain: bowland.link
       emailApiKeyName: emails-ApiAp-PpyBTSu47hU9
       emailApiUrl: 'https://emails-email-api.bowland.link/v1'
-      errorTopic: arn:aws:sns:us-east-1:494887012091:error-topic-test
+      logStreamFunction: log-subscriber-test
       project: emails-inbound-service-test
       queueApiKeyName: emails-ApiAp-g89VosJ3mW61
       queueApiUrl: 'https://emails-queue-api.bowland.link/v1'
@@ -131,7 +131,7 @@ Resources:
     Type: AWS::Lambda::Permission
     Properties:
       Action: 'lambda:InvokeFunction'
-      FunctionName: !GetAtt IncomingEmailProcessor.Arn
+      FunctionName: !Sub '${IncomingEmailProcessor.Arn}'
       Principal: ses.amazonaws.com
       SourceAccount: !Ref AWS::AccountId
 
@@ -144,37 +144,14 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${IncomingEmailProcessor}
       RetentionInDays: 30
 
-  ErrorMetricFilter:
-    Type: AWS::Logs::MetricFilter
-    DependsOn: [IncomingEmailLogGroup]
+  IncomingEmailLogGroupSubscription:
+    Type: AWS::Logs::SubscriptionFilter
     Properties:
+      DestinationArn: !Sub
+        - 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Function}'
+        - Function: !FindInMap [EnvironmentMap, !Ref Environment, logStreamFunction]
       FilterPattern: '[timestamp, uuid, level="ERROR", message]'
-      LogGroupName: !Sub /aws/lambda/${IncomingEmailProcessor}
-      MetricTransformations:
-        - MetricValue: '1'
-          MetricNamespace: !Sub
-            - 'dbowland/${Project}'
-            - Project: !FindInMap [EnvironmentMap, !Ref Environment, project]
-          MetricName: ErrorCount
-
-  ErrorAlarm:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmActions:
-        - !FindInMap [EnvironmentMap, !Ref Environment, errorTopic]
-      AlarmDescription: Error alarm for emails-inbound-service
-      AlarmName: !FindInMap [EnvironmentMap, !Ref Environment, project]
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      DatapointsToAlarm: 1
-      EvaluationPeriods: 1
-      MetricName: ErrorCount
-      Namespace: !Sub
-        - 'dbowland/${Project}'
-        - Project: !FindInMap [EnvironmentMap, !Ref Environment, project]
-      Period: 60
-      Statistic: Maximum
-      Threshold: 1
-      TreatMissingData: notBreaching
+      LogGroupName: !Ref IncomingEmailLogGroup
 
   # S3
 
