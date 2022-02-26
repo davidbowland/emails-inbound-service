@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  emails-inbound-service
+  Service to process inbound emails
 
 Transform:
   - AWS::Serverless-2016-10-31
