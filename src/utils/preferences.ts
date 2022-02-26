@@ -11,10 +11,9 @@ const reduceToSinglePreference = (
   forwardTargets: current.inbound?.forwardTargets
     ? new Set([...previous.forwardTargets, ...current.inbound.forwardTargets])
     : previous.forwardTargets,
-  save: current.inbound?.save || previous.save,
 })
 
 export const aggregatePreferences = (recipients: string[]): Promise<AccountInboundPreference> =>
   fetchPreferences(recipients).then((allPreferences) =>
-    allPreferences.reduce(reduceToSinglePreference, { forwardTargets: new Set(), save: false })
+    allPreferences.reduce(reduceToSinglePreference, { forwardTargets: new Set() })
   )

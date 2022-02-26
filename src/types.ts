@@ -5,12 +5,10 @@ export { Attachment } from 'nodemailer/lib/mailer'
 
 export interface AccountInboundPreference {
   forwardTargets?: string[] | Set<string>
-  save: boolean
 }
 
 export interface AccountOutboundPreference {
   ccTargets?: string[]
-  save: boolean
 }
 
 export interface AccountPreference {

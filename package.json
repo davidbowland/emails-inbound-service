@@ -13,7 +13,7 @@
     "lint": "prettier --write . && eslint --fix . --resolve-plugins-relative-to .",
     "prepare": "if [ \"$HUSKY\" != \"0\" ]; then husky install ; fi",
     "start": "npm run build && npm run quick-start",
-    "quick-start": "tsc && HUSKY=0 sam build && sam local invoke --event events/post-item.json --parameter-overrides AccountId=$AWS_ACCOUNT_ID",
+    "quick-start": "tsc && HUSKY=0 sam build && sam local invoke --event events/receive-email.json --parameter-overrides Environment=test",
     "test": "npm run lint && jest --colors"
   },
   "lint-staged": {

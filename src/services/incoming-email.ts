@@ -1,4 +1,3 @@
-import { saveEmail as incomingEmailService } from './emails'
 import { AccountInboundPreference, AttachmentCommon, AxiosResponse, Email } from '../types'
 import { uploadAttachments } from '../utils/attachments'
 import { forwardEmail } from '../utils/forwarding'
@@ -11,7 +10,7 @@ const applyPreferencesToEmail = (
   email: Email,
   attachments: AttachmentCommon[]
 ): Promise<AxiosResponse[]> =>
-  Promise.resolve(preferences.save ? incomingEmailService(email) : undefined).then(() =>
+  Promise.resolve(
     preferences.forwardTargets ? forwardEmail([...preferences.forwardTargets], email, attachments) : undefined
   )
 

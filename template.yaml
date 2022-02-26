@@ -21,8 +21,6 @@ Mappings:
       accountApiUrl: 'https://emails-account-api.dbowland.com/v1'
       bucket: emails-service-storage
       domain: dbowland.com
-      emailApiKeyName: emails-ApiAp-HAz9kJmN4UNJ
-      emailApiUrl: 'https://emails-email-api.dbowland.com/v1'
       logStreamFunction: log-subscriber
       project: emails-inbound-service
       queueApiKeyName: emails-ApiAp-yI1gb3pwh6ea
@@ -32,8 +30,6 @@ Mappings:
       accountApiUrl: 'https://emails-account-api.bowland.link/v1'
       bucket: emails-service-storage-test
       domain: bowland.link
-      emailApiKeyName: emails-ApiAp-PpyBTSu47hU9
-      emailApiUrl: 'https://emails-email-api.bowland.link/v1'
       logStreamFunction: log-subscriber-test
       project: emails-inbound-service-test
       queueApiKeyName: emails-ApiAp-g89VosJ3mW61
@@ -114,8 +110,6 @@ Resources:
         Variables:
           ACCOUNT_API_KEY_NAME: !FindInMap [EnvironmentMap, !Ref Environment, accountApiKeyName]
           ACCOUNT_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, accountApiUrl]
-          EMAIL_API_KEY_NAME: !FindInMap [EnvironmentMap, !Ref Environment, emailApiKeyName]
-          EMAIL_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, emailApiUrl]
           EMAIL_BUCKET: !Ref EmailBucket
           EMAIL_FROM: !Sub
             - 'do-not-reply@${Domain}'

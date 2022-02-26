@@ -8,21 +8,15 @@ export const accounts = {
   default: {
     inbound: {
       forwardTargets: ['one@email.address', 'two@email.address'],
-      save: false,
     },
   },
   account1: {
-    inbound: {
-      save: true,
-    },
-    outbound: {
-      save: true,
-    },
+    inbound: {},
+    outbound: {},
   },
   account2: {
     outbound: {
       ccTargets: ['three@email.address', 'four@email.address'],
-      save: false,
     },
   },
 }
