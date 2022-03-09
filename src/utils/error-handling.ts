@@ -12,10 +12,10 @@ const getErrorText = (record: SESEventRecord, error: Error): string =>
     record.ses.mail.messageId
   )}\n\nAt ${new Date().toISOString()} encountered error: ${escape(error as unknown as string)}\n${escape(error.stack)}`
 
-export const sendErrorEmail = (record: SESEventRecord, error: Error): Promise<string> =>
-  logError(error)
-    .then(() => getErrorText(record, error))
-    .then((text) => ({
+export const sendErrorEmail = async (record: SESEventRecord, error: Error): Promise<string> => {
+  try {
+    const text = await getErrorText(record, error)
+    await sendRawEmail({
       from: emailFrom,
       sender: emailFrom,
       to: [notificationTarget],
@@ -23,7 +23,9 @@ export const sendErrorEmail = (record: SESEventRecord, error: Error): Promise<st
       subject: 'Error processing SES inbound',
       text,
       html: `<p>${text.replace(/\n/g, '<br>')}</p>`,
-    }))
-    .then(sendRawEmail)
-    .catch(logError)
-    .then(() => `${error}`)
+    })
+  } catch (error) {
+    logError(error)
+  }
+  return `${error}`
+}

@@ -1,13 +1,11 @@
 import { request } from '../__mocks__'
 import { emailFrom, notificationTarget } from '@config'
 import { mocked } from 'jest-mock'
+import * as queue from '@services/queue'
 import * as logging from '@utils/logging'
 import { sendErrorEmail } from '@utils/error-handling'
 
-const mockSendRawEmail = jest.fn()
-jest.mock('@services/queue', () => ({
-  sendRawEmail: (...args) => mockSendRawEmail(...args),
-}))
+jest.mock('@services/queue')
 jest.mock('@utils/logging')
 
 describe('error-handling', () => {
@@ -16,18 +14,12 @@ describe('error-handling', () => {
     const record = request.Records[0]
 
     beforeAll(() => {
-      mockSendRawEmail.mockRejectedValue(undefined)
-      mocked(logging).logError.mockResolvedValue(undefined)
-    })
-
-    test('expect sendErrorEmail logs error', async () => {
-      await sendErrorEmail(record, error)
-      expect(mocked(logging).logError).toHaveBeenCalledWith(error)
+      mocked(queue).sendRawEmail.mockResolvedValue(undefined)
     })
 
     test('expect sendErrorEmail called with error information', async () => {
       await sendErrorEmail(record, error)
-      expect(mockSendRawEmail).toHaveBeenCalledWith(
+      expect(mocked(queue).sendRawEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           from: emailFrom,
           replyTo: emailFrom,
@@ -44,8 +36,10 @@ describe('error-handling', () => {
     })
 
     test('expect error message on sendErrorEmail reject', async () => {
-      mockSendRawEmail.mockRejectedValueOnce(undefined)
+      const newError = 'This is too much'
+      mocked(queue).sendRawEmail.mockRejectedValueOnce(newError)
       const result = await sendErrorEmail(record, error)
+      expect(mocked(logging).logError).toHaveBeenCalledWith(newError)
       expect(result).toEqual('Error: A wild error appeared')
     })
   })
