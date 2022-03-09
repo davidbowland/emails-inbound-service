@@ -10,12 +10,11 @@ const api = axios.create({
 
 export const extractAccountFromAddress = (email: string): string => email.replace(/@[a-z0-9.-]+$/i, '')
 
-export const getAccountPreferences = (account: string, orDefault = true): Promise<AccountPreference> =>
-  getApiKey(accountApiKeyName)
-    .then((accountApiKey) =>
-      api.get(`/accounts/${encodeURIComponent(account)}`, {
-        headers: { 'x-api-key': accountApiKey },
-        params: { default: orDefault },
-      })
-    )
-    .then((response) => response.data)
+export const getAccountPreferences = async (account: string, orDefault = true): Promise<AccountPreference> => {
+  const apiKey = await getApiKey(accountApiKeyName)
+  const response = await api.get(`/accounts/${encodeURIComponent(account)}`, {
+    headers: { 'x-api-key': apiKey },
+    params: { default: orDefault },
+  })
+  return response.data
+}

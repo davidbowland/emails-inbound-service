@@ -1,5 +1,5 @@
 {
-  "name": "emails-eminbound-service",
+  "name": "emails-inbound-service",
   "author": "David Bowland",
   "description": "Handles inbound emails from SES",
   "version": "1.11.0",
@@ -14,17 +14,7 @@
     "prepare": "if [ \"$HUSKY\" != \"0\" ]; then husky install ; fi",
     "start": "npm run build && npm run quick-start",
     "quick-start": "tsc && HUSKY=0 sam build && sam local invoke --event events/receive-email.json --parameter-overrides Environment=test",
-    "test": "npm run lint && jest --colors"
-  },
-  "lint-staged": {
-    "**/*.{js,jsx,ts,tsx}": [
-      "prettier --write --ignore-unknown",
-      "eslint --resolve-plugins-relative-to . --fix",
-      "jest --colors --findRelatedTests --coverageThreshold '{}'"
-    ],
-    "**/*": [
-      "prettier --write --ignore-unknown"
-    ]
+    "test": "jest --colors"
   },
   "repository": {
     "type": "git",
@@ -66,5 +56,15 @@
     "prettier": "^2.5.1",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.4"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "prettier --write --ignore-unknown",
+      "eslint --resolve-plugins-relative-to . --fix",
+      "jest --colors --findRelatedTests --coverageThreshold '{}'"
+    ],
+    "**/*": [
+      "prettier --write --ignore-unknown"
+    ]
   }
 }

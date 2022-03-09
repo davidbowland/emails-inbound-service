@@ -22,7 +22,8 @@ export const forwardEmail = (
   attachments: AttachmentCommon[]
 ): Promise<AxiosResponse[]> =>
   Promise.all(
-    targets.map((target) =>
-      copyAttachments(attachments, uuidv1()).then((attachmentsOnS3) => sendEmail(target, email, attachmentsOnS3))
-    )
+    targets.map(async (target) => {
+      const attachmentsOnS3 = await copyAttachments(attachments, uuidv1())
+      return sendEmail(target, email, attachmentsOnS3)
+    })
   )

@@ -10,9 +10,9 @@ const applyPreferencesToEmail = (
   email: Email,
   attachments: AttachmentCommon[]
 ): Promise<AxiosResponse[]> =>
-  Promise.resolve(
-    preferences.forwardTargets ? forwardEmail([...preferences.forwardTargets], email, attachments) : undefined
-  )
+  preferences.forwardTargets
+    ? forwardEmail([...preferences.forwardTargets], email, attachments)
+    : Promise.resolve(undefined)
 
 export const processReceivedEmail = async (messageId: string, recipients: string[]): Promise<AxiosResponse[]> => {
   const parsedMail = await getParsedMail(messageId)

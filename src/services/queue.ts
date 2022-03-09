@@ -25,13 +25,13 @@ const convertEmailToJson = (target: string, email: Email, attachments: Attachmen
 })
 
 export const sendEmail = (target: string, email: Email, attachments: AttachmentCommon[]): Promise<AxiosResponse> =>
-  Promise.resolve(convertEmailToJson(target, email, attachments)).then(exports.sendRawEmail)
+  exports.sendRawEmail(convertEmailToJson(target, email, attachments))
 
-export const sendRawEmail = (body: unknown): Promise<AxiosResponse> =>
-  getApiKey(queueApiKeyName).then((queueApiKey) =>
-    api.post('/emails', body, {
-      headers: {
-        'x-api-key': queueApiKey,
-      },
-    })
-  )
+export const sendRawEmail = async (body: unknown): Promise<AxiosResponse> => {
+  const apiKey = await getApiKey(queueApiKeyName)
+  return api.post('/emails', body, {
+    headers: {
+      'x-api-key': apiKey,
+    },
+  })
+}
