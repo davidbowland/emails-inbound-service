@@ -1,11 +1,7 @@
 import { accounts } from '../__mocks__'
-import { accountApiKeyName, accountApiUrl } from '@config'
-import { mocked } from 'jest-mock'
+import { accountApiKey, accountApiUrl } from '@config'
 import { extractAccountFromAddress, getAccountPreferences } from '@services/accounts'
-import * as apiKeys from '@services/api-keys'
 import { rest, server } from '@setup-server'
-
-jest.mock('@services/api-keys')
 
 describe('accounts', () => {
   describe('extractAccountFromAddress', () => {
@@ -20,8 +16,6 @@ describe('accounts', () => {
   })
 
   describe('getAccountPreferences', () => {
-    const accountApiKey = '89olkvcxswr'
-
     beforeAll(() => {
       server.use(
         rest.get(`${accountApiUrl}/accounts/:accountId`, async (req, res, ctx) => {
@@ -39,13 +33,6 @@ describe('accounts', () => {
           return res(ctx.json(accounts[accountId as string]))
         })
       )
-
-      mocked(apiKeys).getApiKey.mockResolvedValue(accountApiKey)
-    })
-
-    test('expect API key fetched', async () => {
-      await getAccountPreferences('anything', true)
-      expect(mocked(apiKeys).getApiKey).toHaveBeenCalledWith(accountApiKeyName)
     })
 
     test.each(Object.keys(accounts))('expect correct account preferences back for account %s', async (accountId) => {

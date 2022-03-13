@@ -1,16 +1,11 @@
 import { attachment, email } from '../__mocks__'
-import { queueApiKeyName, queueApiUrl } from '@config'
-import { mocked } from 'jest-mock'
-import * as apiKeys from '@services/api-keys'
+import { queueApiKey, queueApiUrl } from '@config'
 import { sendEmail } from '@services/queue'
 import { rest, server } from '@setup-server'
-
-jest.mock('@services/api-keys')
 
 describe('queue', () => {
   describe('sendEmail', () => {
     const postEndpoint = jest.fn().mockReturnValue(200)
-    const queueApiKey = '23efvb67yujkm'
     const target = 'some@email.address'
 
     beforeAll(() => {
@@ -24,12 +19,6 @@ describe('queue', () => {
           return res(body ? ctx.json(body) : ctx.status(400))
         })
       )
-      mocked(apiKeys).getApiKey.mockResolvedValue(queueApiKey)
-    })
-
-    test('expect API key fetched', async () => {
-      await sendEmail(target, email, [attachment])
-      expect(mocked(apiKeys).getApiKey).toHaveBeenCalledWith(queueApiKeyName)
     })
 
     test('expect email contents to be passed to the endpoint', async () => {
