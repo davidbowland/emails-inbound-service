@@ -6,6 +6,9 @@ Transform:
   - AWS::Serverless-2016-10-31
 
 Parameters:
+  AccountApiKey:
+    Type: String
+    Description: API key for emails-account-api
   Environment:
     Type: String
     Default: prod
@@ -13,26 +16,25 @@ Parameters:
       - prod
       - test
     Description: Environment for deploy
+  QueueApiKey:
+    Type: String
+    Description: API key for emails-queue-api
 
 Mappings:
   EnvironmentMap:
     prod:
-      accountApiKeyName: emails-ApiAp-XL6zNpBsD5MQ
       accountApiUrl: 'https://emails-account-api.dbowland.com/v1'
       bucket: emails-service-storage
       domain: dbowland.com
       logStreamFunction: log-subscriber
       project: emails-inbound-service
-      queueApiKeyName: emails-ApiAp-yI1gb3pwh6ea
       queueApiUrl: 'https://emails-queue-api.dbowland.com/v1'
     test:
-      accountApiKeyName: emails-ApiAp-n43huA04RZ8a
       accountApiUrl: 'https://emails-account-api.bowland.link/v1'
       bucket: emails-service-storage-test
       domain: bowland.link
       logStreamFunction: log-subscriber-test
       project: emails-inbound-service-test
-      queueApiKeyName: emails-ApiAp-g89VosJ3mW61
       queueApiUrl: 'https://emails-queue-api.bowland.link/v1'
 
 Resources:
@@ -100,22 +102,16 @@ Resources:
         - AWSLambdaBasicExecutionRole
         - S3CrudPolicy:
             BucketName: !Ref EmailBucket
-        - Version: 2012-10-17
-          Statement:
-            - Action:
-                - 'apigateway:GET'
-              Effect: Allow
-              Resource: 'arn:aws:apigateway:us-east-1::/apikeys'
       Environment:
         Variables:
-          ACCOUNT_API_KEY_NAME: !FindInMap [EnvironmentMap, !Ref Environment, accountApiKeyName]
+          ACCOUNT_API_KEY: !Ref AccountApiKey
           ACCOUNT_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, accountApiUrl]
           EMAIL_BUCKET: !Ref EmailBucket
           EMAIL_FROM: !Sub
             - 'do-not-reply@${Domain}'
             - Domain: !FindInMap [EnvironmentMap, !Ref Environment, domain]
           EMAIL_REGION: us-east-1
-          QUEUE_API_KEY_NAME: !FindInMap [EnvironmentMap, !Ref Environment, queueApiKeyName]
+          QUEUE_API_KEY: !Ref QueueApiKey
           QUEUE_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, queueApiUrl]
       Tags:
         'created-by': 'emails-inbound-service'

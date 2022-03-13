@@ -1,10 +1,8 @@
 // API
 
-process.env.ACCOUNT_API_KEY_NAME = 'account-api-key'
+process.env.ACCOUNT_API_KEY = 'account-api-key'
 process.env.ACCOUNT_API_URL = 'http://account.api'
-process.env.EMAIL_API_KEY_NAME = 'email-api-key'
-process.env.EMAIL_API_URL = 'https://email.api'
-process.env.QUEUE_API_KEY_NAME = 'queue-api-key'
+process.env.QUEUE_API_KEY = 'queue-api-key'
 process.env.QUEUE_API_URL = 'https://queue.api'
 
 // S3

@@ -1,6 +1,6 @@
-# Lambdas for Email Inbound API
+# Lambdas for Emails Inbound Service
 
-Lambdas for email inbound API, which accepts emails from SES.
+Lambda for inbound emails, which accepts emails from SES.
 
 ## Setup
 

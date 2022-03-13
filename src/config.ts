@@ -7,11 +7,9 @@ axiosRetry(axios, { retries: 3 })
 
 // API
 
-export const accountApiKeyName = process.env.ACCOUNT_API_KEY_NAME as string
+export const accountApiKey = process.env.ACCOUNT_API_KEY as string
 export const accountApiUrl = process.env.ACCOUNT_API_URL as string
-export const emailApiKeyName = process.env.EMAIL_API_KEY_NAME as string
-export const emailApiUrl = process.env.EMAIL_API_URL as string
-export const queueApiKeyName = process.env.QUEUE_API_KEY_NAME as string
+export const queueApiKey = process.env.QUEUE_API_KEY as string
 export const queueApiUrl = process.env.QUEUE_API_URL as string
 
 // S3
