@@ -1,9 +1,9 @@
 import { v1 as uuidv1 } from 'uuid'
 
-import { getAttachmentId } from './attachments'
-import { copyS3Object } from '../services/s3'
-import { sendEmail } from '../services/queue'
 import { AttachmentCommon, AxiosResponse, Email } from '../types'
+import { copyS3Object } from '../services/s3'
+import { getAttachmentId } from './attachments'
+import { sendEmail } from '../services/queue'
 
 const copyAttachments = (attachments: AttachmentCommon[], uuid: string): Promise<AttachmentCommon[]> =>
   Promise.all(

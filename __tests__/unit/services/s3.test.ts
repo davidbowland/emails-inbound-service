@@ -1,5 +1,5 @@
-import { emailBucket } from '@config'
 import { copyS3Object, getS3Object, putS3Object } from '@services/s3'
+import { emailBucket } from '@config'
 
 const mockCopyObject = jest.fn()
 const mockGetObject = jest.fn()

@@ -1,7 +1,7 @@
 import { attachment, email } from '../__mocks__'
 import { queueApiKey, queueApiUrl } from '@config'
-import { sendEmail } from '@services/queue'
 import { rest, server } from '@setup-server'
+import { sendEmail } from '@services/queue'
 
 describe('queue', () => {
   describe('sendEmail', () => {

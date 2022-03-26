@@ -1,7 +1,8 @@
-import { getAttachmentId } from './attachments'
 import { simpleParser } from 'mailparser'
-import { getS3Object } from '../services/s3'
+
 import { Email, EmailAddress, EmailHeaders, ParsedMail } from '../types'
+import { getAttachmentId } from './attachments'
+import { getS3Object } from '../services/s3'
 
 const emptyAddress: EmailAddress = {
   display: '',
@@ -26,11 +27,11 @@ export const convertParsedContentsToEmail = (
   headers: parsedMail.headers as unknown as EmailHeaders,
   id: parsedMail.messageId ?? messageId,
   inReplyTo: parsedMail.inReplyTo,
+  recipients,
   references: typeof parsedMail.references === 'string' ? [parsedMail.references] : parsedMail.references ?? [],
   replyToAddress: (parsedMail.replyTo ?? emptyAddress) as EmailAddress,
   subject: parsedMail.subject,
   toAddress: parsedMail.to as unknown as EmailAddress,
-  recipients,
 })
 
 export const getParsedMail = (messageId: string): Promise<ParsedMail> =>

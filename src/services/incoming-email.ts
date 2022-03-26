@@ -1,9 +1,9 @@
 import { AccountInboundPreference, AttachmentCommon, AxiosResponse, Email } from '../types'
-import { uploadAttachments } from '../utils/attachments'
-import { forwardEmail } from '../utils/forwarding'
-import { log } from '../utils/logging'
 import { convertParsedContentsToEmail, getParsedMail } from '../utils/parser'
 import { aggregatePreferences } from '../utils/preferences'
+import { forwardEmail } from '../utils/forwarding'
+import { log } from '../utils/logging'
+import { uploadAttachments } from '../utils/attachments'
 
 const applyPreferencesToEmail = (
   preferences: AccountInboundPreference,

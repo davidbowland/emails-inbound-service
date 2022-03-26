@@ -1,8 +1,9 @@
-import { request } from '../__mocks__'
-import { emailFrom, notificationTarget } from '@config'
 import { mocked } from 'jest-mock'
-import * as queue from '@services/queue'
+
 import * as logging from '@utils/logging'
+import * as queue from '@services/queue'
+import { emailFrom, notificationTarget } from '@config'
+import { request } from '../__mocks__'
 import { sendErrorEmail } from '@utils/error-handling'
 
 jest.mock('@services/queue')

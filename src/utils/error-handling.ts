@@ -1,9 +1,9 @@
 import escape from 'escape-html'
 
 import { emailFrom, notificationTarget } from '../config'
+import { SESEventRecord } from '../types'
 import { logError } from './logging'
 import { sendRawEmail } from '../services/queue'
-import { SESEventRecord } from '../types'
 
 /* Email */
 
@@ -17,12 +17,12 @@ export const sendErrorEmail = async (record: SESEventRecord, error: Error): Prom
     const text = await getErrorText(record, error)
     await sendRawEmail({
       from: emailFrom,
-      sender: emailFrom,
-      to: [notificationTarget],
+      html: `<p>${text.replace(/\n/g, '<br>')}</p>`,
       replyTo: emailFrom,
+      sender: emailFrom,
       subject: 'Error processing SES inbound',
       text,
-      html: `<p>${text.replace(/\n/g, '<br>')}</p>`,
+      to: [notificationTarget],
     })
   } catch (error) {
     logError(error)

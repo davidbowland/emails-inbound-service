@@ -1,10 +1,11 @@
-import { attachment, email, uuid } from '../__mocks__'
-import { mocked } from 'jest-mock'
-import * as s3 from '@services/s3'
-import * as queue from '@services/queue'
-import * as utilsAttachments from '@utils/attachments'
-import { forwardEmail } from '@utils/forwarding'
 import * as uuidV1 from 'uuid'
+import { mocked } from 'jest-mock'
+
+import * as queue from '@services/queue'
+import * as s3 from '@services/s3'
+import * as utilsAttachments from '@utils/attachments'
+import { attachment, email, uuid } from '../__mocks__'
+import { forwardEmail } from '@utils/forwarding'
 
 jest.mock('@services/s3')
 jest.mock('@services/queue')

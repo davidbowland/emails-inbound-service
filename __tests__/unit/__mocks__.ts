@@ -1,15 +1,10 @@
-import { AttachmentCommon, Email, SESEvent, ParsedMail } from '@types'
+import { AttachmentCommon, Email, ParsedMail, SESEvent } from '@types'
 
 export const messageId = 'aaaaa-uuuuu-uuuuu-iiiii-ddddd'
 
 export const uuid = 'uuuuu-uuuuu-iiiii-ddddd-22222'
 
 export const accounts = {
-  default: {
-    inbound: {
-      forwardTargets: ['one@email.address', 'two@email.address'],
-    },
-  },
   account1: {
     inbound: {},
     outbound: {},
@@ -17,6 +12,11 @@ export const accounts = {
   account2: {
     outbound: {
       ccTargets: ['three@email.address', 'four@email.address'],
+    },
+  },
+  default: {
+    inbound: {
+      forwardTargets: ['one@email.address', 'two@email.address'],
     },
   },
 }
@@ -79,7 +79,11 @@ export const email: Email = {
 
 export const parsedContents = {
   attachments: [attachment],
-  headers: {},
+  date: '2018-08-06T00:58:58.000Z',
+  from: {
+    display: 'Person A <a@person.email>',
+    value: [{ address: 'a@person.email', name: 'Person A' }],
+  },
   headerLines: [
     { key: 'mime-version', line: 'MIME-Version: 1.0' },
     { key: 'date', line: 'Date: Sun, 5 Aug 2018 19:58:58 -0500' },
@@ -92,21 +96,17 @@ export const parsedContents = {
       line: 'Content-Type: multipart/alternative; boundary="00000000000054a3f30572b9c865"',
     },
   ],
+  headers: {},
   html: '<a href="http://www.gutenberg.org/files/8164/8164-h/8164-h.htm">http://www.gutenberg.org/files/8164/8164-h/8164-h.htm</a>\n',
+  messageId,
+  subject: 'P G Wodehouse',
   text: 'http://www.gutenberg.org/files/8164/8164-h/8164-h.htm\n',
   textAsHtml:
     '<p><a href="http://www.gutenberg.org/files/8164/8164-h/8164-h.htm">http://www.gutenberg.org/files/8164/8164-h/8164-h.htm</a></p>',
-  subject: 'P G Wodehouse',
-  date: '2018-08-06T00:58:58.000Z',
   to: {
-    value: [{ address: 'b@person.email', name: 'Person B' }],
     display: 'Person B <b@person.email>',
+    value: [{ address: 'b@person.email', name: 'Person B' }],
   },
-  from: {
-    value: [{ address: 'a@person.email', name: 'Person A' }],
-    display: 'Person A <a@person.email>',
-  },
-  messageId,
 } as unknown as ParsedMail
 
 export const request = {

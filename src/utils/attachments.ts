@@ -1,5 +1,5 @@
-import { putS3Object } from '../services/s3'
 import { AttachmentCommon, StringObject } from '../types'
+import { putS3Object } from '../services/s3'
 
 const getAttachmentMetadata = (attachment: AttachmentCommon): StringObject => ({
   checksum: attachment.checksum,

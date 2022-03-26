@@ -1,10 +1,11 @@
-import { accounts, attachment, email, messageId, parsedContents } from '../__mocks__'
 import { mocked } from 'jest-mock'
-import { processReceivedEmail } from '@services/incoming-email'
+
 import * as attachments from '@utils/attachments'
 import * as forwarding from '@utils/forwarding'
 import * as parser from '@utils/parser'
 import * as preferences from '@utils/preferences'
+import { accounts, attachment, email, messageId, parsedContents } from '../__mocks__'
+import { processReceivedEmail } from '@services/incoming-email'
 
 jest.mock('@utils/attachments')
 jest.mock('@utils/forwarding')

@@ -1,7 +1,7 @@
-import { processReceivedEmail } from '../services/incoming-email'
 import { SESEvent } from '../types'
-import { sendErrorEmail } from '../utils/error-handling'
 import { logError } from '../utils/logging'
+import { processReceivedEmail } from '../services/incoming-email'
+import { sendErrorEmail } from '../utils/error-handling'
 
 const processRecord = async (record: any) => {
   try {

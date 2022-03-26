@@ -1,10 +1,11 @@
-import { attachment, email, messageId, parsedContents } from '../__mocks__'
-import { mocked } from 'jest-mock'
 import * as mailparser from 'mailparser'
+import { mocked } from 'jest-mock'
+
 import * as s3 from '@services/s3'
-import { ParsedMail } from '@types'
 import * as utilsAttachments from '@utils/attachments'
+import { attachment, email, messageId, parsedContents } from '../__mocks__'
 import { convertParsedContentsToEmail, getParsedMail } from '@utils/parser'
+import { ParsedMail } from '@types'
 
 jest.mock('mailparser')
 jest.mock('@services/s3')

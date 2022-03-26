@@ -1,5 +1,5 @@
-import { extractAccountFromAddress, getAccountPreferences } from '../services/accounts'
 import { AccountInboundPreference, AccountPreference } from '../types'
+import { extractAccountFromAddress, getAccountPreferences } from '../services/accounts'
 
 const fetchPreferences = (recipients: string[]): Promise<AccountPreference[]> =>
   Promise.all(recipients.map((address) => getAccountPreferences(extractAccountFromAddress(address))))

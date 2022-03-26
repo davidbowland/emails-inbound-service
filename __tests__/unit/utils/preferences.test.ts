@@ -1,6 +1,7 @@
-import { accounts } from '../__mocks__'
 import { mocked } from 'jest-mock'
+
 import * as accountsService from '@services/accounts'
+import { accounts } from '../__mocks__'
 import { aggregatePreferences } from '@utils/preferences'
 
 jest.mock('@services/accounts')

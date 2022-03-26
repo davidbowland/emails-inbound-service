@@ -1,6 +1,7 @@
-import { attachment, messageId } from '../__mocks__'
 import { mocked } from 'jest-mock'
+
 import * as s3 from '@services/s3'
+import { attachment, messageId } from '../__mocks__'
 import { getAttachmentId, uploadAttachments } from '@utils/attachments'
 
 jest.mock('@services/s3')

@@ -1,7 +1,7 @@
-import { accounts } from '../__mocks__'
 import { accountApiKey, accountApiUrl } from '@config'
 import { extractAccountFromAddress, getAccountPreferences } from '@services/accounts'
 import { rest, server } from '@setup-server'
+import { accounts } from '../__mocks__'
 
 describe('accounts', () => {
   describe('extractAccountFromAddress', () => {
