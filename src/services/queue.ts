@@ -5,6 +5,7 @@ import { emailFrom, queueApiKey, queueApiUrl } from '../config'
 
 const api = axios.create({
   baseURL: queueApiUrl,
+  headers: { 'x-api-key': queueApiKey },
 })
 
 /* Emails */
@@ -26,9 +27,4 @@ const convertEmailToJson = (target: string, email: Email, attachments: Attachmen
 export const sendEmail = (target: string, email: Email, attachments: AttachmentCommon[]): Promise<AxiosResponse> =>
   exports.sendRawEmail(convertEmailToJson(target, email, attachments))
 
-export const sendRawEmail = (body: unknown): Promise<AxiosResponse> =>
-  api.post('/emails', body, {
-    headers: {
-      'x-api-key': queueApiKey,
-    },
-  })
+export const sendRawEmail = (body: unknown): Promise<AxiosResponse> => api.post('/emails', body, {})
