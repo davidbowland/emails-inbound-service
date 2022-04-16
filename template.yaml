@@ -42,7 +42,7 @@ Resources:
 
   # NOTE: Must be activated manually
   ReceiptRuleSet:
-    Type: 'AWS::SES::ReceiptRuleSet'
+    Type: AWS::SES::ReceiptRuleSet
     Properties:
       RuleSetName: !FindInMap [EnvironmentMap, !Ref Environment, project]
 
@@ -116,6 +116,7 @@ Resources:
       Tags:
         'created-by': 'emails-inbound-service'
         'created-for': 'emails'
+        'environment': !Ref Environment
 
   LambdaExecutePermission:
     Type: AWS::Lambda::Permission
@@ -133,6 +134,13 @@ Resources:
     Properties:
       LogGroupName: !Sub /aws/lambda/${IncomingEmailProcessor}
       RetentionInDays: 30
+      Tags:
+        - Key: 'created-by'
+          Value: 'emails-inbound-service'
+        - Key: 'created-for'
+          Value: 'emails'
+        - Key: 'environment'
+          Value: !Ref Environment
 
   IncomingEmailLogGroupSubscription:
     Type: AWS::Logs::SubscriptionFilter
@@ -172,6 +180,8 @@ Resources:
           Value: 'emails-inbound-service'
         - Key: 'created-for'
           Value: 'emails'
+        - Key: 'environment'
+          Value: !Ref Environment
 
   EmailBucketPolicy:
     Type: AWS::S3::BucketPolicy
