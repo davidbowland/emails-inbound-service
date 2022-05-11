@@ -21,7 +21,7 @@
     "lint": "prettier --write . && eslint --fix . --resolve-plugins-relative-to .",
     "prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then husky install ; fi",
     "start": "npm run build && npm run quick-start",
-    "quick-start": "tsc &&  ./scripts/runLocal.sh",
+    "quick-start": "tsc && ./scripts/runLocal.sh",
     "test": "jest --colors"
   },
   "dependencies": {

@@ -41,6 +41,15 @@ describe('attachments', () => {
       )
     })
 
+    test('expect contentDisposition defaults to application/octet-stream', async () => {
+      await uploadAttachments(messageId, [{ ...attachment, contentDisposition: undefined }])
+      expect(mocked(s3).putS3Object).toHaveBeenCalledWith(
+        'inbound/aaaaa-uuuuu-uuuuu-iiiii-ddddd/ytghji87ytgbhj',
+        'A big file',
+        expect.objectContaining({ contentDisposition: 'application/octet-stream' })
+      )
+    })
+
     test('expect putS3Object called with checksum when cid not available', async () => {
       await uploadAttachments(messageId, [{ ...attachment, cid: undefined, filename: undefined }])
       expect(mocked(s3).putS3Object).toHaveBeenCalledWith(

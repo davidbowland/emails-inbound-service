@@ -3,7 +3,7 @@ import { putS3Object } from '../services/s3'
 
 const getAttachmentMetadata = (attachment: AttachmentCommon): StringObject => ({
   checksum: attachment.checksum,
-  contentDisposition: attachment.contentDisposition,
+  contentDisposition: attachment.contentDisposition ?? 'application/octet-stream',
   contentType: attachment.contentType,
   filename: attachment.filename ?? 'unnamed',
   headers: JSON.stringify(attachment.headers),
