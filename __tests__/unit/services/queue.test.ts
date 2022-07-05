@@ -3,6 +3,8 @@ import { queueApiKey, queueApiUrl } from '@config'
 import { rest, server } from '@setup-server'
 import { sendEmail } from '@services/queue'
 
+jest.mock('@utils/logging')
+
 describe('queue', () => {
   describe('sendEmail', () => {
     const postEndpoint = jest.fn().mockReturnValue(200)

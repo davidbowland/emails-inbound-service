@@ -96,7 +96,6 @@ Resources:
       Architectures:
         - x86_64
       MemorySize: 128
-      Timeout: 90
       Description: Incoming SES email
       Policies:
         - AWSLambdaBasicExecutionRole
@@ -117,6 +116,8 @@ Resources:
         'created-by': 'emails-inbound-service'
         'created-for': 'emails'
         'environment': !Ref Environment
+      Timeout: 90
+      Tracing: Active
 
   LambdaExecutePermission:
     Type: AWS::Lambda::Permission

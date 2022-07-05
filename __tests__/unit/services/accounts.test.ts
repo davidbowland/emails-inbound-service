@@ -3,6 +3,8 @@ import { extractAccountFromAddress, getAccountPreferences } from '@services/acco
 import { rest, server } from '@setup-server'
 import { accounts } from '../__mocks__'
 
+jest.mock('@utils/logging')
+
 describe('accounts', () => {
   describe('extractAccountFromAddress', () => {
     test.each([

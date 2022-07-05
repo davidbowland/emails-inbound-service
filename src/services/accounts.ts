@@ -2,7 +2,9 @@ import axios from 'axios'
 
 import { accountApiKey, accountApiUrl } from '../config'
 import { AccountPreference } from '../types'
+import { xrayCaptureHttps } from '../utils/logging'
 
+xrayCaptureHttps()
 const api = axios.create({
   baseURL: accountApiUrl,
   headers: { 'x-api-key': accountApiKey },

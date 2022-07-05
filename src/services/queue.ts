@@ -2,7 +2,9 @@ import axios from 'axios'
 
 import { Attachment, AttachmentCommon, AxiosResponse, Email } from '../types'
 import { emailFrom, queueApiKey, queueApiUrl } from '../config'
+import { xrayCaptureHttps } from '../utils/logging'
 
+xrayCaptureHttps()
 const api = axios.create({
   baseURL: queueApiUrl,
   headers: { 'x-api-key': queueApiKey },
