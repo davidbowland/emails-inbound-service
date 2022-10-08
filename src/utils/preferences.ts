@@ -4,10 +4,7 @@ import { extractAccountFromAddress, getAccountPreferences } from '../services/ac
 const fetchPreferences = (recipients: string[]): Promise<AccountPreference[]> =>
   Promise.all(recipients.map((address) => getAccountPreferences(extractAccountFromAddress(address))))
 
-const reduceToSinglePreference = (
-  previous: { forwardTargets: Set<string>; save: boolean },
-  current: AccountPreference
-) => ({
+const reduceToSinglePreference = (previous: { forwardTargets: Set<string> }, current: AccountPreference) => ({
   forwardTargets: current.inbound?.forwardTargets
     ? new Set([...previous.forwardTargets, ...current.inbound.forwardTargets])
     : previous.forwardTargets,

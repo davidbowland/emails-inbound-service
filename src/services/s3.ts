@@ -17,7 +17,7 @@ export const getS3Object = (key: string): Promise<string> =>
   s3
     .getObject({ Bucket: emailBucket, Key: key })
     .promise()
-    .then((result) => result.Body as string)
+    .then((result: any) => result.Body as string)
 
 /* Put */
 

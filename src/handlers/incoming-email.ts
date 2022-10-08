@@ -6,7 +6,7 @@ import { sendErrorEmail } from '../utils/error-handling'
 const processRecord = async (record: any) => {
   try {
     await processReceivedEmail(record.ses.mail.messageId, record.ses.receipt.recipients)
-  } catch (error) {
+  } catch (error: any) {
     logError(error)
     sendErrorEmail(record, error)
   }

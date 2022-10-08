@@ -9,12 +9,15 @@ const applyPreferencesToEmail = (
   preferences: AccountInboundPreference,
   email: Email,
   attachments: AttachmentCommon[]
-): Promise<AxiosResponse[]> =>
+): Promise<AxiosResponse[] | undefined> =>
   preferences.forwardTargets
     ? forwardEmail([...preferences.forwardTargets], email, attachments)
     : Promise.resolve(undefined)
 
-export const processReceivedEmail = async (messageId: string, recipients: string[]): Promise<AxiosResponse[]> => {
+export const processReceivedEmail = async (
+  messageId: string,
+  recipients: string[]
+): Promise<AxiosResponse[] | undefined> => {
   const parsedMail = await getParsedMail(messageId)
   const preferences = await aggregatePreferences(recipients)
   log(`${messageId} to ${recipients} =>`, preferences)
