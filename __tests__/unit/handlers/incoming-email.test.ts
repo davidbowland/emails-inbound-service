@@ -1,6 +1,5 @@
 import { mocked } from 'jest-mock'
 
-import * as errorHandlingUtil from '@utils/error-handling'
 import * as incomingEmailService from '@services/incoming-email'
 import * as loggingUtil from '@utils/logging'
 import { SESEvent } from '@types'
@@ -8,7 +7,6 @@ import eventJson from '@events/receive-email.json'
 import { handleIncomingEmail } from '@handlers/incoming-email'
 
 jest.mock('@services/incoming-email')
-jest.mock('@utils/error-handling')
 jest.mock('@utils/logging')
 
 describe('incoming-email handler', () => {
@@ -32,7 +30,6 @@ describe('incoming-email handler', () => {
       mocked(incomingEmailService).processReceivedEmail.mockRejectedValueOnce(error)
       await handleIncomingEmail(event)
       expect(mocked(loggingUtil).logError).toHaveBeenCalledWith(error)
-      expect(mocked(errorHandlingUtil).sendErrorEmail).toHaveBeenCalledWith(expect.anything(), error)
     })
   })
 })

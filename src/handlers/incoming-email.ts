@@ -1,14 +1,12 @@
 import { SESEvent } from '../types'
 import { logError } from '../utils/logging'
 import { processReceivedEmail } from '../services/incoming-email'
-import { sendErrorEmail } from '../utils/error-handling'
 
 const processRecord = async (record: any) => {
   try {
     await processReceivedEmail(record.ses.mail.messageId, record.ses.receipt.recipients)
   } catch (error: any) {
     logError(error)
-    sendErrorEmail(record, error)
   }
 }
 
