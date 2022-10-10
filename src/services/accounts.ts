@@ -12,9 +12,9 @@ const api = axios.create({
 
 export const extractAccountFromAddress = (email: string): string => email.replace(/@[a-z0-9.-]+$/i, '')
 
-export const getAccountPreferences = async (account: string, orDefault = true): Promise<AccountPreference> => {
-  const response = await api.get(`/accounts/${encodeURIComponent(account)}`, {
-    params: { default: orDefault },
-  })
-  return response.data
-}
+export const getAccountPreferences = (account: string, orDefault = true): Promise<AccountPreference> =>
+  api
+    .get(`/accounts/${encodeURIComponent(account)}`, {
+      params: { default: orDefault },
+    })
+    .then((response: any) => response.data)

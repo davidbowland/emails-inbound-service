@@ -5,14 +5,16 @@ import { forwardEmail } from '../utils/forwarding'
 import { log } from '../utils/logging'
 import { uploadAttachments } from '../utils/attachments'
 
-const applyPreferencesToEmail = (
+const applyPreferencesToEmail = async (
   preferences: AccountInboundPreference,
   email: Email,
   attachments: AttachmentCommon[]
-): Promise<AxiosResponse[] | undefined> =>
-  preferences.forwardTargets
-    ? forwardEmail([...preferences.forwardTargets], email, attachments)
-    : Promise.resolve(undefined)
+): Promise<AxiosResponse[] | undefined> => {
+  if (preferences.forwardTargets) {
+    return await forwardEmail([...preferences.forwardTargets], email, attachments)
+  }
+  return undefined
+}
 
 export const processReceivedEmail = async (
   messageId: string,
