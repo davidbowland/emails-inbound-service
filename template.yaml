@@ -167,10 +167,12 @@ Resources:
       LifecycleConfiguration:
         Rules:
           - Status: Enabled
-            ExpirationInDays: 365
+            ExpirationInDays: 1096 # 3 years
             Transitions:
-              - TransitionInDays: 30
+              - TransitionInDays: 60
                 StorageClass: STANDARD_IA
+              - TransitionInDays: 180
+                StorageClass: GLACIER_IR
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
