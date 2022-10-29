@@ -5,19 +5,10 @@ export const messageId = 'aaaaa-uuuuu-uuuuu-iiiii-ddddd'
 export const uuid = 'uuuuu-uuuuu-iiiii-ddddd-22222'
 
 export const accounts = {
-  account1: {
-    inbound: {},
-    outbound: {},
-  },
-  account2: {
-    outbound: {
-      ccTargets: ['three@email.address', 'four@email.address'],
-    },
-  },
+  account1: {},
+  account2: {},
   default: {
-    inbound: {
-      forwardTargets: ['one@email.address', 'two@email.address'],
-    },
+    forwardTargets: ['one@email.address', 'two@email.address'],
   },
 }
 
@@ -79,7 +70,7 @@ export const email: Email = {
 
 export const parsedContents = {
   attachments: [attachment],
-  date: '2018-08-06T00:58:58.000Z',
+  date: new Date('2018-08-06T00:58:58.000Z'),
   from: {
     display: 'Person A <a@person.email>',
     value: [{ address: 'a@person.email', name: 'Person A' }],

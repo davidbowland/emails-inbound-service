@@ -1,7 +1,7 @@
 // API
 
-process.env.ACCOUNT_API_KEY = 'account-api-key'
-process.env.ACCOUNT_API_URL = 'http://account.api'
+process.env.EMAILS_API_KEY = 'emails-api-key'
+process.env.EMAILS_API_URL = 'http://emails.api'
 process.env.QUEUE_API_KEY = 'queue-api-key'
 process.env.QUEUE_API_URL = 'https://queue.api'
 

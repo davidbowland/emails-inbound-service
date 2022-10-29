@@ -12,7 +12,7 @@ const api = axios.create({
 
 /* Emails */
 
-const convertEmailToJson = (target: string, email: Email, attachments: AttachmentCommon[]) => ({
+const convertEmailToJson = (target: string, email: Email, attachments: AttachmentCommon[]): unknown => ({
   attachments: attachments as unknown as Attachment[],
   from: `"${email.fromAddress.value[0].name}" <${emailFrom}>`,
   headers: email.headers,
@@ -27,6 +27,4 @@ const convertEmailToJson = (target: string, email: Email, attachments: Attachmen
 })
 
 export const sendEmail = (target: string, email: Email, attachments: AttachmentCommon[]): Promise<AxiosResponse> =>
-  exports.sendRawEmail(convertEmailToJson(target, email, attachments))
-
-export const sendRawEmail = (body: unknown): Promise<AxiosResponse> => api.post('/emails', body, {})
+  api.post('/emails', convertEmailToJson(target, email, attachments), {})

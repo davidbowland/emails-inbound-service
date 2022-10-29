@@ -3,17 +3,8 @@ export { AxiosResponse } from 'axios'
 export { AttachmentCommon, ParsedMail } from 'mailparser'
 export { Attachment } from 'nodemailer/lib/mailer'
 
-export interface AccountInboundPreference {
-  forwardTargets?: string[] | Set<string>
-}
-
-export interface AccountOutboundPreference {
-  ccTargets?: string[]
-}
-
 export interface AccountPreference {
-  inbound?: AccountInboundPreference
-  outbound?: AccountOutboundPreference
+  forwardTargets?: string[]
 }
 
 export interface EmailAddress {
@@ -43,6 +34,24 @@ export interface Email {
   replyToAddress: EmailAddress
   subject?: string
   toAddress?: EmailAddress
+}
+
+export interface EmailAttachment {
+  filename: string
+  id: string
+  size: number
+  type: string
+}
+
+export interface EmailReceived {
+  attachments?: EmailAttachment[]
+  bcc?: string[]
+  cc?: string[]
+  from: string
+  subject: string
+  timestamp: number
+  to: string[]
+  viewed: boolean
 }
 
 export interface StringObject {

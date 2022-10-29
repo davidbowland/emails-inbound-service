@@ -7,8 +7,8 @@ axiosRetry(axios, { retries: 3 })
 
 // API
 
-export const accountApiKey = process.env.ACCOUNT_API_KEY as string
-export const accountApiUrl = process.env.ACCOUNT_API_URL as string
+export const emailsApiKey = process.env.EMAILS_API_KEY as string
+export const emailsApiUrl = process.env.EMAILS_API_URL as string
 export const queueApiKey = process.env.QUEUE_API_KEY as string
 export const queueApiUrl = process.env.QUEUE_API_URL as string
 

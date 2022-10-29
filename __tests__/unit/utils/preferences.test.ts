@@ -1,10 +1,10 @@
 import { mocked } from 'jest-mock'
 
-import * as accountsService from '@services/accounts'
+import * as emailsService from '@services/emails'
 import { accounts } from '../__mocks__'
 import { aggregatePreferences } from '@utils/preferences'
 
-jest.mock('@services/accounts')
+jest.mock('@services/emails')
 
 describe('preferences', () => {
   describe('aggregatePreferences', () => {
@@ -13,32 +13,30 @@ describe('preferences', () => {
     const account2 = 'account2@email.address'
 
     beforeAll(() => {
-      mocked(accountsService).extractAccountFromAddress.mockImplementation((email) =>
-        email.replace(/@[a-z0-9.-]+$/i, '')
-      )
-      mocked(accountsService).getAccountPreferences.mockImplementation((account) => accounts[account])
+      mocked(emailsService).extractAccountFromAddress.mockImplementation((email) => email.replace(/@[a-z0-9.-]+$/i, ''))
+      mocked(emailsService).getAccountPreferences.mockImplementation((account) => accounts[account])
     })
 
     test('expect account extraction called', async () => {
       await aggregatePreferences([defaultAccount, account1, account2])
-      expect(mocked(accountsService).extractAccountFromAddress).toHaveBeenCalledWith(defaultAccount)
-      expect(mocked(accountsService).extractAccountFromAddress).toHaveBeenCalledWith(account1)
-      expect(mocked(accountsService).extractAccountFromAddress).toHaveBeenCalledWith(account2)
+      expect(mocked(emailsService).extractAccountFromAddress).toHaveBeenCalledWith(defaultAccount)
+      expect(mocked(emailsService).extractAccountFromAddress).toHaveBeenCalledWith(account1)
+      expect(mocked(emailsService).extractAccountFromAddress).toHaveBeenCalledWith(account2)
     })
 
     test('expect preferences returned', async () => {
       const defaultAccount = 'default@email.address'
       const result = await aggregatePreferences([defaultAccount])
       expect(result).toEqual({
-        ...accounts.default.inbound,
-        forwardTargets: new Set(accounts.default.inbound.forwardTargets),
+        ...accounts.default,
+        forwardTargets: accounts.default.forwardTargets,
       })
     })
 
     test('expect preferences merged', async () => {
       const result = await aggregatePreferences([defaultAccount, account1, account2])
       expect(result).toEqual({
-        forwardTargets: new Set(accounts.default.inbound.forwardTargets),
+        forwardTargets: accounts.default.forwardTargets,
       })
     })
   })

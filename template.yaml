@@ -6,9 +6,9 @@ Transform:
   - AWS::Serverless-2016-10-31
 
 Parameters:
-  AccountApiKey:
+  EmailsApiKey:
     Type: String
-    Description: API key for emails-account-api
+    Description: API key for emails-email-api
   Environment:
     Type: String
     Default: prod
@@ -23,16 +23,16 @@ Parameters:
 Mappings:
   EnvironmentMap:
     prod:
-      accountApiUrl: 'https://emails-account-api.dbowland.com/v1'
       bucket: emails-service-storage
       domain: dbowland.com
+      emailsApiUrl: 'https://emails-email-api-internal.dbowland.com/v1'
       logStreamFunction: log-subscriber
       project: emails-inbound-service
       queueApiUrl: 'https://emails-queue-api.dbowland.com/v1'
     test:
-      accountApiUrl: 'https://emails-account-api.bowland.link/v1'
       bucket: emails-service-storage-test
       domain: bowland.link
+      emailsApiUrl: 'https://emails-email-api-internal.bowland.link/v1'
       logStreamFunction: log-subscriber-test
       project: emails-inbound-service-test
       queueApiUrl: 'https://emails-queue-api.bowland.link/v1'
@@ -103,8 +103,8 @@ Resources:
             BucketName: !Ref EmailBucket
       Environment:
         Variables:
-          ACCOUNT_API_KEY: !Ref AccountApiKey
-          ACCOUNT_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, accountApiUrl]
+          EMAILS_API_KEY: !Ref EmailsApiKey
+          EMAILS_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, emailsApiUrl]
           EMAIL_BUCKET: !Ref EmailBucket
           EMAIL_FROM: !Sub
             - 'do-not-reply@${Domain}'

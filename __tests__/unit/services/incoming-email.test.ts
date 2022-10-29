@@ -1,12 +1,14 @@
 import { mocked } from 'jest-mock'
 
 import * as attachments from '@utils/attachments'
+import * as emails from '@services/emails'
 import * as forwarding from '@utils/forwarding'
 import * as parser from '@utils/parser'
 import * as preferences from '@utils/preferences'
 import { accounts, attachment, email, messageId, parsedContents } from '../__mocks__'
 import { processReceivedEmail } from '@services/incoming-email'
 
+jest.mock('@services/emails')
 jest.mock('@utils/attachments')
 jest.mock('@utils/forwarding')
 jest.mock('@utils/logging')
@@ -15,14 +17,20 @@ jest.mock('@utils/preferences')
 
 describe('incoming-email service', () => {
   describe('processReceivedEmail', () => {
+    const account = 'account'
     const recipients = ['e@mail.address']
 
     beforeAll(() => {
       mocked(attachments).uploadAttachments.mockResolvedValue([attachment])
-      mocked(forwarding).forwardEmail.mockResolvedValue([])
+      mocked(emails).extractAccountFromAddress.mockReturnValue(account)
       mocked(parser).convertParsedContentsToEmail.mockReturnValue(email)
       mocked(parser).getParsedMail.mockResolvedValue(parsedContents)
-      mocked(preferences).aggregatePreferences.mockResolvedValue(accounts.default.inbound)
+      mocked(preferences).aggregatePreferences.mockResolvedValue(accounts.default)
+    })
+
+    test('expect registerReceivedEmail invoked', async () => {
+      await processReceivedEmail(messageId, recipients)
+      expect(mocked(emails).registerReceivedEmail).toHaveBeenCalledWith(messageId, account, parsedContents)
     })
 
     test('expect attachments uploaded', async () => {

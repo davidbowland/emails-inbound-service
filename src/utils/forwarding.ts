@@ -1,29 +1,18 @@
 import { v1 as uuidv1 } from 'uuid'
 
-import { AttachmentCommon, AxiosResponse, Email } from '../types'
+import { AttachmentCommon, Email } from '../types'
 import { copyS3Object } from '../services/s3'
 import { getAttachmentId } from './attachments'
 import { sendEmail } from '../services/queue'
 
-const copyAttachments = (attachments: AttachmentCommon[], uuid: string): Promise<AttachmentCommon[]> =>
-  Promise.all(
-    attachments.map(async (attachment) => {
-      await copyS3Object(attachment.content, `queue/emails-service/${uuid}/${getAttachmentId(attachment)}`)
-      return {
-        ...attachment,
-        content: `queue/emails-service/${uuid}/${getAttachmentId(attachment)}`,
-      }
+export const forwardEmail = async (targets: string[], email: Email, attachments: AttachmentCommon[]): Promise<void> => {
+  for (const target of targets) {
+    const uuid = uuidv1()
+    const attachmentsOnS3 = attachments.map(async (attachment) => {
+      const s3Key = `queue/emails-service/${uuid}/${getAttachmentId(attachment)}`
+      await copyS3Object(attachment.content, s3Key)
+      return { ...attachment, content: s3Key }
     })
-  )
-
-export const forwardEmail = (
-  targets: string[],
-  email: Email,
-  attachments: AttachmentCommon[]
-): Promise<AxiosResponse[]> =>
-  Promise.all(
-    targets.map(async (target) => {
-      const attachmentsOnS3 = await copyAttachments(attachments, uuidv1())
-      return sendEmail(target, email, attachmentsOnS3)
-    })
-  )
+    await sendEmail(target, email, await Promise.all(attachmentsOnS3))
+  }
+}
