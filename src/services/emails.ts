@@ -30,11 +30,11 @@ const convertParsedMailToReceivedEmail = (parsedMail: ParsedMail): EmailReceived
       size: file.size,
       type: file.contentType,
     })),
-    cc: cc?.map((address) => address.value[0].address as string) ?? [],
-    from: parsedMail.from?.value[0].address ?? 'unknown',
+    cc: cc?.map((address) => address.text as string) ?? [],
+    from: parsedMail.from?.text ?? 'unknown',
     subject: parsedMail.subject ?? '',
     timestamp: (parsedMail.date ?? new Date()).getTime(),
-    to: to?.map((address) => address.value[0].address as string) ?? [],
+    to: to?.map((address) => address.text as string) ?? [],
     viewed: false,
   }
 }

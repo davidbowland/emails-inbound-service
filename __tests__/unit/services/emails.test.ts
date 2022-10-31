@@ -87,9 +87,9 @@ describe('emails', () => {
               type: 'text/plain',
             },
           ],
-          from: 'a@person.email',
+          from: 'Person A <a@person.email>',
           subject: 'P G Wodehouse',
-          to: ['b@person.email'],
+          to: ['Person B <b@person.email>'],
           viewed: false,
         })
       )

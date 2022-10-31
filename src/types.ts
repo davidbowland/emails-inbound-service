@@ -8,7 +8,8 @@ export interface AccountPreference {
 }
 
 export interface EmailAddress {
-  display: string
+  html: string
+  text: string
   value: {
     address: string
     group?: string[]

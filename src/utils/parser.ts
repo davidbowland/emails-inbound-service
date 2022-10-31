@@ -5,7 +5,8 @@ import { getAttachmentId } from './attachments'
 import { getS3Object } from '../services/s3'
 
 const emptyAddress: EmailAddress = {
-  display: '',
+  html: '',
+  text: '',
   value: [
     {
       address: '',

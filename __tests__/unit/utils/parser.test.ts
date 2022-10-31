@@ -38,7 +38,7 @@ describe('parser', () => {
       const result = await convertParsedContentsToEmail(messageId, tempContents, recipients)
       expect(result.bodyHtml).toEqual('')
       expect(result.bodyText).toEqual('')
-      expect(result.fromAddress).toEqual({ display: '', value: [{ address: '', name: '' }] })
+      expect(result.fromAddress).toEqual({ html: '', text: '', value: [{ address: '', name: '' }] })
       expect(result.id).toEqual(messageId)
       expect(result.references).toEqual([reference])
     })

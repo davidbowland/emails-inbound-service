@@ -34,7 +34,8 @@ export const email: Email = {
   bodyText: 'http://www.gutenberg.org/files/8164/8164-h/8164-h.htm\n',
   ccAddress: undefined,
   fromAddress: {
-    display: 'Person A <a@person.email>',
+    html: '<span class="mp_address_group"><span class="mp_address_name">Person A</span> &lt;<a href="mailto:a@person.email" class="mp_address_email">a@person.email</a>&gt;</span>',
+    text: 'Person A <a@person.email>',
     value: [
       {
         address: 'a@person.email',
@@ -48,7 +49,8 @@ export const email: Email = {
   recipients: ['e@mail.address'],
   references: [],
   replyToAddress: {
-    display: '',
+    html: '',
+    text: '',
     value: [
       {
         address: '',
@@ -58,7 +60,8 @@ export const email: Email = {
   },
   subject: 'P G Wodehouse',
   toAddress: {
-    display: 'Person B <b@person.email>',
+    html: '<span class="mp_address_group"><span class="mp_address_name">Person B</span> &lt;<a href="mailto:b@person.email" class="mp_address_email">b@person.email</a>&gt;</span>',
+    text: 'Person B <b@person.email>',
     value: [
       {
         address: 'b@person.email',
@@ -72,8 +75,14 @@ export const parsedContents = {
   attachments: [attachment],
   date: new Date('2018-08-06T00:58:58.000Z'),
   from: {
-    display: 'Person A <a@person.email>',
-    value: [{ address: 'a@person.email', name: 'Person A' }],
+    html: '<span class="mp_address_group"><span class="mp_address_name">Person A</span> &lt;<a href="mailto:a@person.email" class="mp_address_email">a@person.email</a>&gt;</span>',
+    text: 'Person A <a@person.email>',
+    value: [
+      {
+        address: 'a@person.email',
+        name: 'Person A',
+      },
+    ],
   },
   headerLines: [
     { key: 'mime-version', line: 'MIME-Version: 1.0' },
@@ -95,8 +104,14 @@ export const parsedContents = {
   textAsHtml:
     '<p><a href="http://www.gutenberg.org/files/8164/8164-h/8164-h.htm">http://www.gutenberg.org/files/8164/8164-h/8164-h.htm</a></p>',
   to: {
-    display: 'Person B <b@person.email>',
-    value: [{ address: 'b@person.email', name: 'Person B' }],
+    html: '<span class="mp_address_group"><span class="mp_address_name">Person B</span> &lt;<a href="mailto:b@person.email" class="mp_address_email">b@person.email</a>&gt;</span>',
+    text: 'Person B <b@person.email>',
+    value: [
+      {
+        address: 'b@person.email',
+        name: 'Person B',
+      },
+    ],
   },
 } as unknown as ParsedMail
 
