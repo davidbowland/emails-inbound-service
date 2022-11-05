@@ -16,8 +16,8 @@ SAM_TEMPLATE=template.yaml
 sam build --template ${SAM_TEMPLATE}
 
 # Start the service locally
-export EMAILS_API_KEY=$(aws apigateway get-api-key --api-key ypyhbxzdh4 --include-value --region us-east-1 | jq -r .value)
-export EMAILS_API_URL=https://emails-account-api.bowland.link/v1
+export EMAILS_API_KEY=$(aws apigateway get-api-key --api-key dgib87qx35 --include-value --region us-east-1 | jq -r .value)
+export EMAILS_API_URL=https://emails-email-api-internal.bowland.link/v1
 export EMAIL_BUCKET=emails-service-storage-test
 export EMAIL_FROM=do-not-reply@bowland.link
 export EMAIL_REGION=us-east-1
