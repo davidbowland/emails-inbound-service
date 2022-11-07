@@ -86,7 +86,7 @@ jobs:
             --capabilities CAPABILITY_IAM \
             --region ${TESTING_REGION} \
             --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
-            --s3-prefix emails-inbound-service-test \
+            --s3-prefix ${TESTING_STACK_NAME} \
             --no-fail-on-empty-changeset \
             --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE} \
             --parameter-overrides "EmailsApiKey=${TESTING_EMAILS_API_KEY} Environment=test QueueApiKey=${TESTING_QUEUE_API_KEY}"
@@ -131,7 +131,7 @@ jobs:
         run: |
           sam package \
             --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
-            --s3-prefix emails-inbound-service-test \
+            --s3-prefix ${TESTING_STACK_NAME} \
             --region ${TESTING_REGION} \
             --output-template-file packaged-testing.yaml
 
@@ -155,7 +155,7 @@ jobs:
         run: |
           sam package \
             --s3-bucket ${PROD_ARTIFACTS_BUCKET} \
-            --s3-prefix emails-inbound-service \
+            --s3-prefix ${PROD_STACK_NAME} \
             --region ${PROD_REGION} \
             --output-template-file packaged-prod.yaml
 
@@ -199,7 +199,7 @@ jobs:
             --capabilities CAPABILITY_IAM \
             --region ${TESTING_REGION} \
             --s3-bucket ${TESTING_ARTIFACTS_BUCKET} \
-            --s3-prefix emails-inbound-service-test \
+            --s3-prefix ${TESTING_STACK_NAME} \
             --no-fail-on-empty-changeset \
             --role-arn ${TESTING_CLOUDFORMATION_EXECUTION_ROLE} \
             --parameter-overrides "EmailsApiKey=${TESTING_EMAILS_API_KEY} Environment=test QueueApiKey=${TESTING_QUEUE_API_KEY}"
@@ -239,7 +239,7 @@ jobs:
             --capabilities CAPABILITY_IAM \
             --region ${PROD_REGION} \
             --s3-bucket ${PROD_ARTIFACTS_BUCKET} \
-            --s3-prefix emails-inbound-service \
+            --s3-prefix ${PROD_STACK_NAME} \
             --no-fail-on-empty-changeset \
             --role-arn ${PROD_CLOUDFORMATION_EXECUTION_ROLE} \
             --parameter-overrides "EmailsApiKey=${PROD_EMAILS_API_KEY} QueueApiKey=${PROD_QUEUE_API_KEY}"
