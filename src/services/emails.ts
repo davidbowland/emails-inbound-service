@@ -19,7 +19,7 @@ export const getAccountPreferences = (account: string): Promise<AccountPreferenc
 
 /* Emails */
 
-const convertParsedMailToReceivedEmail = (parsedMail: ParsedMail): EmailReceived => {
+const convertParsedMailToReceivedEmail = (parsedMail: ParsedMail, address: string): EmailReceived => {
   const cc = parsedMail.cc === undefined || Array.isArray(parsedMail.cc) ? parsedMail.cc : [parsedMail.cc]
   const to = parsedMail.to === undefined || Array.isArray(parsedMail.to) ? parsedMail.to : [parsedMail.to]
 
@@ -34,17 +34,19 @@ const convertParsedMailToReceivedEmail = (parsedMail: ParsedMail): EmailReceived
     from: parsedMail.from?.text ?? 'unknown',
     subject: parsedMail.subject ?? '',
     timestamp: (parsedMail.date ?? new Date()).getTime(),
-    to: to?.map((address) => address.text as string) ?? [],
+    to: to?.map((address) => address.text as string) ?? [address],
     viewed: false,
   }
 }
 
 export const registerReceivedEmail = (
   messageId: string,
-  account: string,
+  address: string,
   parsedMail: ParsedMail
 ): Promise<AxiosResponse> =>
   api.put(
-    `/accounts/${encodeURIComponent(account.toLowerCase())}/emails/received/${encodeURIComponent(messageId)}`,
-    convertParsedMailToReceivedEmail(parsedMail)
+    `/accounts/${encodeURIComponent(
+      extractAccountFromAddress(address.toLowerCase())
+    )}/emails/received/${encodeURIComponent(messageId)}`,
+    convertParsedMailToReceivedEmail(parsedMail, address)
   )

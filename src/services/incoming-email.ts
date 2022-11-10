@@ -1,9 +1,9 @@
 import { AccountPreference, AttachmentCommon, Email } from '../types'
 import { convertParsedContentsToEmail, getParsedMail } from '../utils/parser'
-import { extractAccountFromAddress, registerReceivedEmail } from './emails'
 import { aggregatePreferences } from '../utils/preferences'
 import { forwardEmail } from '../utils/forwarding'
 import { log } from '../utils/logging'
+import { registerReceivedEmail } from './emails'
 import { uploadAttachments } from '../utils/attachments'
 
 const applyPreferencesToEmail = async (
@@ -30,6 +30,6 @@ export const processReceivedEmail = async (messageId: string, recipients: string
   )
 
   for (const address of recipients) {
-    await registerReceivedEmail(messageId, extractAccountFromAddress(address), parsedMail)
+    await registerReceivedEmail(messageId, address, parsedMail)
   }
 }

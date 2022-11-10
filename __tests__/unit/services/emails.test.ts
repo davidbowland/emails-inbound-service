@@ -55,7 +55,7 @@ describe('emails', () => {
   })
 
   describe('registerReceivedEmail', () => {
-    const accountId = 'account1'
+    const address = 'account1@domain.com'
     const messageId = 'message-id'
     const mockPutEmail = jest.fn()
 
@@ -74,7 +74,7 @@ describe('emails', () => {
     })
 
     test('expect endpoint invoked with email', async () => {
-      await registerReceivedEmail(messageId, accountId, parsedContents)
+      await registerReceivedEmail(messageId, address, parsedContents)
       expect(mockPutEmail).toHaveBeenCalledWith(
         'account1',
         'message-id',
@@ -113,7 +113,7 @@ describe('emails', () => {
         subject: undefined,
         to: undefined,
       } as unknown as ParsedMail
-      await registerReceivedEmail(messageId, accountId, parsedContentsWithMissingParts)
+      await registerReceivedEmail(messageId, address, parsedContentsWithMissingParts)
       expect(mockPutEmail).toHaveBeenCalledWith(
         'account1',
         'message-id',
@@ -126,7 +126,7 @@ describe('emails', () => {
           ],
           from: 'unknown',
           subject: '',
-          to: [],
+          to: ['account1@domain.com'],
           viewed: false,
         })
       )

@@ -30,7 +30,7 @@ describe('incoming-email service', () => {
 
     test('expect registerReceivedEmail invoked', async () => {
       await processReceivedEmail(messageId, recipients)
-      expect(mocked(emails).registerReceivedEmail).toHaveBeenCalledWith(messageId, account, parsedContents)
+      expect(mocked(emails).registerReceivedEmail).toHaveBeenCalledWith(messageId, recipients[0], parsedContents)
     })
 
     test('expect attachments uploaded', async () => {
