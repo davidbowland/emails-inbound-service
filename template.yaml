@@ -173,6 +173,9 @@ Resources:
                 StorageClass: STANDARD_IA
               - TransitionInDays: 180
                 StorageClass: GLACIER_IR
+          - Status: Enabled
+            ExpirationInDays: 1
+            Prefix: attachments/
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
