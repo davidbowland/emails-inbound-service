@@ -1,8 +1,8 @@
 import { mocked } from 'jest-mock'
 
 import * as s3 from '@services/s3'
-import { attachment, messageId } from '../__mocks__'
-import { getAttachmentId, uploadAttachments } from '@utils/attachments'
+import { attachment, messageId, parsedContents } from '../__mocks__'
+import { copyAttachmentsToAccount, getAttachmentId, uploadAttachments } from '@utils/attachments'
 
 jest.mock('@services/s3')
 
@@ -16,6 +16,18 @@ describe('attachments', () => {
     test('expect checksum when present', () => {
       const result = getAttachmentId({ ...attachment, cid: undefined })
       expect(result).toEqual('jytgbni87ytgbnjkuy')
+    })
+  })
+
+  describe('copyAttachmentsToAccount', () => {
+    const accountId = 'account-id'
+
+    test('expect copyS3Object called with attachment', async () => {
+      await copyAttachmentsToAccount(accountId, messageId, parsedContents.attachments)
+      expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(
+        'inbound/aaaaa-uuuuu-uuuuu-iiiii-ddddd/ytghji87ytgbhj',
+        'received/account-id/aaaaa-uuuuu-uuuuu-iiiii-ddddd/ytghji87ytgbhj'
+      )
     })
   })
 

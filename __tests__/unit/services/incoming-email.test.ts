@@ -5,10 +5,12 @@ import * as emails from '@services/emails'
 import * as forwarding from '@utils/forwarding'
 import * as parser from '@utils/parser'
 import * as preferences from '@utils/preferences'
+import * as s3 from '@services/s3'
 import { accounts, attachment, email, messageId, parsedContents } from '../__mocks__'
 import { processReceivedEmail } from '@services/incoming-email'
 
 jest.mock('@services/emails')
+jest.mock('@services/s3')
 jest.mock('@utils/attachments')
 jest.mock('@utils/forwarding')
 jest.mock('@utils/logging')
@@ -17,12 +19,12 @@ jest.mock('@utils/preferences')
 
 describe('incoming-email service', () => {
   describe('processReceivedEmail', () => {
-    const account = 'account'
-    const recipients = ['e@mail.address']
+    const recipients = ['e@mail.address', 'f@mail.address']
 
     beforeAll(() => {
+      mocked(attachments).getAttachmentId.mockImplementation((attachment) => attachment.contentId)
       mocked(attachments).uploadAttachments.mockResolvedValue([attachment])
-      mocked(emails).extractAccountFromAddress.mockReturnValue(account)
+      mocked(emails).extractAccountFromAddress.mockImplementation((email) => email[0])
       mocked(parser).convertParsedContentsToEmail.mockReturnValue(email)
       mocked(parser).getParsedMail.mockResolvedValue(parsedContents)
       mocked(preferences).aggregatePreferences.mockResolvedValue(accounts.default)
@@ -30,7 +32,30 @@ describe('incoming-email service', () => {
 
     test('expect registerReceivedEmail invoked', async () => {
       await processReceivedEmail(messageId, recipients)
-      expect(mocked(emails).registerReceivedEmail).toHaveBeenCalledWith(messageId, recipients[0], parsedContents)
+      expect(mocked(emails).registerReceivedEmail).toHaveBeenCalledWith(recipients[0], messageId, parsedContents)
+      expect(mocked(emails).registerReceivedEmail).toHaveBeenCalledWith(recipients[1], messageId, parsedContents)
+    })
+
+    test('expect copyS3Object invoked for the message', async () => {
+      await processReceivedEmail(messageId, recipients)
+      expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(`inbound/${messageId}`, `received/e/${messageId}`)
+      expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(`inbound/${messageId}`, `received/f/${messageId}`)
+    })
+
+    test('expect copyS3Object invoked for attachments', async () => {
+      await processReceivedEmail(messageId, recipients)
+      expect(mocked(attachments).copyAttachmentsToAccount).toHaveBeenCalledWith('e', messageId, [attachment])
+      expect(mocked(attachments).copyAttachmentsToAccount).toHaveBeenCalledWith('f', messageId, [attachment])
+    })
+
+    test('expect deleteS3Object invoked for the message', async () => {
+      await processReceivedEmail(messageId, recipients)
+      expect(mocked(s3).deleteS3Object).toHaveBeenCalledWith(`inbound/${messageId}`)
+    })
+
+    test('expect deleteS3Object invoked for attachments', async () => {
+      await processReceivedEmail(messageId, recipients)
+      expect(mocked(s3).deleteS3Object).toHaveBeenCalledWith(`inbound/${messageId}/${attachment.contentId}`)
     })
 
     test('expect attachments uploaded', async () => {

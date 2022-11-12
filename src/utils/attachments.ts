@@ -1,5 +1,7 @@
 import { AttachmentCommon, StringObject } from '../types'
-import { putS3Object } from '../services/s3'
+import { copyS3Object, putS3Object } from '../services/s3'
+
+/* Parsing */
 
 const getAttachmentMetadata = (attachment: AttachmentCommon): StringObject => ({
   checksum: attachment.checksum,
@@ -12,6 +14,21 @@ const getAttachmentMetadata = (attachment: AttachmentCommon): StringObject => ({
 })
 
 export const getAttachmentId = (attachment: AttachmentCommon): string => attachment.cid ?? attachment.checksum
+
+/* S3 */
+
+export const copyAttachmentsToAccount = async (
+  accountId: string,
+  messageId: string,
+  emailAttachments: AttachmentCommon[]
+): Promise<void> => {
+  for (const attachment of emailAttachments) {
+    await copyS3Object(
+      `inbound/${messageId}/${getAttachmentId(attachment)}`,
+      `received/${accountId}/${messageId}/${getAttachmentId(attachment)}`
+    )
+  }
+}
 
 export const uploadAttachments = async (
   messageId: string,

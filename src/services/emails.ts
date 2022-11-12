@@ -12,7 +12,7 @@ const api = axios.create({
 
 /* Accounts */
 
-export const extractAccountFromAddress = (email: string): string => email.replace(/@[a-z0-9.-]+$/i, '')
+export const extractAccountFromAddress = (email: string): string => email.replace(/@[a-z0-9.-]+$/i, '').toLowerCase()
 
 export const getAccountPreferences = (account: string): Promise<AccountPreference> =>
   api.get(`/accounts/${encodeURIComponent(account.toLowerCase())}/internal`).then((response: any) => response.data)
@@ -40,13 +40,13 @@ const convertParsedMailToReceivedEmail = (parsedMail: ParsedMail, address: strin
 }
 
 export const registerReceivedEmail = (
-  messageId: string,
   address: string,
+  messageId: string,
   parsedMail: ParsedMail
 ): Promise<AxiosResponse> =>
   api.put(
-    `/accounts/${encodeURIComponent(
-      extractAccountFromAddress(address.toLowerCase())
-    )}/emails/received/${encodeURIComponent(messageId)}`,
+    `/accounts/${encodeURIComponent(extractAccountFromAddress(address))}/emails/received/${encodeURIComponent(
+      messageId
+    )}`,
     convertParsedMailToReceivedEmail(parsedMail, address)
   )
