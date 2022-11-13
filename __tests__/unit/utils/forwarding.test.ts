@@ -16,7 +16,7 @@ describe('forwarding', () => {
   describe('forwardEmail', () => {
     const transformedAttachment = {
       ...attachment,
-      content: 'queue/emails-service/uuuuu-uuuuu-iiiii-ddddd-22222/ytghji87ytgbhj',
+      content: 'queue/uuuuu-uuuuu-iiiii-ddddd-22222/ytghji87ytgbhj',
     }
 
     beforeAll(() => {

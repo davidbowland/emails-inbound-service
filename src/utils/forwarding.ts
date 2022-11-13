@@ -9,7 +9,7 @@ export const forwardEmail = async (targets: string[], email: Email, attachments:
   for (const target of targets) {
     const uuid = uuidv1()
     const attachmentsOnS3 = attachments.map(async (attachment) => {
-      const s3Key = `queue/emails-service/${uuid}/${getAttachmentId(attachment)}`
+      const s3Key = `queue/${uuid}/${getAttachmentId(attachment)}`
       await copyS3Object(attachment.content, s3Key)
       return { ...attachment, content: s3Key }
     })

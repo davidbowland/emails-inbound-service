@@ -17,7 +17,7 @@ describe('queue', () => {
             return res(ctx.status(403))
           }
 
-          const body = postEndpoint(req.body)
+          const body = postEndpoint(await req.json())
           return res(body ? ctx.json(body) : ctx.status(400))
         })
       )
