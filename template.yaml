@@ -116,7 +116,7 @@ Resources:
         'created-by': 'emails-inbound-service'
         'created-for': 'emails'
         'environment': !Ref Environment
-      Timeout: 90
+      Timeout: 180
       Tracing: Active
 
   LambdaExecutePermission:

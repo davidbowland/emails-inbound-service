@@ -14,14 +14,22 @@ const api = axios.create({
 
 export const extractAccountFromAddress = (email: string): string => email.replace(/@[a-z0-9.-]+$/i, '').toLowerCase()
 
+export const getAccountExists = (account: string): Promise<boolean> =>
+  api
+    .get(`/accounts/${encodeURIComponent(account.toLowerCase())}`, {
+      headers: { 'x-api-key': emailsApiKey, 'x-user-name': account.toLowerCase() },
+    })
+    .then(() => true)
+    .catch(() => false)
+
 export const getAccountPreferences = (account: string): Promise<AccountPreference> =>
   api.get(`/accounts/${encodeURIComponent(account.toLowerCase())}/internal`).then((response: any) => response.data)
 
 /* Emails */
 
 const convertParsedMailToReceivedEmail = (parsedMail: ParsedMail, address: string): EmailReceived => {
-  const cc = parsedMail.cc === undefined || Array.isArray(parsedMail.cc) ? parsedMail.cc : [parsedMail.cc]
-  const to = parsedMail.to === undefined || Array.isArray(parsedMail.to) ? parsedMail.to : [parsedMail.to]
+  const cc = parsedMail.cc === undefined || Array.isArray(parsedMail.cc) ? parsedMail.cc : parsedMail.cc.value
+  const to = parsedMail.to === undefined || Array.isArray(parsedMail.to) ? parsedMail.to : parsedMail.to.value
 
   return {
     attachments: parsedMail.attachments.map((file) => ({
@@ -30,11 +38,11 @@ const convertParsedMailToReceivedEmail = (parsedMail: ParsedMail, address: strin
       size: file.size,
       type: file.contentType,
     })),
-    cc: cc?.map((address) => address.text as string) ?? [],
+    cc: cc?.map((address: any) => address.address as string) ?? [],
     from: parsedMail.from?.text ?? 'unknown',
     subject: parsedMail.subject ?? '',
     timestamp: (parsedMail.date ?? new Date()).getTime(),
-    to: to?.map((address) => address.text as string) ?? [address],
+    to: to?.map((address: any) => address.address as string) ?? [address],
     viewed: false,
   }
 }

@@ -2,7 +2,7 @@ import { AccountPreference, AttachmentCommon, Email } from '../types'
 import { convertParsedContentsToEmail, getParsedMail } from '../utils/parser'
 import { copyAttachmentsToAccount, getAttachmentId, uploadAttachments } from '../utils/attachments'
 import { copyS3Object, deleteS3Object } from './s3'
-import { extractAccountFromAddress, registerReceivedEmail } from './emails'
+import { extractAccountFromAddress, getAccountExists, registerReceivedEmail } from './emails'
 import { aggregatePreferences } from '../utils/preferences'
 import { forwardEmail } from '../utils/forwarding'
 import { log } from '../utils/logging'
@@ -35,6 +35,15 @@ export const processReceivedEmail = async (messageId: string, recipients: string
     await registerReceivedEmail(address, messageId, parsedMail)
     await copyS3Object(`inbound/${messageId}`, `received/${accountId}/${messageId}`)
     await copyAttachmentsToAccount(accountId, messageId, parsedMail.attachments)
+  }
+  if (
+    !(await Promise.all(recipients.map((address) => getAccountExists(extractAccountFromAddress(address))))).every(
+      Boolean
+    )
+  ) {
+    await registerReceivedEmail('admin', messageId, parsedMail)
+    await copyS3Object(`inbound/${messageId}`, `received/admin/${messageId}`)
+    await copyAttachmentsToAccount('admin', messageId, parsedMail.attachments)
   }
   await deleteS3Object(`inbound/${messageId}`)
   for (const attachment of parsedMail.attachments) {

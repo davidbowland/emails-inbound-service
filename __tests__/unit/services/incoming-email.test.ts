@@ -25,6 +25,7 @@ describe('incoming-email service', () => {
       mocked(attachments).getAttachmentId.mockImplementation((attachment) => attachment.contentId)
       mocked(attachments).uploadAttachments.mockResolvedValue([attachment])
       mocked(emails).extractAccountFromAddress.mockImplementation((email) => email[0])
+      mocked(emails).getAccountExists.mockResolvedValue(false)
       mocked(parser).convertParsedContentsToEmail.mockReturnValue(email)
       mocked(parser).getParsedMail.mockResolvedValue(parsedContents)
       mocked(preferences).aggregatePreferences.mockResolvedValue(accounts.default)
@@ -40,12 +41,32 @@ describe('incoming-email service', () => {
       await processReceivedEmail(messageId, recipients)
       expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(`inbound/${messageId}`, `received/e/${messageId}`)
       expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(`inbound/${messageId}`, `received/f/${messageId}`)
+      expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(`inbound/${messageId}`, `received/admin/${messageId}`)
     })
 
     test('expect copyS3Object invoked for attachments', async () => {
       await processReceivedEmail(messageId, recipients)
       expect(mocked(attachments).copyAttachmentsToAccount).toHaveBeenCalledWith('e', messageId, [attachment])
       expect(mocked(attachments).copyAttachmentsToAccount).toHaveBeenCalledWith('f', messageId, [attachment])
+      expect(mocked(attachments).copyAttachmentsToAccount).toHaveBeenCalledWith('admin', messageId, [attachment])
+    })
+
+    test('expect copyS3Object not invoked for admin when accounts exist', async () => {
+      mocked(emails).getAccountExists.mockResolvedValueOnce(true)
+      mocked(emails).getAccountExists.mockResolvedValueOnce(true)
+      await processReceivedEmail(messageId, recipients)
+      expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(`inbound/${messageId}`, `received/e/${messageId}`)
+      expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(`inbound/${messageId}`, `received/f/${messageId}`)
+      expect(mocked(s3).copyS3Object).not.toHaveBeenCalledWith(`inbound/${messageId}`, `received/admin/${messageId}`)
+    })
+
+    test('expect copyS3Object not invoked for admin when accounts exist, attachments', async () => {
+      mocked(emails).getAccountExists.mockResolvedValueOnce(true)
+      mocked(emails).getAccountExists.mockResolvedValueOnce(true)
+      await processReceivedEmail(messageId, recipients)
+      expect(mocked(attachments).copyAttachmentsToAccount).toHaveBeenCalledWith('e', messageId, [attachment])
+      expect(mocked(attachments).copyAttachmentsToAccount).toHaveBeenCalledWith('f', messageId, [attachment])
+      expect(mocked(attachments).copyAttachmentsToAccount).not.toHaveBeenCalledWith('admin', messageId, [attachment])
     })
 
     test('expect deleteS3Object invoked for the message', async () => {

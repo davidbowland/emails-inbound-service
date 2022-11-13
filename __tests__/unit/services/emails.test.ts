@@ -1,6 +1,11 @@
 import { accounts, parsedContents } from '../__mocks__'
 import { emailsApiKey, emailsApiUrl } from '@config'
-import { extractAccountFromAddress, getAccountPreferences, registerReceivedEmail } from '@services/emails'
+import {
+  extractAccountFromAddress,
+  getAccountExists,
+  getAccountPreferences,
+  registerReceivedEmail,
+} from '@services/emails'
 import { rest, server } from '@setup-server'
 import { ParsedMail } from '@types'
 
@@ -15,6 +20,34 @@ describe('emails', () => {
     ])('validate %s is extracted to %s account', async (address, account) => {
       const result = await extractAccountFromAddress(address)
       expect(result).toEqual(account)
+    })
+  })
+
+  describe('getAccountExists', () => {
+    beforeAll(() => {
+      server.use(
+        rest.get(`${emailsApiUrl}/accounts/:accountId`, async (req, res, ctx) => {
+          if (emailsApiKey != req.headers.get('x-api-key')) {
+            return res(ctx.status(403))
+          }
+
+          const { accountId } = req.params
+          if (!((accountId as string) in accounts)) {
+            return res(ctx.status(404))
+          }
+          return res(ctx.json(accounts[accountId as string]))
+        })
+      )
+    })
+
+    test.each(Object.keys(accounts))('expect true for account %s', async (accountId) => {
+      const result = await getAccountExists(accountId)
+      expect(result).toEqual(true)
+    })
+
+    test('expect false when querying non-existent account with default', async () => {
+      const result = await getAccountExists('i-should-not-exist')
+      expect(result).toEqual(false)
     })
   })
 
@@ -89,7 +122,7 @@ describe('emails', () => {
           ],
           from: 'Person A <a@person.email>',
           subject: 'P G Wodehouse',
-          to: ['Person B <b@person.email>'],
+          to: ['b@person.email'],
           viewed: false,
         })
       )
