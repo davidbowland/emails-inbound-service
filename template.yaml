@@ -166,16 +166,18 @@ Resources:
       BucketName: !FindInMap [EnvironmentMap, !Ref Environment, bucket]
       LifecycleConfiguration:
         Rules:
-          - Status: Enabled
-            ExpirationInDays: 1096 # 3 years
+          - ExpirationInDays: 1096 # 3 years
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 30
+            Status: Enabled
             Transitions:
               - TransitionInDays: 60
                 StorageClass: STANDARD_IA
               - TransitionInDays: 180
                 StorageClass: GLACIER_IR
-          - Status: Enabled
-            ExpirationInDays: 1
+          - ExpirationInDays: 1
             Prefix: attachments/
+            Status: Enabled
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -188,6 +190,8 @@ Resources:
           Value: 'emails'
         - Key: 'environment'
           Value: !Ref Environment
+      VersioningConfiguration:
+        Status: Enabled
 
   EmailBucketPolicy:
     Type: AWS::S3::BucketPolicy
