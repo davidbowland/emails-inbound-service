@@ -24,6 +24,7 @@ Mappings:
   EnvironmentMap:
     prod:
       bucket: emails-service-storage
+      corsDomain: https://email.dbowland.com
       domain: dbowland.com
       emailsApiUrl: 'https://emails-email-api-internal.dbowland.com/v1'
       logStreamFunction: log-subscriber
@@ -31,6 +32,7 @@ Mappings:
       queueApiUrl: 'https://emails-queue-api.dbowland.com/v1'
     test:
       bucket: emails-service-storage-test
+      corsDomain: https://email.bowland.link
       domain: bowland.link
       emailsApiUrl: 'https://emails-email-api-internal.bowland.link/v1'
       logStreamFunction: log-subscriber-test
@@ -164,6 +166,19 @@ Resources:
             ServerSideEncryptionByDefault:
               SSEAlgorithm: 'AES256'
       BucketName: !FindInMap [EnvironmentMap, !Ref Environment, bucket]
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+              - POST
+            AllowedOrigins:
+              - !FindInMap [EnvironmentMap, !Ref Environment, corsDomain]
+            ExposedHeaders:
+              - Date
+            Id: EmailCORS
+            MaxAge: 3600
       LifecycleConfiguration:
         Rules:
           - ExpirationInDays: 1096 # 3 years
