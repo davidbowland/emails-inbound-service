@@ -19,7 +19,7 @@ const convertEmailToJson = (target: string, email: Email, attachments: Attachmen
   html: email.bodyHtml,
   inReplyTo: email.inReplyTo,
   references: email.references,
-  replyTo: email.replyToAddress.value[0].address || email.fromAddress.value[0].address,
+  replyTo: email.replyToAddress.value[0]?.address || email.fromAddress.value[0].address,
   sender: `"${email.fromAddress.value[0].name}" <${emailFrom}>`,
   subject: email.subject,
   text: email.bodyText,
