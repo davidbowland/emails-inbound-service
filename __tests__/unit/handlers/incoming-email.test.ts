@@ -2,9 +2,9 @@ import { mocked } from 'jest-mock'
 
 import * as incomingEmailService from '@services/incoming-email'
 import * as loggingUtil from '@utils/logging'
-import { SESEvent } from '@types'
 import eventJson from '@events/receive-email.json'
 import { handleIncomingEmail } from '@handlers/incoming-email'
+import { SESEvent } from '@types'
 
 jest.mock('@services/incoming-email')
 jest.mock('@utils/logging')
