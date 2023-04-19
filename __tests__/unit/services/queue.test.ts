@@ -25,6 +25,7 @@ describe('queue', () => {
 
     test('expect email contents to be passed to the endpoint', async () => {
       await sendEmail(target, email, [attachment])
+
       expect(postEndpoint).toHaveBeenCalledWith({
         attachments: [attachment],
         from: '"Person A" <do-not@reply.com>',

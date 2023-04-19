@@ -19,6 +19,7 @@ describe('incoming-email handler', () => {
 
     test('expect items from request passed to processReceivedEmail', async () => {
       await handleIncomingEmail(event)
+
       expect(mocked(incomingEmailService).processReceivedEmail).toHaveBeenCalledWith(
         'o3vrnil0e2ic28trm7dfhrc2v0clambda4nbp0g1',
         ['johndoe@example.com']
@@ -29,6 +30,7 @@ describe('incoming-email handler', () => {
       const error = 'A wild error appeared!'
       mocked(incomingEmailService).processReceivedEmail.mockRejectedValueOnce(error)
       await handleIncomingEmail(event)
+
       expect(mocked(loggingUtil).logError).toHaveBeenCalledWith(error)
     })
   })

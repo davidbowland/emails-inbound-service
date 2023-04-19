@@ -10,11 +10,13 @@ describe('attachments', () => {
   describe('getAttachmentId', () => {
     test('expect cid when present', () => {
       const result = getAttachmentId(attachment)
+
       expect(result).toEqual('ytghji87ytgbhj')
     })
 
     test('expect checksum when present', () => {
       const result = getAttachmentId({ ...attachment, cid: undefined })
+
       expect(result).toEqual('jytgbni87ytgbnjkuy')
     })
   })
@@ -24,6 +26,7 @@ describe('attachments', () => {
 
     test('expect copyS3Object called with attachment', async () => {
       await copyAttachmentsToAccount(accountId, messageId, parsedContents.attachments)
+
       expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(
         'inbound/aaaaa-uuuuu-uuuuu-iiiii-ddddd/ytghji87ytgbhj',
         'received/account-id/aaaaa-uuuuu-uuuuu-iiiii-ddddd/ytghji87ytgbhj'
@@ -38,6 +41,7 @@ describe('attachments', () => {
 
     test('expect putS3Object called with attachment', async () => {
       await uploadAttachments(messageId, [attachment])
+
       expect(mocked(s3).putS3Object).toHaveBeenCalledWith(
         'inbound/aaaaa-uuuuu-uuuuu-iiiii-ddddd/ytghji87ytgbhj',
         'A big file',
@@ -55,6 +59,7 @@ describe('attachments', () => {
 
     test('expect contentDisposition defaults to application/octet-stream', async () => {
       await uploadAttachments(messageId, [{ ...attachment, contentDisposition: undefined }])
+
       expect(mocked(s3).putS3Object).toHaveBeenCalledWith(
         'inbound/aaaaa-uuuuu-uuuuu-iiiii-ddddd/ytghji87ytgbhj',
         'A big file',
@@ -64,6 +69,7 @@ describe('attachments', () => {
 
     test('expect putS3Object called with checksum when cid not available', async () => {
       await uploadAttachments(messageId, [{ ...attachment, cid: undefined, filename: undefined }])
+
       expect(mocked(s3).putS3Object).toHaveBeenCalledWith(
         'inbound/aaaaa-uuuuu-uuuuu-iiiii-ddddd/jytgbni87ytgbnjkuy',
         'A big file',

@@ -108,6 +108,7 @@ describe('emails', () => {
 
     test('expect endpoint invoked with email', async () => {
       await registerReceivedEmail(address, messageId, parsedContents)
+
       expect(mockPutEmail).toHaveBeenCalledWith(
         'account1',
         'message-id',
@@ -147,6 +148,7 @@ describe('emails', () => {
         to: undefined,
       } as unknown as ParsedMail
       await registerReceivedEmail(address, messageId, parsedContentsWithMissingParts)
+
       expect(mockPutEmail).toHaveBeenCalledWith(
         'account1',
         'message-id',

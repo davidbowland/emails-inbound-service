@@ -19,6 +19,7 @@ describe('preferences', () => {
 
     test('expect account extraction called', async () => {
       await aggregatePreferences([defaultAccount, account1, account2])
+
       expect(mocked(emailsService).extractAccountFromAddress).toHaveBeenCalledWith(defaultAccount)
       expect(mocked(emailsService).extractAccountFromAddress).toHaveBeenCalledWith(account1)
       expect(mocked(emailsService).extractAccountFromAddress).toHaveBeenCalledWith(account2)
@@ -27,6 +28,7 @@ describe('preferences', () => {
     test('expect preferences returned', async () => {
       const defaultAccount = 'default@email.address'
       const result = await aggregatePreferences([defaultAccount])
+
       expect(result).toEqual({
         ...accounts.default,
         forwardTargets: accounts.default.forwardTargets,
@@ -35,6 +37,7 @@ describe('preferences', () => {
 
     test('expect preferences merged', async () => {
       const result = await aggregatePreferences([defaultAccount, account1, account2])
+
       expect(result).toEqual({
         forwardTargets: accounts.default.forwardTargets,
       })

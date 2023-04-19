@@ -33,12 +33,14 @@ describe('incoming-email service', () => {
 
     test('expect registerReceivedEmail invoked', async () => {
       await processReceivedEmail(messageId, recipients)
+
       expect(mocked(emails).registerReceivedEmail).toHaveBeenCalledWith(recipients[0], messageId, parsedContents)
       expect(mocked(emails).registerReceivedEmail).toHaveBeenCalledWith(recipients[1], messageId, parsedContents)
     })
 
     test('expect copyS3Object invoked for the message', async () => {
       await processReceivedEmail(messageId, recipients)
+
       expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(`inbound/${messageId}`, `received/e/${messageId}`)
       expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(`inbound/${messageId}`, `received/f/${messageId}`)
       expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(`inbound/${messageId}`, `received/admin/${messageId}`)
@@ -46,6 +48,7 @@ describe('incoming-email service', () => {
 
     test('expect copyS3Object invoked for attachments', async () => {
       await processReceivedEmail(messageId, recipients)
+
       expect(mocked(attachments).copyAttachmentsToAccount).toHaveBeenCalledWith('e', messageId, [attachment])
       expect(mocked(attachments).copyAttachmentsToAccount).toHaveBeenCalledWith('f', messageId, [attachment])
       expect(mocked(attachments).copyAttachmentsToAccount).toHaveBeenCalledWith('admin', messageId, [attachment])
@@ -55,6 +58,7 @@ describe('incoming-email service', () => {
       mocked(emails).getAccountExists.mockResolvedValueOnce(true)
       mocked(emails).getAccountExists.mockResolvedValueOnce(true)
       await processReceivedEmail(messageId, recipients)
+
       expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(`inbound/${messageId}`, `received/e/${messageId}`)
       expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(`inbound/${messageId}`, `received/f/${messageId}`)
       expect(mocked(s3).copyS3Object).not.toHaveBeenCalledWith(`inbound/${messageId}`, `received/admin/${messageId}`)
@@ -64,6 +68,7 @@ describe('incoming-email service', () => {
       mocked(emails).getAccountExists.mockResolvedValueOnce(true)
       mocked(emails).getAccountExists.mockResolvedValueOnce(true)
       await processReceivedEmail(messageId, recipients)
+
       expect(mocked(attachments).copyAttachmentsToAccount).toHaveBeenCalledWith('e', messageId, [attachment])
       expect(mocked(attachments).copyAttachmentsToAccount).toHaveBeenCalledWith('f', messageId, [attachment])
       expect(mocked(attachments).copyAttachmentsToAccount).not.toHaveBeenCalledWith('admin', messageId, [attachment])
@@ -71,33 +76,39 @@ describe('incoming-email service', () => {
 
     test('expect deleteS3Object invoked for the message', async () => {
       await processReceivedEmail(messageId, recipients)
+
       expect(mocked(s3).deleteS3Object).toHaveBeenCalledWith(`inbound/${messageId}`)
     })
 
     test('expect deleteS3Object invoked for attachments', async () => {
       await processReceivedEmail(messageId, recipients)
+
       expect(mocked(s3).deleteS3Object).toHaveBeenCalledWith(`inbound/${messageId}/${attachment.contentId}`)
     })
 
     test('expect attachments uploaded', async () => {
       await processReceivedEmail(messageId, recipients)
+
       expect(mocked(attachments).uploadAttachments).toHaveBeenCalledWith(messageId, [attachment])
     })
 
     test('expect getParsedMail contents passed to convertParsedContentsToEmail', async () => {
       await processReceivedEmail(messageId, recipients)
+
       expect(mocked(parser).convertParsedContentsToEmail).toHaveBeenCalledWith(messageId, parsedContents, recipients)
     })
 
     test('expect forwardEmail called with forward targets', async () => {
       mocked(preferences).aggregatePreferences.mockResolvedValue({ forwardTargets: recipients })
       await processReceivedEmail(messageId, recipients)
+
       expect(mocked(forwarding).forwardEmail).toHaveBeenCalledWith(recipients, email, [attachment])
     })
 
     test('expect forwardEmail to not be called with no forward targets', async () => {
       mocked(preferences).aggregatePreferences.mockResolvedValue({ forwardTargets: undefined })
       await processReceivedEmail(messageId, recipients)
+
       expect(mocked(forwarding).forwardEmail).toHaveBeenCalledTimes(0)
     })
   })

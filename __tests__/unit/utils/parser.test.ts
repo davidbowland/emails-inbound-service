@@ -21,6 +21,7 @@ describe('parser', () => {
 
     test('expect contents converted correctly', async () => {
       const result = await convertParsedContentsToEmail(messageId, parsedContents, recipients)
+
       expect(result).toEqual(email)
     })
 
@@ -36,6 +37,7 @@ describe('parser', () => {
         textAsHtml: false,
       } as unknown as ParsedMail
       const result = await convertParsedContentsToEmail(messageId, tempContents, recipients)
+
       expect(result.bodyHtml).toEqual('')
       expect(result.bodyText).toEqual('')
       expect(result.fromAddress).toEqual({ html: '', text: '', value: [{ address: '', name: '' }] })
@@ -54,16 +56,19 @@ describe('parser', () => {
 
     test('expect S3 object queried', async () => {
       await getParsedMail(messageId)
+
       expect(mocked(s3).getS3Object).toHaveBeenCalledWith('inbound/aaaaa-uuuuu-uuuuu-iiiii-ddddd')
     })
 
     test('expect S3 object contents passed to simpleParser', async () => {
       await getParsedMail(messageId)
+
       expect(mocked(mailparser).simpleParser).toHaveBeenCalledWith(contents)
     })
 
     test('expect simpleParser result returned', async () => {
       const result = await getParsedMail(messageId)
+
       expect(result).toEqual(parsedContents)
     })
   })

@@ -30,6 +30,7 @@ describe('forwarding', () => {
       const recipient1 = 'one@email.address'
       const recipient2 = 'two@email.address'
       await forwardEmail([recipient1, recipient2], email, [attachment])
+
       expect(mocked(queue).sendEmail).toHaveBeenCalledWith(recipient1, email, [transformedAttachment])
       expect(mocked(queue).sendEmail).toHaveBeenCalledWith(recipient2, email, [transformedAttachment])
     })
@@ -37,6 +38,7 @@ describe('forwarding', () => {
     test('expect copyS3Object called for attachments', async () => {
       const recipient1 = 'one@email.address'
       await forwardEmail([recipient1], email, [attachment])
+
       expect(mocked(s3).copyS3Object).toHaveBeenCalledWith(attachment.content, transformedAttachment.content)
     })
   })
