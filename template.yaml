@@ -92,8 +92,7 @@ Resources:
   IncomingEmailProcessor:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: handlers/incoming-email.handleIncomingEmail
-      CodeUri: './dist'
+      Handler: src/handlers/incoming-email.handleIncomingEmail
       Runtime: nodejs20.x
       Architectures:
         - x86_64
@@ -120,6 +119,14 @@ Resources:
         'environment': !Ref Environment
       Timeout: 180
       Tracing: Active
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: 'es2020'
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/incoming-email.ts
 
   LambdaExecutePermission:
     Type: AWS::Lambda::Permission
