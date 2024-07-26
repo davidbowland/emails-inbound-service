@@ -6,7 +6,7 @@ import {
   getAccountPreferences,
   registerReceivedEmail,
 } from '@services/emails'
-import { rest, server } from '@setup-server'
+import { http, HttpResponse, server } from '@setup-server'
 import { ParsedMail } from '@types'
 
 jest.mock('@utils/logging')
@@ -26,16 +26,16 @@ describe('emails', () => {
   describe('getAccountExists', () => {
     beforeAll(() => {
       server.use(
-        rest.get(`${emailsApiUrl}/accounts/:accountId`, async (req, res, ctx) => {
-          if (emailsApiKey != req.headers.get('x-api-key')) {
-            return res(ctx.status(403))
+        http.get(`${emailsApiUrl}/accounts/:accountId`, async ({ params, request }) => {
+          if (emailsApiKey != request.headers.get('x-api-key')) {
+            return new HttpResponse(JSON.stringify({ error: 'Invalid API key' }), { status: 403 })
           }
 
-          const { accountId } = req.params
+          const { accountId } = params
           if (!((accountId as string) in accounts)) {
-            return res(ctx.status(404))
+            return new HttpResponse(null, { status: 404 })
           }
-          return res(ctx.json(accounts[accountId as string]))
+          return HttpResponse.json(accounts[accountId as string])
         })
       )
     })
@@ -54,16 +54,16 @@ describe('emails', () => {
   describe('getAccountPreferences', () => {
     beforeAll(() => {
       server.use(
-        rest.get(`${emailsApiUrl}/accounts/:accountId/internal`, async (req, res, ctx) => {
-          if (emailsApiKey != req.headers.get('x-api-key')) {
-            return res(ctx.status(403))
+        http.get(`${emailsApiUrl}/accounts/:accountId/internal`, async ({ params, request }) => {
+          if (emailsApiKey != request.headers.get('x-api-key')) {
+            return new HttpResponse(JSON.stringify({ error: 'Invalid API key' }), { status: 403 })
           }
 
-          const { accountId } = req.params
+          const { accountId } = params
           if (!((accountId as string) in accounts)) {
-            return res(ctx.json(accounts.default))
+            return HttpResponse.json(accounts.default)
           }
-          return res(ctx.json(accounts[accountId as string]))
+          return HttpResponse.json(accounts[accountId as string])
         })
       )
     })
@@ -94,14 +94,14 @@ describe('emails', () => {
 
     beforeAll(() => {
       server.use(
-        rest.put(`${emailsApiUrl}/accounts/:accountId/emails/received/:emailId`, async (req, res, ctx) => {
-          if (emailsApiKey != req.headers.get('x-api-key')) {
-            return res(ctx.status(403))
+        http.put(`${emailsApiUrl}/accounts/:accountId/emails/received/:emailId`, async ({ params, request }) => {
+          if (emailsApiKey != request.headers.get('x-api-key')) {
+            return new HttpResponse(JSON.stringify({ error: 'Invalid API key' }), { status: 403 })
           }
 
-          const { accountId, emailId } = req.params
-          mockPutEmail(accountId, emailId, await req.json())
-          return res(ctx.status(204))
+          const { accountId, emailId } = params
+          mockPutEmail(accountId, emailId, await request.json())
+          return new HttpResponse(null, { status: 204 })
         })
       )
     })
