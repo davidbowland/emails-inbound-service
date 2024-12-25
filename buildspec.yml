@@ -1,4 +1,5 @@
 version: 0.2
+
 phases:
   install:
     commands:
@@ -14,8 +15,6 @@ phases:
       - npm prune --production
   build:
     commands:
-      # Build the package by transpiling TypeScript
-      - npm run build
       # Use AWS SAM to package the application by using AWS CloudFormation
       - aws cloudformation package --template template.yaml --s3-bucket $S3_BUCKET --output-template template-export.yml
 artifacts:
