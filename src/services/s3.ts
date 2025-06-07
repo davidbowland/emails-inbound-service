@@ -34,7 +34,7 @@ export const getS3Object = async (key: string): Promise<string> => {
 export const putS3Object = async (
   key: string,
   body: Buffer | string,
-  metadata: StringObject = {}
+  metadata: StringObject = {},
 ): Promise<PutObjectOutput> => {
   const command = new PutObjectCommand({ Body: body, Bucket: emailBucket, Key: key, Metadata: metadata })
   return s3.send(command)

@@ -1,9 +1,9 @@
 import { v1 as uuidv1 } from 'uuid'
 
-import { AttachmentCommon, Email } from '../types'
-import { copyS3Object } from '../services/s3'
-import { getAttachmentId } from './attachments'
 import { sendEmail } from '../services/queue'
+import { copyS3Object } from '../services/s3'
+import { AttachmentCommon, Email } from '../types'
+import { getAttachmentId } from './attachments'
 
 export const forwardEmail = async (targets: string[], email: Email, attachments: AttachmentCommon[]): Promise<void> => {
   for (const target of targets) {

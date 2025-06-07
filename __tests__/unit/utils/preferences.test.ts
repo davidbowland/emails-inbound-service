@@ -1,7 +1,5 @@
-import { mocked } from 'jest-mock'
-
-import * as emailsService from '@services/emails'
 import { accounts } from '../__mocks__'
+import * as emailsService from '@services/emails'
 import { aggregatePreferences } from '@utils/preferences'
 
 jest.mock('@services/emails')
@@ -13,19 +11,21 @@ describe('preferences', () => {
     const account2 = 'account2@email.address'
 
     beforeAll(() => {
-      mocked(emailsService).extractAccountFromAddress.mockImplementation((email) => email.replace(/@[a-z0-9.-]+$/i, ''))
-      mocked(emailsService).getAccountPreferences.mockImplementation((account) => accounts[account])
+      jest
+        .mocked(emailsService)
+        .extractAccountFromAddress.mockImplementation((email) => email.replace(/@[a-z0-9.-]+$/i, ''))
+      jest.mocked(emailsService).getAccountPreferences.mockImplementation((account) => accounts[account])
     })
 
-    test('expect account extraction called', async () => {
+    it('should call account extraction', async () => {
       await aggregatePreferences([defaultAccount, account1, account2])
 
-      expect(mocked(emailsService).extractAccountFromAddress).toHaveBeenCalledWith(defaultAccount)
-      expect(mocked(emailsService).extractAccountFromAddress).toHaveBeenCalledWith(account1)
-      expect(mocked(emailsService).extractAccountFromAddress).toHaveBeenCalledWith(account2)
+      expect(emailsService.extractAccountFromAddress).toHaveBeenCalledWith(defaultAccount)
+      expect(emailsService.extractAccountFromAddress).toHaveBeenCalledWith(account1)
+      expect(emailsService.extractAccountFromAddress).toHaveBeenCalledWith(account2)
     })
 
-    test('expect preferences returned', async () => {
+    it('should return preferences', async () => {
       const defaultAccount = 'default@email.address'
       const result = await aggregatePreferences([defaultAccount])
 
@@ -35,7 +35,7 @@ describe('preferences', () => {
       })
     })
 
-    test('expect preferences merged', async () => {
+    it('should merge preferences', async () => {
       const result = await aggregatePreferences([defaultAccount, account1, account2])
 
       expect(result).toEqual({

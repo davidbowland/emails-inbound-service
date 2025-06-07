@@ -13,5 +13,5 @@ const reduceToSinglePreference = (previous: AccountPreference, current: AccountP
 
 export const aggregatePreferences = (recipients: string[]): Promise<AccountPreference> =>
   fetchPreferences(recipients).then((allPreferences) =>
-    allPreferences.reduce(reduceToSinglePreference, { forwardTargets: [] })
+    allPreferences.reduce(reduceToSinglePreference, { forwardTargets: [] }),
   )

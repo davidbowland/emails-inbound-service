@@ -1,5 +1,5 @@
-import { copyS3Object, deleteS3Object, getS3Object, putS3Object } from '@services/s3'
 import { emailBucket } from '@config'
+import { copyS3Object, deleteS3Object, getS3Object, putS3Object } from '@services/s3'
 
 const mockSend = jest.fn()
 jest.mock('@aws-sdk/client-s3', () => ({
@@ -25,7 +25,7 @@ describe('S3', () => {
       mockSend.mockResolvedValue({})
     })
 
-    test('expect keys passed to S3 as object', async () => {
+    it('should pass keys to S3 as object', async () => {
       await copyS3Object(fromKey, key)
 
       expect(mockSend).toHaveBeenCalledWith({
@@ -35,7 +35,7 @@ describe('S3', () => {
       })
     })
 
-    test('expect reject when promise rejects', async () => {
+    it('should reject when promise rejects', async () => {
       const rejectReason = 'unable to foo the bar'
       mockSend.mockRejectedValueOnce(rejectReason)
 
@@ -44,7 +44,7 @@ describe('S3', () => {
   })
 
   describe('deleteS3Object', () => {
-    test('expect key passed to mock', async () => {
+    it('should pass key to mock', async () => {
       await deleteS3Object(key)
 
       expect(mockSend).toHaveBeenCalledWith({
@@ -53,7 +53,7 @@ describe('S3', () => {
       })
     })
 
-    test('expect reject when promise rejects', async () => {
+    it('should reject when promise rejects', async () => {
       const rejectReason = 'unable to foo the bar'
       mockSend.mockRejectedValueOnce(rejectReason)
 
@@ -68,19 +68,19 @@ describe('S3', () => {
       mockSend.mockResolvedValue({ Body: expectedObject })
     })
 
-    test('expect key passed to S3 as object', async () => {
+    it('should pass key to S3 as object', async () => {
       await getS3Object(key)
 
       expect(mockSend).toHaveBeenCalledWith({ Bucket: emailBucket, Key: key })
     })
 
-    test('expect expectedObject as result', async () => {
+    it('should return expectedObject as result', async () => {
       const result = await getS3Object(key)
 
       expect(result).toEqual(expectedObject)
     })
 
-    test('expect empty result when body missing', async () => {
+    it('should return empty result when body is missing', async () => {
       mockSend.mockResolvedValueOnce({})
       const result = await getS3Object(key)
 
@@ -94,7 +94,7 @@ describe('S3', () => {
     }
     const valueToPut = 'Hello, world!'
 
-    test('expect key and data passed to S3 as object', async () => {
+    it('should pass key and data to S3 as object', async () => {
       await putS3Object(key, valueToPut, metadata)
 
       expect(mockSend).toHaveBeenCalledWith({
@@ -105,7 +105,7 @@ describe('S3', () => {
       })
     })
 
-    test('expect no metadata passed to S3 when omitted', async () => {
+    it('should not pass metadata to S3 when omitted', async () => {
       await putS3Object(key, valueToPut)
 
       expect(mockSend).toHaveBeenCalledWith({
@@ -116,7 +116,7 @@ describe('S3', () => {
       })
     })
 
-    test('expect reject when promise rejects', async () => {
+    it('should reject when promise rejects', async () => {
       const rejectReason = 'unable to foo the bar'
       mockSend.mockRejectedValueOnce(rejectReason)
 

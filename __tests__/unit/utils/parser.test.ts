@@ -1,11 +1,10 @@
 import * as mailparser from 'mailparser'
-import { mocked } from 'jest-mock'
 
-import * as s3 from '@services/s3'
-import * as utilsAttachments from '@utils/attachments'
 import { attachment, email, messageId, parsedContents } from '../__mocks__'
-import { convertParsedContentsToEmail, getParsedMail } from '@utils/parser'
+import * as s3 from '@services/s3'
 import { ParsedMail } from '@types'
+import * as utilsAttachments from '@utils/attachments'
+import { convertParsedContentsToEmail, getParsedMail } from '@utils/parser'
 
 jest.mock('mailparser')
 jest.mock('@services/s3')
@@ -16,16 +15,16 @@ describe('parser', () => {
     const recipients = ['e@mail.address']
 
     beforeAll(() => {
-      mocked(utilsAttachments).getAttachmentId.mockReturnValue(attachment.cid)
+      jest.mocked(utilsAttachments).getAttachmentId.mockReturnValue(attachment.cid)
     })
 
-    test('expect contents converted correctly', async () => {
+    it('should convert contents correctly', async () => {
       const result = await convertParsedContentsToEmail(messageId, parsedContents, recipients)
 
       expect(result).toEqual(email)
     })
 
-    test('expect default values', async () => {
+    it('should use default values when fields are missing', async () => {
       const reference = 'fnord'
       const tempContents = {
         ...parsedContents,
@@ -50,23 +49,23 @@ describe('parser', () => {
     const contents = 'some cool contents'
 
     beforeAll(() => {
-      mocked(s3).getS3Object.mockResolvedValue(contents)
-      mocked(mailparser).simpleParser.mockResolvedValue(parsedContents)
+      jest.mocked(s3).getS3Object.mockResolvedValue(contents)
+      jest.mocked(mailparser).simpleParser.mockResolvedValue(parsedContents)
     })
 
-    test('expect S3 object queried', async () => {
+    it('should query S3 object', async () => {
       await getParsedMail(messageId)
 
-      expect(mocked(s3).getS3Object).toHaveBeenCalledWith('inbound/aaaaa-uuuuu-uuuuu-iiiii-ddddd')
+      expect(s3.getS3Object).toHaveBeenCalledWith('inbound/aaaaa-uuuuu-uuuuu-iiiii-ddddd')
     })
 
-    test('expect S3 object contents passed to simpleParser', async () => {
+    it('should pass S3 object contents to simpleParser', async () => {
       await getParsedMail(messageId)
 
-      expect(mocked(mailparser).simpleParser).toHaveBeenCalledWith(contents)
+      expect(mailparser.simpleParser).toHaveBeenCalledWith(contents)
     })
 
-    test('expect simpleParser result returned', async () => {
+    it('should return simpleParser result', async () => {
       const result = await getParsedMail(messageId)
 
       expect(result).toEqual(parsedContents)

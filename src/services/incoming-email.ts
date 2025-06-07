@@ -1,16 +1,16 @@
 import { AccountPreference, AttachmentCommon, Email } from '../types'
-import { convertParsedContentsToEmail, getParsedMail } from '../utils/parser'
 import { copyAttachmentsToAccount, getAttachmentId, uploadAttachments } from '../utils/attachments'
-import { copyS3Object, deleteS3Object } from './s3'
-import { extractAccountFromAddress, getAccountExists, registerReceivedEmail } from './emails'
-import { aggregatePreferences } from '../utils/preferences'
 import { forwardEmail } from '../utils/forwarding'
 import { log } from '../utils/logging'
+import { convertParsedContentsToEmail, getParsedMail } from '../utils/parser'
+import { aggregatePreferences } from '../utils/preferences'
+import { extractAccountFromAddress, getAccountExists, registerReceivedEmail } from './emails'
+import { copyS3Object, deleteS3Object } from './s3'
 
 const applyPreferencesToEmail = async (
   preferences: AccountPreference,
   email: Email,
-  attachments: AttachmentCommon[]
+  attachments: AttachmentCommon[],
 ): Promise<void> => {
   if (preferences.forwardTargets) {
     await forwardEmail([...new Set(preferences.forwardTargets)], email, attachments)
@@ -27,7 +27,7 @@ export const processReceivedEmail = async (messageId: string, recipients: string
   await applyPreferencesToEmail(
     preferences,
     convertParsedContentsToEmail(messageId, parsedMail, recipients),
-    attachments
+    attachments,
   )
 
   for (const address of recipients) {
@@ -38,7 +38,7 @@ export const processReceivedEmail = async (messageId: string, recipients: string
   }
   if (
     !(await Promise.all(recipients.map((address) => getAccountExists(extractAccountFromAddress(address))))).every(
-      Boolean
+      Boolean,
     )
   ) {
     await registerReceivedEmail('admin', messageId, parsedMail)

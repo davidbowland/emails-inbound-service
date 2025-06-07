@@ -1,8 +1,8 @@
 import { simpleParser } from 'mailparser'
 
+import { getS3Object } from '../services/s3'
 import { Email, EmailAddress, EmailHeaders, ParsedMail } from '../types'
 import { getAttachmentId } from './attachments'
-import { getS3Object } from '../services/s3'
 
 const emptyAddress: EmailAddress = {
   html: '',
@@ -18,7 +18,7 @@ const emptyAddress: EmailAddress = {
 export const convertParsedContentsToEmail = (
   messageId: string,
   parsedMail: ParsedMail,
-  recipients: string[]
+  recipients: string[],
 ): Email => ({
   attachments: parsedMail.attachments.map(getAttachmentId),
   bodyHtml: (parsedMail.html ?? parsedMail.textAsHtml) || '',
@@ -29,7 +29,7 @@ export const convertParsedContentsToEmail = (
   id: parsedMail.messageId ?? messageId,
   inReplyTo: parsedMail.inReplyTo,
   recipients,
-  references: typeof parsedMail.references === 'string' ? [parsedMail.references] : parsedMail.references ?? [],
+  references: typeof parsedMail.references === 'string' ? [parsedMail.references] : (parsedMail.references ?? []),
   replyToAddress: (parsedMail.replyTo ?? emptyAddress) as EmailAddress,
   subject: parsedMail.subject,
   toAddress: parsedMail.to as unknown as EmailAddress,

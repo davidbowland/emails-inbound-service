@@ -1,5 +1,5 @@
-import { AttachmentCommon, StringObject } from '../types'
 import { copyS3Object, putS3Object } from '../services/s3'
+import { AttachmentCommon, StringObject } from '../types'
 
 /* Parsing */
 
@@ -20,21 +20,21 @@ export const getAttachmentId = (attachment: AttachmentCommon): string => attachm
 export const copyAttachmentsToAccount = async (
   accountId: string,
   messageId: string,
-  emailAttachments: AttachmentCommon[]
+  emailAttachments: AttachmentCommon[],
 ): Promise<void> => {
   for (const attachment of emailAttachments) {
     await copyS3Object(
       `inbound/${messageId}/${getAttachmentId(attachment)}`,
-      `received/${accountId}/${messageId}/${getAttachmentId(attachment)}`
+      `received/${accountId}/${messageId}/${getAttachmentId(attachment)}`,
     )
   }
 }
 
 export const uploadAttachments = async (
   messageId: string,
-  emailAttachments: AttachmentCommon[]
+  emailAttachments: AttachmentCommon[],
 ): Promise<AttachmentCommon[]> => {
-  const uploadedAttachmenets = emailAttachments.map(async (attachment) => {
+  const uploadedAttachments = emailAttachments.map(async (attachment) => {
     const s3Key = `inbound/${messageId}/${getAttachmentId(attachment)}`
     await putS3Object(s3Key, attachment.content, getAttachmentMetadata(attachment))
     return {
@@ -42,5 +42,5 @@ export const uploadAttachments = async (
       content: s3Key,
     }
   })
-  return Promise.all(uploadedAttachmenets)
+  return Promise.all(uploadedAttachments)
 }

@@ -1,3 +1,5 @@
+import { http, HttpResponse, server } from '@setup-server'
+
 import { accounts, parsedContents } from '../__mocks__'
 import { emailsApiKey, emailsApiUrl } from '@config'
 import {
@@ -6,18 +8,17 @@ import {
   getAccountPreferences,
   registerReceivedEmail,
 } from '@services/emails'
-import { http, HttpResponse, server } from '@setup-server'
 import { ParsedMail } from '@types'
 
 jest.mock('@utils/logging')
 
 describe('emails', () => {
   describe('extractAccountFromAddress', () => {
-    test.each([
+    it.each([
       ['hello@world.com', 'hello'],
       ['three@email-address.with.sub.domains', 'three'],
       ['"whoa-this@is-weird.com"@email.address', '"whoa-this@is-weird.com"'],
-    ])('validate %s is extracted to %s account', async (address, account) => {
+    ])('should extract %s to %s account', async (address, account) => {
       const result = await extractAccountFromAddress(address)
       expect(result).toEqual(account)
     })
@@ -36,16 +37,16 @@ describe('emails', () => {
             return new HttpResponse(null, { status: 404 })
           }
           return HttpResponse.json(accounts[accountId as string])
-        })
+        }),
       )
     })
 
-    test.each(Object.keys(accounts))('expect true for account %s', async (accountId) => {
+    it.each(Object.keys(accounts))('should return true for account %s', async (accountId) => {
       const result = await getAccountExists(accountId)
       expect(result).toEqual(true)
     })
 
-    test('expect false when querying non-existent account with default', async () => {
+    it('should return false when querying non-existent account with default', async () => {
       const result = await getAccountExists('i-should-not-exist')
       expect(result).toEqual(false)
     })
@@ -64,24 +65,24 @@ describe('emails', () => {
             return HttpResponse.json(accounts.default)
           }
           return HttpResponse.json(accounts[accountId as string])
-        })
+        }),
       )
     })
 
-    test.each(Object.keys(accounts))('expect correct account preferences back for account %s', async (accountId) => {
+    it.each(Object.keys(accounts))('should return correct account preferences for account %s', async (accountId) => {
       const result = await getAccountPreferences(accountId)
       expect(result).toEqual(accounts[accountId])
     })
 
-    test.each(Object.keys(accounts))(
-      'expect correct account preferences back for account %s with default',
+    it.each(Object.keys(accounts))(
+      'should return correct account preferences for account %s with default',
       async (accountId) => {
         const result = await getAccountPreferences(accountId)
         expect(result).toEqual(accounts[accountId])
-      }
+      },
     )
 
-    test('expect default account when querying non-existent account with default', async () => {
+    it('should return default account when querying non-existent account with default', async () => {
       const result = await getAccountPreferences('i-should-not-exist')
       expect(result).toEqual(accounts.default)
     })
@@ -102,11 +103,11 @@ describe('emails', () => {
           const { accountId, emailId } = params
           mockPutEmail(accountId, emailId, await request.json())
           return new HttpResponse(null, { status: 204 })
-        })
+        }),
       )
     })
 
-    test('expect endpoint invoked with email', async () => {
+    it('should invoke endpoint with email', async () => {
       await registerReceivedEmail(address, messageId, parsedContents)
 
       expect(mockPutEmail).toHaveBeenCalledWith(
@@ -125,11 +126,11 @@ describe('emails', () => {
           subject: 'P G Wodehouse',
           to: ['b@person.email'],
           viewed: false,
-        })
+        }),
       )
     })
 
-    test('expect endpoint invoked with email, no missing values', async () => {
+    it('should invoke endpoint with email, handling missing values', async () => {
       const parsedContentsWithMissingParts = {
         ...parsedContents,
         attachments: [{ checksum: 'fnord', filename: undefined }],
@@ -163,7 +164,7 @@ describe('emails', () => {
           subject: '',
           to: ['account1@domain.com'],
           viewed: false,
-        })
+        }),
       )
     })
   })

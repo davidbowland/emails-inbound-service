@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-import { AccountPreference, AxiosResponse, EmailReceived, ParsedMail } from '../types'
 import { emailsApiKey, emailsApiUrl } from '../config'
+import { AccountPreference, AxiosResponse, EmailReceived, ParsedMail } from '../types'
 import { xrayCaptureHttps } from '../utils/logging'
 
 xrayCaptureHttps()
@@ -50,11 +50,11 @@ const convertParsedMailToReceivedEmail = (parsedMail: ParsedMail, address: strin
 export const registerReceivedEmail = (
   address: string,
   messageId: string,
-  parsedMail: ParsedMail
+  parsedMail: ParsedMail,
 ): Promise<AxiosResponse> =>
   api.put(
     `/accounts/${encodeURIComponent(extractAccountFromAddress(address))}/emails/received/${encodeURIComponent(
-      messageId
+      messageId,
     )}`,
-    convertParsedMailToReceivedEmail(parsedMail, address)
+    convertParsedMailToReceivedEmail(parsedMail, address),
   )

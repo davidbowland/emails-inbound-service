@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-import { Attachment, AttachmentCommon, AxiosResponse, Email } from '../types'
 import { emailFrom, queueApiKey, queueApiUrl } from '../config'
+import { Attachment, AttachmentCommon, AxiosResponse, Email } from '../types'
 import { xrayCaptureHttps } from '../utils/logging'
 
 xrayCaptureHttps()

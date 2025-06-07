@@ -1,10 +1,8 @@
-import { mocked } from 'jest-mock'
-
-import * as incomingEmailService from '@services/incoming-email'
-import * as loggingUtil from '@utils/logging'
 import eventJson from '@events/receive-email.json'
 import { handleIncomingEmail } from '@handlers/incoming-email'
+import * as incomingEmailService from '@services/incoming-email'
 import { SESEvent } from '@types'
+import * as loggingUtil from '@utils/logging'
 
 jest.mock('@services/incoming-email')
 jest.mock('@utils/logging')
@@ -14,24 +12,24 @@ describe('incoming-email handler', () => {
     const event = eventJson as unknown as SESEvent
 
     beforeAll(() => {
-      mocked(incomingEmailService).processReceivedEmail.mockResolvedValue([])
+      jest.mocked(incomingEmailService).processReceivedEmail.mockResolvedValue([])
     })
 
-    test('expect items from request passed to processReceivedEmail', async () => {
+    it('should pass items from request to processReceivedEmail', async () => {
       await handleIncomingEmail(event)
 
-      expect(mocked(incomingEmailService).processReceivedEmail).toHaveBeenCalledWith(
+      expect(incomingEmailService.processReceivedEmail).toHaveBeenCalledWith(
         'o3vrnil0e2ic28trm7dfhrc2v0clambda4nbp0g1',
-        ['johndoe@example.com']
+        ['johndoe@example.com'],
       )
     })
 
-    test('expect error logged and sendErrorEmail called on exception', async () => {
+    it('should log error when an exception occurs', async () => {
       const error = 'A wild error appeared!'
-      mocked(incomingEmailService).processReceivedEmail.mockRejectedValueOnce(error)
+      jest.mocked(incomingEmailService).processReceivedEmail.mockRejectedValueOnce(error)
       await handleIncomingEmail(event)
 
-      expect(mocked(loggingUtil).logError).toHaveBeenCalledWith(error)
+      expect(loggingUtil.logError).toHaveBeenCalledWith(error)
     })
   })
 })
