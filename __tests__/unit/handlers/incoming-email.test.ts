@@ -12,7 +12,7 @@ describe('incoming-email handler', () => {
     const event = eventJson as unknown as SESEvent
 
     beforeAll(() => {
-      jest.mocked(incomingEmailService).processReceivedEmail.mockResolvedValue([])
+      jest.mocked(incomingEmailService).processReceivedEmail.mockResolvedValue([] as any)
     })
 
     it('should pass items from request to processReceivedEmail', async () => {
