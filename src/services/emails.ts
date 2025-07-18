@@ -2,7 +2,7 @@ import axios from 'axios'
 
 import { emailsApiKey, emailsApiUrl } from '../config'
 import { AccountPreference, AxiosResponse, EmailReceived, ParsedMail } from '../types'
-import { xrayCaptureHttps } from '../utils/logging'
+import { logWarn, xrayCaptureHttps } from '../utils/logging'
 
 xrayCaptureHttps()
 const api = axios.create({
@@ -31,9 +31,19 @@ const convertParsedMailToReceivedEmail = (parsedMail: ParsedMail, address: strin
   const cc = parsedMail.cc === undefined || Array.isArray(parsedMail.cc) ? parsedMail.cc : parsedMail.cc.value
   const to = parsedMail.to === undefined || Array.isArray(parsedMail.to) ? parsedMail.to : parsedMail.to.value
 
+  const validAttachments = parsedMail.attachments.filter((file) => {
+    const hasValidFilename = file.filename && file.filename.trim() !== ''
+    if (!hasValidFilename) {
+      logWarn(
+        `Attachment filtered out due to missing or empty filename. ID: ${file.cid ?? file.checksum}, Type: ${file.contentType}`,
+      )
+    }
+    return hasValidFilename
+  })
+
   return {
-    attachments: parsedMail.attachments.map((file) => ({
-      filename: file.filename ?? '',
+    attachments: validAttachments.map((file) => ({
+      filename: file.filename!,
       id: file.cid ?? file.checksum,
       size: file.size,
       type: file.contentType,

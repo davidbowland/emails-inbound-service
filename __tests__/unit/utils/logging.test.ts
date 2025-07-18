@@ -2,13 +2,14 @@ import { S3 } from '@aws-sdk/client-s3'
 import * as AWSXRay from 'aws-xray-sdk-core'
 import https from 'https'
 
-import { log, logError, xrayCapture, xrayCaptureHttps } from '@utils/logging'
+import { log, logError, logWarn, xrayCapture, xrayCaptureHttps } from '@utils/logging'
 
 jest.mock('aws-xray-sdk-core')
 
 describe('logging', () => {
   beforeAll(() => {
     console.error = jest.fn()
+    console.warn = jest.fn()
     console.log = jest.fn()
   })
 
@@ -18,6 +19,15 @@ describe('logging', () => {
       await log(message)
 
       expect(console.log).toHaveBeenCalledWith(message)
+    })
+  })
+
+  describe('logWarn', () => {
+    it.each(['Hello', 0, null, undefined, { a: 1, b: 2 }])('should call logFunc with message', async (value) => {
+      const message = `Log message for value ${JSON.stringify(value)}`
+      await logWarn(message)
+
+      expect(console.warn).toHaveBeenCalledWith(message)
     })
   })
 

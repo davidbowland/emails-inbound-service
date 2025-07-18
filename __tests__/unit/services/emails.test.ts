@@ -130,6 +130,78 @@ describe('emails', () => {
       )
     })
 
+    it('should filter out attachments with missing filename', async () => {
+      const parsedContentsWithMissingFilename = {
+        ...parsedContents,
+        attachments: [
+          { checksum: 'invalid-attachment', contentType: 'text/plain', filename: undefined },
+          { checksum: 'valid-attachment', contentType: 'text/plain', filename: 'valid.txt', size: 1000 },
+        ],
+      } as unknown as ParsedMail
+
+      await registerReceivedEmail(address, messageId, parsedContentsWithMissingFilename)
+
+      expect(mockPutEmail).toHaveBeenCalledWith(
+        'account1',
+        'message-id',
+        expect.objectContaining({
+          attachments: [
+            {
+              filename: 'valid.txt',
+              id: 'valid-attachment',
+              size: 1000,
+              type: 'text/plain',
+            },
+          ],
+        }),
+      )
+    })
+
+    it('should filter out attachments with empty filename', async () => {
+      const parsedContentsWithEmptyFilename = {
+        ...parsedContents,
+        attachments: [
+          { cid: 'empty-filename', contentType: 'image/png', filename: '' },
+          { cid: 'whitespace-filename', contentType: 'application/pdf', filename: '   ' },
+          { cid: 'valid-attachment', contentType: 'application/pdf', filename: 'document.pdf', size: 2000 },
+        ],
+      } as unknown as ParsedMail
+
+      await registerReceivedEmail(address, messageId, parsedContentsWithEmptyFilename)
+
+      expect(mockPutEmail).toHaveBeenCalledWith(
+        'account1',
+        'message-id',
+        expect.objectContaining({
+          attachments: [
+            {
+              filename: 'document.pdf',
+              id: 'valid-attachment',
+              size: 2000,
+              type: 'application/pdf',
+            },
+          ],
+        }),
+      )
+    })
+
+    it('should handle email with no attachments', async () => {
+      const parsedContentsWithNoAttachments = {
+        ...parsedContents,
+        attachments: [],
+      } as unknown as ParsedMail
+
+      await registerReceivedEmail(address, messageId, parsedContentsWithNoAttachments)
+
+      expect(mockPutEmail).toHaveBeenCalledWith(
+        'account1',
+        'message-id',
+        expect.objectContaining({
+          attachments: [],
+        }),
+      )
+    })
+
     it('should invoke endpoint with email, handling missing values', async () => {
       const parsedContentsWithMissingParts = {
         ...parsedContents,
@@ -154,12 +226,7 @@ describe('emails', () => {
         'account1',
         'message-id',
         expect.objectContaining({
-          attachments: [
-            {
-              filename: '',
-              id: 'fnord',
-            },
-          ],
+          attachments: [],
           from: 'unknown',
           subject: '',
           to: ['account1@domain.com'],
