@@ -1,7 +1,5 @@
-import { http, HttpResponse, server } from '@setup-server'
-
 import { accounts, parsedContents } from '../__mocks__'
-import { emailsApiKey, emailsApiUrl } from '@config'
+import { emailsApiKey } from '@config'
 import {
   extractAccountFromAddress,
   getAccountExists,
@@ -10,6 +8,14 @@ import {
 } from '@services/emails'
 import { ParsedMail } from '@types'
 
+const mockGet = jest.fn()
+const mockPut = jest.fn()
+jest.mock('axios', () => ({
+  create: jest
+    .fn()
+    .mockImplementation(() => ({ get: (...args) => mockGet(...args), put: (...args) => mockPut(...args) })),
+}))
+jest.mock('axios-retry')
 jest.mock('@utils/logging')
 
 describe('emails', () => {
@@ -25,64 +31,46 @@ describe('emails', () => {
   })
 
   describe('getAccountExists', () => {
-    beforeAll(() => {
-      server.use(
-        http.get(`${emailsApiUrl}/accounts/:accountId`, async ({ params, request }) => {
-          if (emailsApiKey != request.headers.get('x-api-key')) {
-            return new HttpResponse(JSON.stringify({ error: 'Invalid API key' }), { status: 403 })
-          }
-
-          const { accountId } = params
-          if (!((accountId as string) in accounts)) {
-            return new HttpResponse(null, { status: 404 })
-          }
-          return HttpResponse.json(accounts[accountId as string])
-        }),
-      )
-    })
-
     it.each(Object.keys(accounts))('should return true for account %s', async (accountId) => {
+      mockGet.mockResolvedValue({ data: accounts[accountId] })
+
       const result = await getAccountExists(accountId)
       expect(result).toEqual(true)
+      expect(mockGet).toHaveBeenCalledWith(`/accounts/${accountId}`, {
+        headers: { 'x-api-key': emailsApiKey, 'x-user-name': accountId },
+      })
     })
 
     it('should return false when querying non-existent account with default', async () => {
+      mockGet.mockRejectedValue(new Error('Not found'))
+
       const result = await getAccountExists('i-should-not-exist')
       expect(result).toEqual(false)
     })
   })
 
   describe('getAccountPreferences', () => {
-    beforeAll(() => {
-      server.use(
-        http.get(`${emailsApiUrl}/accounts/:accountId/internal`, async ({ params, request }) => {
-          if (emailsApiKey != request.headers.get('x-api-key')) {
-            return new HttpResponse(JSON.stringify({ error: 'Invalid API key' }), { status: 403 })
-          }
-
-          const { accountId } = params
-          if (!((accountId as string) in accounts)) {
-            return HttpResponse.json(accounts.default)
-          }
-          return HttpResponse.json(accounts[accountId as string])
-        }),
-      )
-    })
-
     it.each(Object.keys(accounts))('should return correct account preferences for account %s', async (accountId) => {
+      mockGet.mockResolvedValue({ data: accounts[accountId] })
+
       const result = await getAccountPreferences(accountId)
       expect(result).toEqual(accounts[accountId])
+      expect(mockGet).toHaveBeenCalledWith(`/accounts/${accountId}/internal`)
     })
 
     it.each(Object.keys(accounts))(
       'should return correct account preferences for account %s with default',
       async (accountId) => {
+        mockGet.mockResolvedValue({ data: accounts[accountId] })
+
         const result = await getAccountPreferences(accountId)
         expect(result).toEqual(accounts[accountId])
       },
     )
 
     it('should return default account when querying non-existent account with default', async () => {
+      mockGet.mockResolvedValue({ data: accounts.default })
+
       const result = await getAccountPreferences('i-should-not-exist')
       expect(result).toEqual(accounts.default)
     })
@@ -91,28 +79,16 @@ describe('emails', () => {
   describe('registerReceivedEmail', () => {
     const address = 'account1@domain.com'
     const messageId = 'message-id'
-    const mockPutEmail = jest.fn()
 
-    beforeAll(() => {
-      server.use(
-        http.put(`${emailsApiUrl}/accounts/:accountId/emails/received/:emailId`, async ({ params, request }) => {
-          if (emailsApiKey != request.headers.get('x-api-key')) {
-            return new HttpResponse(JSON.stringify({ error: 'Invalid API key' }), { status: 403 })
-          }
-
-          const { accountId, emailId } = params
-          mockPutEmail(accountId, emailId, await request.json())
-          return new HttpResponse(null, { status: 204 })
-        }),
-      )
+    beforeEach(() => {
+      mockPut.mockResolvedValue({ status: 204 })
     })
 
     it('should invoke endpoint with email', async () => {
       await registerReceivedEmail(address, messageId, parsedContents)
 
-      expect(mockPutEmail).toHaveBeenCalledWith(
-        'account1',
-        'message-id',
+      expect(mockPut).toHaveBeenCalledWith(
+        '/accounts/account1/emails/received/message-id',
         expect.objectContaining({
           attachments: [
             {
@@ -130,7 +106,7 @@ describe('emails', () => {
       )
     })
 
-    it('should filter out attachments with missing filename', async () => {
+    it('should filter out attachments with missing filename and log warning', async () => {
       const parsedContentsWithMissingFilename = {
         ...parsedContents,
         attachments: [
@@ -141,9 +117,8 @@ describe('emails', () => {
 
       await registerReceivedEmail(address, messageId, parsedContentsWithMissingFilename)
 
-      expect(mockPutEmail).toHaveBeenCalledWith(
-        'account1',
-        'message-id',
+      expect(mockPut).toHaveBeenCalledWith(
+        '/accounts/account1/emails/received/message-id',
         expect.objectContaining({
           attachments: [
             {
@@ -157,7 +132,7 @@ describe('emails', () => {
       )
     })
 
-    it('should filter out attachments with empty filename', async () => {
+    it('should filter out attachments with empty filename and log warning', async () => {
       const parsedContentsWithEmptyFilename = {
         ...parsedContents,
         attachments: [
@@ -169,9 +144,8 @@ describe('emails', () => {
 
       await registerReceivedEmail(address, messageId, parsedContentsWithEmptyFilename)
 
-      expect(mockPutEmail).toHaveBeenCalledWith(
-        'account1',
-        'message-id',
+      expect(mockPut).toHaveBeenCalledWith(
+        '/accounts/account1/emails/received/message-id',
         expect.objectContaining({
           attachments: [
             {
@@ -193,9 +167,8 @@ describe('emails', () => {
 
       await registerReceivedEmail(address, messageId, parsedContentsWithNoAttachments)
 
-      expect(mockPutEmail).toHaveBeenCalledWith(
-        'account1',
-        'message-id',
+      expect(mockPut).toHaveBeenCalledWith(
+        '/accounts/account1/emails/received/message-id',
         expect.objectContaining({
           attachments: [],
         }),
@@ -222,9 +195,8 @@ describe('emails', () => {
       } as unknown as ParsedMail
       await registerReceivedEmail(address, messageId, parsedContentsWithMissingParts)
 
-      expect(mockPutEmail).toHaveBeenCalledWith(
-        'account1',
-        'message-id',
+      expect(mockPut).toHaveBeenCalledWith(
+        '/accounts/account1/emails/received/message-id',
         expect.objectContaining({
           attachments: [],
           from: 'unknown',
