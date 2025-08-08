@@ -11,7 +11,7 @@ import {
 
 import { emailBucket } from '../config'
 import { StringObject } from '../types'
-import { xrayCapture } from '../utils/logging'
+import { log, xrayCapture } from '../utils/logging'
 
 const s3 = xrayCapture(new S3Client({ apiVersion: '2006-03-01' }))
 
@@ -36,6 +36,9 @@ export const putS3Object = async (
   body: Buffer | string,
   metadata: StringObject = {},
 ): Promise<PutObjectOutput> => {
+  const bodySize = Buffer.isBuffer(body) ? body.length : Buffer.byteLength(body, 'utf8')
+  log('Uploading to S3', { key, size: bodySize })
+
   const command = new PutObjectCommand({ Body: body, Bucket: emailBucket, Key: key, Metadata: metadata })
   return s3.send(command)
 }

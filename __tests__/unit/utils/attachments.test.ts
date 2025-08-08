@@ -3,6 +3,7 @@ import * as s3 from '@services/s3'
 import { copyAttachmentsToAccount, getAttachmentId, uploadAttachments } from '@utils/attachments'
 
 jest.mock('@services/s3')
+jest.mock('@utils/logging')
 
 describe('attachments', () => {
   describe('getAttachmentId', () => {

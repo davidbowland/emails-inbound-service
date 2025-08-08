@@ -1,5 +1,6 @@
 import { copyS3Object, putS3Object } from '../services/s3'
 import { AttachmentCommon, StringObject } from '../types'
+import { log } from './logging'
 
 /* Parsing */
 
@@ -36,6 +37,7 @@ export const uploadAttachments = async (
 ): Promise<AttachmentCommon[]> => {
   const uploadedAttachments = emailAttachments.map(async (attachment) => {
     const s3Key = `inbound/${messageId}/${getAttachmentId(attachment)}`
+    log('Uploading attachment', { contentType: attachment.contentType, size: attachment.size })
     await putS3Object(s3Key, attachment.content, getAttachmentMetadata(attachment))
     return {
       ...attachment,

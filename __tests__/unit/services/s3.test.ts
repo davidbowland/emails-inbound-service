@@ -12,6 +12,7 @@ jest.mock('@aws-sdk/client-s3', () => ({
   })),
 }))
 jest.mock('@utils/logging', () => ({
+  log: jest.fn(),
   xrayCapture: jest.fn().mockImplementation((x) => x),
 }))
 
