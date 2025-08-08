@@ -8,6 +8,7 @@ import {
   PutObjectOutput,
   S3Client,
 } from '@aws-sdk/client-s3'
+import { Readable } from 'stream'
 
 import { emailBucket } from '../config'
 import { StringObject } from '../types'
@@ -25,10 +26,20 @@ export const deleteS3Object = async (key: string): Promise<DeleteObjectOutput> =
   return s3.send(command)
 }
 
+const readableToBuffer = (stream: Readable): Promise<Buffer> =>
+  new Promise<Buffer>((resolve, reject) => {
+    const chunks: Buffer[] = []
+    stream.on('data', (chunk) => chunks.push(chunk))
+    stream.on('error', reject)
+    stream.on('end', () => resolve(Buffer.concat(chunks)))
+  })
+
 export const getS3Object = async (key: string): Promise<string> => {
   const command = new GetObjectCommand({ Bucket: emailBucket, Key: key })
   const response = await s3.send(command)
-  return response.Body
+
+  const s3Data = await readableToBuffer(response.Body as Readable)
+  return s3Data.toString('utf-8')
 }
 
 export const putS3Object = async (

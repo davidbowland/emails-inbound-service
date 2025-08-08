@@ -36,6 +36,7 @@ export const processReceivedEmail = async (messageId: string, recipients: string
     await copyS3Object(`inbound/${messageId}`, `received/${accountId}/${messageId}`)
     await copyAttachmentsToAccount(accountId, messageId, parsedMail.attachments)
   }
+  // Send emails to admin when there are no valid accounts
   if (
     !(await Promise.all(recipients.map((address) => getAccountExists(extractAccountFromAddress(address))))).every(
       Boolean,

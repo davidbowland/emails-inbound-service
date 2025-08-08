@@ -1,3 +1,5 @@
+import EventEmitter from 'events'
+
 import { emailBucket } from '@config'
 import { copyS3Object, deleteS3Object, getS3Object, putS3Object } from '@services/s3'
 
@@ -64,27 +66,58 @@ describe('S3', () => {
   describe('getS3Object', () => {
     const expectedObject = 'thar-be-values-here'
 
-    beforeAll(() => {
-      mockSend.mockResolvedValue({ Body: expectedObject })
-    })
+    const createMockStream = (data: string) => {
+      const stream = new EventEmitter()
+
+      // Emit data immediately when listeners are attached
+      process.nextTick(() => {
+        stream.emit('data', Buffer.from(data))
+        stream.emit('end')
+      })
+
+      return stream
+    }
 
     it('should pass key to S3 as object', async () => {
+      mockSend.mockResolvedValueOnce({ Body: createMockStream(expectedObject) })
       await getS3Object(key)
 
       expect(mockSend).toHaveBeenCalledWith({ Bucket: emailBucket, Key: key })
     })
 
     it('should return expectedObject as result', async () => {
+      mockSend.mockResolvedValueOnce({ Body: createMockStream(expectedObject) })
       const result = await getS3Object(key)
 
       expect(result).toEqual(expectedObject)
     })
 
-    it('should return empty result when body is missing', async () => {
-      mockSend.mockResolvedValueOnce({})
-      const result = await getS3Object(key)
+    it('should handle stream errors', async () => {
+      const errorStream = new EventEmitter()
+      mockSend.mockResolvedValueOnce({ Body: errorStream })
 
-      expect(result).toEqual(undefined)
+      process.nextTick(() => {
+        errorStream.emit('error', new Error('Stream error'))
+      })
+
+      await expect(getS3Object(key)).rejects.toThrow('Stream error')
+    })
+
+    it('should handle multiple data chunks', async () => {
+      const chunk1 = 'Hello, '
+      const chunk2 = 'world!'
+      const stream = new EventEmitter()
+
+      mockSend.mockResolvedValueOnce({ Body: stream })
+
+      process.nextTick(() => {
+        stream.emit('data', Buffer.from(chunk1))
+        stream.emit('data', Buffer.from(chunk2))
+        stream.emit('end')
+      })
+
+      const result = await getS3Object(key)
+      expect(result).toEqual('Hello, world!')
     })
   })
 
