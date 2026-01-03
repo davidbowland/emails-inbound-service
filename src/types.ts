@@ -3,7 +3,8 @@ export { AxiosResponse } from 'axios'
 export { AttachmentCommon, ParsedMail } from 'mailparser'
 export { Attachment } from 'nodemailer/lib/mailer'
 
-export interface AccountPreference {
+export interface Account {
+  bounceSenders: string[]
   forwardTargets?: string[]
 }
 

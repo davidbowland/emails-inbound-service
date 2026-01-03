@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 import { emailsApiKey, emailsApiUrl } from '../config'
-import { AccountPreference, AxiosResponse, EmailReceived, ParsedMail } from '../types'
+import { Account, AxiosResponse, EmailReceived, ParsedMail } from '../types'
 import { logWarn, xrayCaptureHttps } from '../utils/logging'
 
 xrayCaptureHttps()
@@ -14,16 +14,8 @@ const api = axios.create({
 
 export const extractAccountFromAddress = (email: string): string => email.replace(/@[a-z0-9.-]+$/i, '').toLowerCase()
 
-export const getAccountExists = (account: string): Promise<boolean> =>
-  api
-    .get(`/accounts/${encodeURIComponent(account.toLowerCase())}`, {
-      headers: { 'x-api-key': emailsApiKey, 'x-user-name': account.toLowerCase() },
-    })
-    .then(() => true)
-    .catch(() => false)
-
-export const getAccountPreferences = (account: string): Promise<AccountPreference> =>
-  api.get(`/accounts/${encodeURIComponent(account.toLowerCase())}/internal`).then((response: any) => response.data)
+export const getAccount = (account: string): Promise<Account> =>
+  api.get(`/accounts/${encodeURIComponent(account.toLowerCase())}`).then((response: any) => response.data)
 
 /* Emails */
 
@@ -67,4 +59,14 @@ export const registerReceivedEmail = (
       messageId,
     )}`,
     convertParsedMailToReceivedEmail(parsedMail, address),
+  )
+
+/* Bounces */
+
+export const bounceReceivedEmail = (address: string, messageId: string): Promise<AxiosResponse> =>
+  api.post(
+    `/accounts/${encodeURIComponent(extractAccountFromAddress(address))}/emails/received/${encodeURIComponent(
+      messageId,
+    )}/bounce`,
+    {},
   )
