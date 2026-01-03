@@ -21,6 +21,7 @@ describe('incoming-email handler', () => {
       expect(incomingEmailService.processReceivedEmail).toHaveBeenCalledWith(
         'o3vrnil0e2ic28trm7dfhrc2v0clambda4nbp0g1',
         ['johndoe@example.com'],
+        'janedoe@example.com',
       )
     })
 

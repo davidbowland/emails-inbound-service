@@ -5,9 +5,14 @@ export const messageId = 'aaaaa-uuuuu-uuuuu-iiiii-ddddd'
 export const uuid = 'uuuuu-uuuuu-iiiii-ddddd-22222'
 
 export const accounts = {
-  account1: {},
-  account2: {},
+  account1: {
+    bounceSenders: [],
+  },
+  account2: {
+    bounceSenders: [],
+  },
   default: {
+    bounceSenders: [],
     forwardTargets: ['one@email.address', 'two@email.address'],
   },
 }

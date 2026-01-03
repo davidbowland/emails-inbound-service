@@ -1,19 +1,16 @@
 import { accounts, parsedContents } from '../__mocks__'
-import { emailsApiKey } from '@config'
-import {
-  extractAccountFromAddress,
-  getAccountExists,
-  getAccountPreferences,
-  registerReceivedEmail,
-} from '@services/emails'
+import { bounceReceivedEmail, extractAccountFromAddress, getAccount, registerReceivedEmail } from '@services/emails'
 import { ParsedMail } from '@types'
 
 const mockGet = jest.fn()
 const mockPut = jest.fn()
+const mockPost = jest.fn()
 jest.mock('axios', () => ({
-  create: jest
-    .fn()
-    .mockImplementation(() => ({ get: (...args) => mockGet(...args), put: (...args) => mockPut(...args) })),
+  create: jest.fn().mockImplementation(() => ({
+    get: (...args: any[]) => mockGet(...args),
+    post: (...args: any[]) => mockPost(...args),
+    put: (...args: any[]) => mockPut(...args),
+  })),
 }))
 jest.mock('axios-retry')
 jest.mock('@utils/logging')
@@ -24,55 +21,25 @@ describe('emails', () => {
       ['hello@world.com', 'hello'],
       ['three@email-address.with.sub.domains', 'three'],
       ['"whoa-this@is-weird.com"@email.address', '"whoa-this@is-weird.com"'],
-    ])('should extract %s to %s account', async (address, account) => {
-      const result = await extractAccountFromAddress(address)
+    ])('should extract %s to %s account', (address, account) => {
+      const result = extractAccountFromAddress(address)
       expect(result).toEqual(account)
     })
   })
 
-  describe('getAccountExists', () => {
-    it.each(Object.keys(accounts))('should return true for account %s', async (accountId) => {
-      mockGet.mockResolvedValue({ data: accounts[accountId] })
-
-      const result = await getAccountExists(accountId)
-      expect(result).toEqual(true)
-      expect(mockGet).toHaveBeenCalledWith(`/accounts/${accountId}`, {
-        headers: { 'x-api-key': emailsApiKey, 'x-user-name': accountId },
-      })
-    })
-
-    it('should return false when querying non-existent account with default', async () => {
-      mockGet.mockRejectedValue(new Error('Not found'))
-
-      const result = await getAccountExists('i-should-not-exist')
-      expect(result).toEqual(false)
-    })
-  })
-
-  describe('getAccountPreferences', () => {
+  describe('getAccount', () => {
     it.each(Object.keys(accounts))('should return correct account preferences for account %s', async (accountId) => {
       mockGet.mockResolvedValue({ data: accounts[accountId] })
 
-      const result = await getAccountPreferences(accountId)
+      const result = await getAccount(accountId)
       expect(result).toEqual(accounts[accountId])
-      expect(mockGet).toHaveBeenCalledWith(`/accounts/${accountId}/internal`)
+      expect(mockGet).toHaveBeenCalledWith(`/accounts/${accountId}`)
     })
 
-    it.each(Object.keys(accounts))(
-      'should return correct account preferences for account %s with default',
-      async (accountId) => {
-        mockGet.mockResolvedValue({ data: accounts[accountId] })
+    it('should throw error when querying non-existent account', async () => {
+      mockGet.mockRejectedValue(new Error('Not found'))
 
-        const result = await getAccountPreferences(accountId)
-        expect(result).toEqual(accounts[accountId])
-      },
-    )
-
-    it('should return default account when querying non-existent account with default', async () => {
-      mockGet.mockResolvedValue({ data: accounts.default })
-
-      const result = await getAccountPreferences('i-should-not-exist')
-      expect(result).toEqual(accounts.default)
+      await expect(getAccount('i-should-not-exist')).rejects.toThrow('Not found')
     })
   })
 
@@ -80,7 +47,7 @@ describe('emails', () => {
     const address = 'account1@domain.com'
     const messageId = 'message-id'
 
-    beforeEach(() => {
+    beforeAll(() => {
       mockPut.mockResolvedValue({ status: 204 })
     })
 
@@ -205,6 +172,30 @@ describe('emails', () => {
           viewed: false,
         }),
       )
+    })
+  })
+
+  describe('bounceReceivedEmail', () => {
+    const address = 'account1@domain.com'
+    const messageId = 'message-id-123'
+
+    beforeAll(() => {
+      mockPost.mockResolvedValue({ status: 200 })
+    })
+
+    it('should invoke bounce endpoint with correct parameters', async () => {
+      await bounceReceivedEmail(address, messageId)
+
+      expect(mockPost).toHaveBeenCalledWith('/accounts/account1/emails/received/message-id-123/bounce', {})
+    })
+
+    it('should handle special characters in address and messageId', async () => {
+      const specialAddress = 'user+tag@domain.com'
+      const specialMessageId = 'message@id.with.dots'
+
+      await bounceReceivedEmail(specialAddress, specialMessageId)
+
+      expect(mockPost).toHaveBeenCalledWith('/accounts/user%2Btag/emails/received/message%40id.with.dots/bounce', {})
     })
   })
 })

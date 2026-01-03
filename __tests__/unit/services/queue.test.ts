@@ -12,7 +12,7 @@ describe('queue', () => {
   describe('sendEmail', () => {
     const target = 'some@email.address'
 
-    beforeEach(() => {
+    beforeAll(() => {
       mockPost.mockResolvedValue({ status: 201 })
     })
 

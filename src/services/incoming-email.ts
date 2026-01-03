@@ -1,50 +1,86 @@
-import { AccountPreference, AttachmentCommon, Email } from '../types'
+import { defaultAccountId } from '../config'
 import { copyAttachmentsToAccount, getAttachmentId, uploadAttachments } from '../utils/attachments'
+import { shouldBounceSender } from '../utils/bounce'
 import { forwardEmail } from '../utils/forwarding'
 import { log } from '../utils/logging'
 import { convertParsedContentsToEmail, getParsedMail } from '../utils/parser'
-import { aggregatePreferences } from '../utils/preferences'
-import { extractAccountFromAddress, getAccountExists, registerReceivedEmail } from './emails'
+import { bounceReceivedEmail, extractAccountFromAddress, getAccount, registerReceivedEmail } from './emails'
 import { copyS3Object, deleteS3Object } from './s3'
 
-const applyPreferencesToEmail = async (
-  preferences: AccountPreference,
-  email: Email,
-  attachments: AttachmentCommon[],
-): Promise<void> => {
-  if (preferences.forwardTargets) {
-    await forwardEmail([...new Set(preferences.forwardTargets)], email, attachments)
+interface RecipientProcessingResult {
+  bouncedRecipients: Set<string>
+  forwardTargets: Set<string>
+  validRecipients: Set<string>
+}
+
+const processRecipients = async (recipients: string[], senderEmail: string): Promise<RecipientProcessingResult> => {
+  const forwardTargets = new Set<string>()
+  const bouncedRecipients = new Set<string>()
+  const validRecipients = new Set<string>()
+
+  const adminAccount = await getAccount(defaultAccountId)
+
+  for (const recipient of recipients) {
+    const accountId = extractAccountFromAddress(recipient)
+
+    try {
+      const account = await getAccount(accountId)
+
+      validRecipients.add(recipient)
+      account.forwardTargets?.forEach((target) => forwardTargets.add(target))
+      if (shouldBounceSender(senderEmail, account.bounceSenders)) {
+        bouncedRecipients.add(recipient)
+      }
+    } catch {
+      validRecipients.add(defaultAccountId)
+      adminAccount.forwardTargets?.forEach((target) => forwardTargets.add(target))
+      if (shouldBounceSender(senderEmail, adminAccount.bounceSenders)) {
+        bouncedRecipients.add(recipient)
+      }
+    }
+  }
+
+  return {
+    bouncedRecipients,
+    forwardTargets,
+    validRecipients,
   }
 }
 
-export const processReceivedEmail = async (messageId: string, recipients: string[]): Promise<void> => {
+export const processReceivedEmail = async (
+  messageId: string,
+  recipients: string[],
+  senderEmail: string,
+): Promise<void> => {
   const parsedMail = await getParsedMail(messageId)
-
-  const preferences = await aggregatePreferences(recipients)
-  log(`${messageId} to ${recipients} =>`, preferences)
+  const { forwardTargets, bouncedRecipients, validRecipients } = await processRecipients(recipients, senderEmail)
 
   const attachments = await uploadAttachments(messageId, parsedMail.attachments)
-  await applyPreferencesToEmail(
-    preferences,
-    convertParsedContentsToEmail(messageId, parsedMail, recipients),
-    attachments,
-  )
 
-  for (const address of recipients) {
-    const accountId = extractAccountFromAddress(address)
-    await registerReceivedEmail(address, messageId, parsedMail)
+  for (const recipient of validRecipients) {
+    const accountId = extractAccountFromAddress(recipient)
+    await registerReceivedEmail(recipient, messageId, parsedMail)
     await copyS3Object(`inbound/${messageId}`, `received/${accountId}/${messageId}`)
     await copyAttachmentsToAccount(accountId, messageId, parsedMail.attachments)
   }
-  if (
-    !(await Promise.all(recipients.map((address) => getAccountExists(extractAccountFromAddress(address))))).every(
-      Boolean,
+
+  if (forwardTargets.size > 0) {
+    const targetArray = [...forwardTargets]
+    log('Forwarding email', { forwardTargets: targetArray.length, messageId })
+    await forwardEmail(
+      targetArray,
+      convertParsedContentsToEmail(messageId, parsedMail, [...validRecipients]),
+      attachments,
     )
-  ) {
-    await registerReceivedEmail('admin', messageId, parsedMail)
-    await copyS3Object(`inbound/${messageId}`, `received/admin/${messageId}`)
-    await copyAttachmentsToAccount('admin', messageId, parsedMail.attachments)
   }
+
+  for (const address of bouncedRecipients) {
+    const accountId = extractAccountFromAddress(address)
+    log('Bouncing email', { accountId, messageId })
+    await registerReceivedEmail(address, messageId, parsedMail)
+    await bounceReceivedEmail(address, messageId)
+  }
+
   await deleteS3Object(`inbound/${messageId}`)
   for (const attachment of parsedMail.attachments) {
     await deleteS3Object(`inbound/${messageId}/${getAttachmentId(attachment)}`)
