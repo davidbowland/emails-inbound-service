@@ -13,4 +13,3 @@ process.env.EMAIL_BUCKET = 'bucket-without-hole'
 
 process.env.EMAIL_FROM = 'do-not@reply.com'
 process.env.EMAIL_REGION = 'us-east-1'
-process.env.ERROR_EMAIL = 'error@e.mail'
