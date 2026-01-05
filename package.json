@@ -2,7 +2,7 @@
   "name": "emails-inbound-service",
   "author": "David Bowland",
   "description": "Handles inbound emails from SES",
-  "version": "1.34.0",
+  "version": "1.35.0",
   "engines": {
     "node": "^22.0.0"
   },
