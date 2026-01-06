@@ -27,15 +27,17 @@ const processRecipients = async (recipients: string[], senderEmail: string): Pro
       const account = await getAccount(accountId)
 
       validRecipients.add(recipient)
-      account.forwardTargets?.forEach((target) => forwardTargets.add(target))
       if (shouldBounceSender(senderEmail, account.bounceSenders)) {
         bouncedRecipients.add(recipient)
+      } else {
+        account.forwardTargets?.forEach((target) => forwardTargets.add(target))
       }
     } catch {
       validRecipients.add(defaultAccountId)
-      adminAccount.forwardTargets?.forEach((target) => forwardTargets.add(target))
       if (shouldBounceSender(senderEmail, adminAccount.bounceSenders)) {
         bouncedRecipients.add(recipient)
+      } else {
+        adminAccount.forwardTargets?.forEach((target) => forwardTargets.add(target))
       }
     }
   }

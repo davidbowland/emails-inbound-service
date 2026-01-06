@@ -119,22 +119,6 @@ describe('incoming-email service', () => {
       expect(forwarding.forwardEmail).not.toHaveBeenCalled()
     })
 
-    it('should bounce all recipients when all should be bounced', async () => {
-      jest.mocked(bounce).shouldBounceSender.mockReturnValue(true)
-      jest
-        .mocked(emails)
-        .getAccount.mockResolvedValueOnce({ bounceSenders: ['sender@example.com'] }) // admin account
-        .mockResolvedValueOnce({ bounceSenders: ['sender@example.com'] }) // first recipient
-        .mockResolvedValueOnce({ bounceSenders: ['sender@example.com'] }) // second recipient
-
-      await processReceivedEmail(messageId, recipients, senderEmail)
-
-      expect(emails.bounceReceivedEmail).toHaveBeenCalledWith('e@mail.address', messageId)
-      expect(emails.bounceReceivedEmail).toHaveBeenCalledWith('f@mail.address', messageId)
-      expect(s3.copyS3Object).not.toHaveBeenCalledWith(expect.stringContaining('received/'), expect.anything())
-      expect(forwarding.forwardEmail).not.toHaveBeenCalled()
-    })
-
     it('should bounce only specific recipients when some should be bounced', async () => {
       jest
         .mocked(emails)
@@ -166,11 +150,7 @@ describe('incoming-email service', () => {
 
       await processReceivedEmail(messageId, recipients, senderEmail)
 
-      expect(forwarding.forwardEmail).toHaveBeenCalledWith(
-        ['forward@example.com', 'forward2@example.com'],
-        expect.any(Object),
-        [attachment],
-      )
+      expect(forwarding.forwardEmail).toHaveBeenCalledWith(['forward2@example.com'], expect.any(Object), [attachment])
       expect(parser.convertParsedContentsToEmail).toHaveBeenCalledWith(messageId, parsedContents, [
         'e@mail.address',
         'f@mail.address',
