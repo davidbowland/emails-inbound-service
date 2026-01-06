@@ -37,16 +37,8 @@ const doesSenderMatchSetting = (senderEmail: string, setting: string): boolean =
 
 export const shouldBounceSender = (senderEmail: string, bounceSenders: string[]): boolean => {
   for (const sender of bounceSenders) {
-    // If sender is falsey, all senders match
-    if (!sender) {
+    if (sender === '*' || doesSenderMatchSetting(senderEmail, sender)) {
       return true
-    }
-
-    const senders = sender.split(',').map((s) => s.trim())
-    for (const senderPattern of senders) {
-      if (senderPattern && doesSenderMatchSetting(senderEmail, senderPattern)) {
-        return true
-      }
     }
   }
 

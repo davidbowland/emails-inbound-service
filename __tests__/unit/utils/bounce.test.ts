@@ -8,8 +8,8 @@ describe('bounce', () => {
       expect(result).toBe(false)
     })
 
-    it('should return true when sender is falsey', () => {
-      const bounceSenders: string[] = ['']
+    it('should return true when sender setting is wildcard', () => {
+      const bounceSenders: string[] = ['*']
       const result = shouldBounceSender('test@example.com', bounceSenders)
 
       expect(result).toBe(true)
@@ -57,15 +57,6 @@ describe('bounce', () => {
       expect(result).toBe(false)
     })
 
-    it('should handle comma-separated senders', () => {
-      const bounceSenders: string[] = ['spam@bad.com,evil.com,another@blocked.net']
-
-      expect(shouldBounceSender('spam@bad.com', bounceSenders)).toBe(true)
-      expect(shouldBounceSender('test@evil.com', bounceSenders)).toBe(true)
-      expect(shouldBounceSender('another@blocked.net', bounceSenders)).toBe(true)
-      expect(shouldBounceSender('good@example.com', bounceSenders)).toBe(false)
-    })
-
     it('should handle multiple bounce settings', () => {
       const bounceSenders: string[] = ['spam@bad.com', 'evil.com']
 
@@ -74,12 +65,11 @@ describe('bounce', () => {
       expect(shouldBounceSender('good@example.com', bounceSenders)).toBe(false)
     })
 
-    it('should handle whitespace in comma-separated senders', () => {
-      const bounceSenders: string[] = [' spam@bad.com , evil.com , another@blocked.net ']
+    it('should return true with wildcard in array', () => {
+      const bounceSenders: string[] = ['*', 'example.com']
 
-      expect(shouldBounceSender('spam@bad.com', bounceSenders)).toBe(true)
-      expect(shouldBounceSender('test@evil.com', bounceSenders)).toBe(true)
-      expect(shouldBounceSender('another@blocked.net', bounceSenders)).toBe(true)
+      expect(shouldBounceSender('any@domain.com', bounceSenders)).toBe(true)
+      expect(shouldBounceSender('test@example.com', bounceSenders)).toBe(true)
     })
   })
 })
