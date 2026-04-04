@@ -189,7 +189,7 @@ Resources:
             MaxAge: 3600
       LifecycleConfiguration:
         Rules:
-          - ExpirationInDays: 1096 # 3 years
+          - ExpirationInDays: 1827 # 5 years
             NoncurrentVersionExpiration:
               NoncurrentDays: 30
             Status: Enabled
@@ -198,7 +198,7 @@ Resources:
                 StorageClass: STANDARD_IA
               - TransitionInDays: 180
                 StorageClass: GLACIER_IR
-          - ExpirationInDays: 1
+          - ExpirationInDays: 15
             Prefix: attachments/
             Status: Enabled
       PublicAccessBlockConfiguration:
