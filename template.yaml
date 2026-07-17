@@ -201,6 +201,9 @@ Resources:
           - ExpirationInDays: 15
             Prefix: attachments/
             Status: Enabled
+          - ExpirationInDays: 30
+            Prefix: queue/
+            Status: Enabled
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
