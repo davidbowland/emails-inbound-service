@@ -1,6 +1,7 @@
 {
   "name": "emails-inbound-service",
   "author": "David Bowland",
+  "license": "SEE LICENSE IN LICENSE",
   "description": "Handles inbound emails from SES",
   "version": "1.40.0",
   "engines": {

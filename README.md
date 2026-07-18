@@ -25,7 +25,7 @@ If file `~/.aws/credentials` does not exist, create it and add a default profile
 [default]
 aws_access_key_id=<YOUR_ACCESS_KEY_ID>
 aws_secret_access_key=<YOUR_SECRET_ACCESS_KEY>
-region=us-east-2
+region=us-east-1
 ```
 
 If necessary, generate a [new access key ID and secret access key](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys).
@@ -37,7 +37,7 @@ Add a `developer` profile to the same credentials file:
 role_arn=arn:aws:iam::<account number>:role/developer
 source_profile=default
 mfa_serial=<YOUR_MFA_ARN>
-region=us-east-2
+region=us-east-1
 ```
 
 If necessary, retrieve the ARN of the primary MFA device attached to the default profile:
@@ -68,7 +68,13 @@ npm run lint
 
 ### Deploying to Production
 
-When a pull request is merged into `master`, the lambda code is transpiled to commonjs and then deployed. Feature branches are also deployed but are given unique resources.
+Deployment is handled by the GitHub Actions pipeline (`.github/workflows/pipeline.yaml`). On every push, unit tests run first. Pushes to `master` then `sam build` (esbuild, bundling the handler) and `sam package` the stack, deploy it to the testing account, and finally deploy the same packaged template to production. Feature branches instead build and deploy directly to the single shared `emails-inbound-service-test` stack (not a stack unique to the branch — concurrent feature branches overwrite whatever was deployed there previously). After a successful production deploy, a final job bumps the package version and pushes the tag.
+
+To build and deploy manually (requires the `developer` role, see Setup above):
+
+```bash
+npm run deploy
+```
 
 ## Additional Documentation
 
