@@ -9,6 +9,7 @@ Parameters:
   EmailsApiKey:
     Type: String
     Description: API key for emails-email-api
+    NoEcho: true
   Environment:
     Type: String
     Default: prod
@@ -19,6 +20,7 @@ Parameters:
   QueueApiKey:
     Type: String
     Description: API key for emails-queue-api
+    NoEcho: true
 
 Mappings:
   EnvironmentMap:
