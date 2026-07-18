@@ -197,9 +197,7 @@ beforeAll(() => {
 })
 
 // For specific test cases:
-mockSend.mockResolvedValueOnce({
-  /* specific response */
-})
+mockSend.mockResolvedValueOnce({/* specific response */})
 mockSend.mockRejectedValueOnce(new Error('AWS error'))
 ```
 
