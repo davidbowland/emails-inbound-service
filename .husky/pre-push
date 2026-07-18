@@ -3,9 +3,6 @@
 # Stop immediately on error
 set -e
 
-
-### Lambdas
-
 # Double-check linting on all files
 npx eslint --fix .
 # Perform type checking
