@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 import { emailsApiKey, emailsApiUrl } from '../config'
-import { Account, AxiosResponse, EmailReceived, ParsedMail } from '../types'
+import { Account, AddressObject, AxiosResponse, EmailReceived, ParsedEmailAddress, ParsedMail } from '../types'
 import { logWarn, xrayCaptureHttps } from '../utils/logging'
 
 xrayCaptureHttps()
@@ -19,9 +19,24 @@ export const getAccount = (account: string): Promise<Account> =>
 
 /* Emails */
 
+// Addresses arrive in several mailparser shapes: a single AddressObject, an array of them when a header is
+// repeated, and entries that nest their addresses inside an RFC 5322 group (e.g. "undisclosed-recipients:;")
+const flattenEmailAddresses = (addresses: ParsedEmailAddress[]): (string | undefined)[] =>
+  addresses.flatMap((address) =>
+    address.group === undefined ? [address.address] : flattenEmailAddresses(address.group),
+  )
+
+const extractAddresses = (addressObject: AddressObject | AddressObject[] | undefined): string[] => {
+  const addressObjects = addressObject === undefined ? [] : [addressObject].flat()
+
+  return flattenEmailAddresses(addressObjects.flatMap((object) => object.value)).filter(
+    (address): address is string => typeof address === 'string' && address.trim() !== '',
+  )
+}
+
 const convertParsedMailToReceivedEmail = (parsedMail: ParsedMail, address: string): EmailReceived => {
-  const cc = parsedMail.cc === undefined || Array.isArray(parsedMail.cc) ? parsedMail.cc : parsedMail.cc.value
-  const to = parsedMail.to === undefined || Array.isArray(parsedMail.to) ? parsedMail.to : parsedMail.to.value
+  const cc = extractAddresses(parsedMail.cc)
+  const to = extractAddresses(parsedMail.to)
 
   const validAttachments = parsedMail.attachments.filter((file) => {
     const hasValidFilename = file.filename && file.filename.trim() !== ''
@@ -40,11 +55,12 @@ const convertParsedMailToReceivedEmail = (parsedMail: ParsedMail, address: strin
       size: file.size,
       type: file.contentType,
     })),
-    cc: cc?.map((address: any) => address.address as string) ?? [],
+    cc,
     from: parsedMail.from?.text ?? 'unknown',
     subject: parsedMail.subject ?? '',
     timestamp: (parsedMail.date ?? new Date()).getTime(),
-    to: to?.map((address: any) => address.address as string) ?? [address],
+    // The API requires at least one addressee; bcc-only mail parses to an empty "to", so keep the SES recipient
+    to: to.length > 0 ? to : [address],
     viewed: false,
   }
 }

@@ -1,6 +1,6 @@
 export * from 'aws-lambda'
 export { AxiosResponse } from 'axios'
-export { AttachmentCommon, ParsedMail } from 'mailparser'
+export { AddressObject, AttachmentCommon, EmailAddress as ParsedEmailAddress, ParsedMail } from 'mailparser'
 export { Attachment } from 'nodemailer/lib/mailer'
 
 export interface Account {

@@ -173,6 +173,61 @@ describe('emails', () => {
         }),
       )
     })
+
+    it('should fall back to recipient when the to header is present but empty', async () => {
+      const parsedContentsWithEmptyTo = {
+        ...parsedContents,
+        to: { html: '', text: '', value: [] },
+      } as unknown as ParsedMail
+
+      await registerReceivedEmail(address, messageId, parsedContentsWithEmptyTo)
+
+      expect(mockPut).toHaveBeenCalledWith(
+        '/accounts/account1/emails/received/message-id',
+        expect.objectContaining({
+          to: ['account1@domain.com'],
+        }),
+      )
+    })
+
+    it('should fall back to recipient when the to header contains only an empty group', async () => {
+      const parsedContentsWithGroupTo = {
+        ...parsedContents,
+        cc: { html: '', text: '', value: [{ group: [], name: 'hidden-recipients' }] },
+        to: { html: '', text: '', value: [{ group: [], name: 'undisclosed-recipients' }] },
+      } as unknown as ParsedMail
+
+      await registerReceivedEmail(address, messageId, parsedContentsWithGroupTo)
+
+      expect(mockPut).toHaveBeenCalledWith(
+        '/accounts/account1/emails/received/message-id',
+        expect.objectContaining({
+          cc: [],
+          to: ['account1@domain.com'],
+        }),
+      )
+    })
+
+    it('should extract addresses when to and cc are arrays of address objects', async () => {
+      const parsedContentsWithArrayTo = {
+        ...parsedContents,
+        cc: [{ html: '', text: '', value: [{ address: 'c@person.email', name: 'Person C' }] }],
+        to: [
+          { html: '', text: '', value: [{ address: 'one@person.email', name: '' }] },
+          { html: '', text: '', value: [{ address: 'two@person.email', name: '' }] },
+        ],
+      } as unknown as ParsedMail
+
+      await registerReceivedEmail(address, messageId, parsedContentsWithArrayTo)
+
+      expect(mockPut).toHaveBeenCalledWith(
+        '/accounts/account1/emails/received/message-id',
+        expect.objectContaining({
+          cc: ['c@person.email'],
+          to: ['one@person.email', 'two@person.email'],
+        }),
+      )
+    })
   })
 
   describe('bounceReceivedEmail', () => {
