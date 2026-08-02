@@ -30,9 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout latest code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Node 24
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24.x
       - name: Install and audit packages
@@ -49,16 +49,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout latest code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Python 3
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Install AWS SAM
-        uses: aws-actions/setup-sam@v2
+        uses: aws-actions/setup-sam@v3
 
       - name: Install Node 24
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24.x
       - name: Build resources
@@ -97,16 +97,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout latest code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Python 3
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Install AWS SAM
-        uses: aws-actions/setup-sam@v2
+        uses: aws-actions/setup-sam@v3
 
       - name: Install Node 24
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24.x
       - name: Build resources
@@ -131,7 +131,7 @@ jobs:
             --region ${TESTING_REGION} \
             --output-template-file packaged-testing.yaml
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: packaged-testing.yaml
           path: packaged-testing.yaml
@@ -155,7 +155,7 @@ jobs:
             --region ${PROD_REGION} \
             --output-template-file packaged-prod.yaml
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: packaged-prod.yaml
           path: packaged-prod.yaml
@@ -167,14 +167,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout latest code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Python 3
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Install AWS SAM
-        uses: aws-actions/setup-sam@v2
-      - uses: actions/download-artifact@v7
+        uses: aws-actions/setup-sam@v3
+      - uses: actions/download-artifact@v8
         with:
           name: packaged-testing.yaml
 
@@ -211,14 +211,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout latest code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Python 3
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Install AWS SAM
-        uses: aws-actions/setup-sam@v2
-      - uses: actions/download-artifact@v7
+        uses: aws-actions/setup-sam@v3
+      - uses: actions/download-artifact@v8
         with:
           name: packaged-prod.yaml
 
@@ -256,9 +256,9 @@ jobs:
       contents: write
     steps:
       - name: Checkout latest code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Node 24
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24.x
       - name: Set git name and email
