@@ -1,24 +1,94 @@
 import { accounts, parsedContents } from '../__mocks__'
-import { bounceReceivedEmail, extractAccountFromAddress, getAccount, registerReceivedEmail } from '@services/emails'
+import { emailsApiKeyPath } from '@config'
+import {
+  bounceReceivedEmail,
+  extractAccountFromAddress,
+  getAccount,
+  notifyReceivedEmail,
+  registerReceivedEmail,
+} from '@services/emails'
 import { ParsedMail } from '@types'
 
 const mockGet = jest.fn()
-const mockPut = jest.fn()
+const mockGetParameter = jest.fn()
 const mockPost = jest.fn()
-jest.mock('axios', () => ({
-  create: jest.fn().mockImplementation(() => ({
-    get: (...args: any[]) => mockGet(...args),
-    post: (...args: any[]) => mockPost(...args),
-    put: (...args: any[]) => mockPut(...args),
-  })),
-}))
+const mockPut = jest.fn()
+jest.mock('axios', () => {
+  const requestInterceptors: ((config: any) => Promise<any>)[] = []
+  return {
+    create: jest.fn().mockImplementation(() => ({
+      get: (...args: any[]) => mockGet(...args),
+      interceptors: {
+        request: { use: (onFulfilled: (config: any) => Promise<any>) => requestInterceptors.push(onFulfilled) },
+      },
+      post: (...args: any[]) => mockPost(...args),
+      put: (...args: any[]) => mockPut(...args),
+    })),
+    requestInterceptors,
+  }
+})
 jest.mock('axios-retry')
+jest.mock('@services/ssm', () => ({
+  getParameter: (...args: any[]) => mockGetParameter(...args),
+  // The real memoize runs here: stubbing it as a pass-through would let a module that read SSM on every
+  // request pass the "once per container" test below
+  memoized: jest.requireActual('@services/ssm').memoized,
+}))
 jest.mock('@utils/logging')
 
+// The memoized key lives for the life of the module instance, so a test that needs a cold cache loads its own
+const loadInterceptor = async (): Promise<(config: any) => Promise<any>> => {
+  let interceptor: ((config: any) => Promise<any>) | undefined
+  await jest.isolateModulesAsync(async () => {
+    await import('@services/emails')
+    const { requestInterceptors } = (await import('axios')) as unknown as {
+      requestInterceptors: ((config: any) => Promise<any>)[]
+    }
+    interceptor = requestInterceptors[requestInterceptors.length - 1]
+  })
+  return interceptor as (config: any) => Promise<any>
+}
+
 describe('emails', () => {
+  describe('x-api-key interceptor', () => {
+    beforeAll(() => {
+      mockGetParameter.mockResolvedValue('ssm-emails-api-key')
+    })
+
+    it('should set the header from the SSM parameter', async () => {
+      const interceptor = await loadInterceptor()
+
+      const config = await interceptor({ headers: {} })
+
+      expect(mockGetParameter).toHaveBeenCalledWith(emailsApiKeyPath)
+      expect(config.headers['x-api-key']).toEqual('ssm-emails-api-key')
+    })
+
+    it('should read the parameter once however many requests it signs', async () => {
+      const interceptor = await loadInterceptor()
+
+      await interceptor({ headers: {} })
+      const config = await interceptor({ headers: {} })
+
+      expect(mockGetParameter).toHaveBeenCalledTimes(1)
+      expect(config.headers['x-api-key']).toEqual('ssm-emails-api-key')
+    })
+
+    it('should reject the request when the parameter cannot be read', async () => {
+      const interceptor = await loadInterceptor()
+      mockGetParameter.mockRejectedValueOnce(new Error('ParameterNotFound'))
+
+      // Failing loudly is the point: a swallowed error would send the request with no key at all
+      await expect(interceptor({ headers: {} })).rejects.toThrow('ParameterNotFound')
+    })
+  })
+
   describe('extractAccountFromAddress', () => {
     it.each([
       ['hello@world.com', 'hello'],
+      // Account ids are lowercase everywhere: services/incoming-email.ts dedupes notifications on the value
+      // this returns, so an uppercase local part must not become a second account
+      ['Hello@World.Com', 'hello'],
       ['three@email-address.with.sub.domains', 'three'],
       ['"whoa-this@is-weird.com"@email.address', '"whoa-this@is-weird.com"'],
     ])('should extract %s to %s account', (address, account) => {
@@ -251,6 +321,33 @@ describe('emails', () => {
       await bounceReceivedEmail(specialAddress, specialMessageId)
 
       expect(mockPost).toHaveBeenCalledWith('/accounts/user%2Btag/emails/received/message%40id.with.dots/bounce', {})
+    })
+  })
+
+  describe('notifyReceivedEmail', () => {
+    const accountId = 'account1'
+    const messageId = 'message-id-123'
+
+    beforeAll(() => {
+      mockPost.mockResolvedValue({ status: 204 })
+    })
+
+    it('should invoke the notify endpoint with an empty body', async () => {
+      await notifyReceivedEmail(accountId, messageId)
+
+      expect(mockPost).toHaveBeenCalledWith('/accounts/account1/emails/received/message-id-123/notify', {})
+    })
+
+    it('should encode the account id and message id', async () => {
+      await notifyReceivedEmail('user+tag', 'message@id.with.dots')
+
+      expect(mockPost).toHaveBeenCalledWith('/accounts/user%2Btag/emails/received/message%40id.with.dots/notify', {})
+    })
+
+    it('should reject when the endpoint rejects', async () => {
+      mockPost.mockRejectedValueOnce(new Error('Internal server error'))
+
+      await expect(notifyReceivedEmail(accountId, messageId)).rejects.toThrow('Internal server error')
     })
   })
 })

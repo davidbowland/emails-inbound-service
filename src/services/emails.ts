@@ -1,13 +1,20 @@
 import axios from 'axios'
 
-import { emailsApiKey, emailsApiUrl } from '../config'
+import { emailsApiKeyPath, emailsApiUrl } from '../config'
 import { Account, AddressObject, AxiosResponse, EmailReceived, ParsedEmailAddress, ParsedMail } from '../types'
 import { logWarn, xrayCaptureHttps } from '../utils/logging'
+import { getParameter, memoized } from './ssm'
 
 xrayCaptureHttps()
-const api = axios.create({
-  baseURL: emailsApiUrl,
-  headers: { 'x-api-key': emailsApiKey },
+const api = axios.create({ baseURL: emailsApiUrl })
+
+const getEmailsApiKey = memoized(() => getParameter(emailsApiKeyPath))
+
+// The key is read from SSM, so it cannot be baked into the instance at import time. An interceptor keeps
+// every call site synchronous and the header can never be stale.
+api.interceptors.request.use(async (config) => {
+  config.headers['x-api-key'] = await getEmailsApiKey()
+  return config
 })
 
 /* Accounts */
@@ -86,3 +93,10 @@ export const bounceReceivedEmail = (address: string, messageId: string): Promise
     )}/bounce`,
     {},
   )
+
+/* Notifications */
+
+// Takes the account id rather than an address: the caller in services/incoming-email.ts has already resolved
+// it, and messageId is the emailId emails-email-api knows.
+export const notifyReceivedEmail = (accountId: string, messageId: string): Promise<AxiosResponse> =>
+  api.post(`/accounts/${encodeURIComponent(accountId)}/emails/received/${encodeURIComponent(messageId)}/notify`, {})

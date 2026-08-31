@@ -1,13 +1,20 @@
 import axios from 'axios'
 
-import { emailFrom, queueApiKey, queueApiUrl } from '../config'
+import { emailFrom, queueApiKeyPath, queueApiUrl } from '../config'
 import { Attachment, AttachmentCommon, AxiosResponse, Email } from '../types'
 import { xrayCaptureHttps } from '../utils/logging'
+import { getParameter, memoized } from './ssm'
 
 xrayCaptureHttps()
-const api = axios.create({
-  baseURL: queueApiUrl,
-  headers: { 'x-api-key': queueApiKey },
+const api = axios.create({ baseURL: queueApiUrl })
+
+const getQueueApiKey = memoized(() => getParameter(queueApiKeyPath))
+
+// The key is read from SSM, so it cannot be baked into the instance at import time. An interceptor keeps
+// every call site synchronous and the header can never be stale.
+api.interceptors.request.use(async (config) => {
+  config.headers['x-api-key'] = await getQueueApiKey()
+  return config
 })
 
 /* Emails */

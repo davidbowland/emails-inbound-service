@@ -28,7 +28,8 @@ values, etc.
 - **events/\*.json** — example event payloads for each handler, used by tests.
 - **\_\_tests\_\_/unit/\_\_mocks\_\_.ts** — mock data that is shared or too large to reasonably live in a test file
   (> 25 lines). Use typing where possible.
-- **\_\_tests\_\_/unit/\*\*/\*** — test files for everything executable in src/ (excluding config and types).
+- **\_\_tests\_\_/unit/\*\*/\*** — test files for everything executable in src/, including `config.ts` now that it
+  exports `assertRequiredEnv`. Only `types.ts` is untested, and it is excluded from coverage in `jest.config.ts`.
 - **\_\_tests\_\_/tsconfig.json** — update `paths` here when adding a new directory within src/.
 
 ## Rules for Development
@@ -77,8 +78,12 @@ SES/handler event should have a matching JSON fixture in `events/` (create one i
 ## Security
 
 **API keys are the sole access control** for the outbound calls this service makes to `emails-email-api` and
-`emails-queue-api` (`x-api-key` header, values sourced from CFN parameters). Treat the parameters carrying them as
-secrets — `NoEcho: true` in `template.yaml`, never logged.
+`emails-queue-api` (`x-api-key` header). Both values are `SecureString` parameters in SSM Parameter Store, read at
+runtime through `src/services/ssm.ts` and injected by an axios request interceptor — they are never CloudFormation
+parameters, never GitHub secrets, and never logged. "Never logged" is enforced rather than merely intended: `log`,
+`logWarn` and `logError` reduce an `AxiosError` to `{ message, status, url }` (`src/utils/logging.ts`), because a
+rejected downstream call otherwise prints `config.headers` — `x-api-key` included — to CloudWatch. See the README
+for the paths and the rotation procedure.
 
 **Validate all external inputs.** Inbound SES payloads and the parsed MIME content are untrusted; validate shape
 before acting on it or forwarding it downstream.

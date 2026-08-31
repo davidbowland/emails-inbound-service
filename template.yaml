@@ -6,10 +6,6 @@ Transform:
   - AWS::Serverless-2016-10-31
 
 Parameters:
-  EmailsApiKey:
-    Type: String
-    Description: API key for emails-email-api
-    NoEcho: true
   Environment:
     Type: String
     Default: prod
@@ -17,10 +13,6 @@ Parameters:
       - prod
       - test
     Description: Environment for deploy
-  QueueApiKey:
-    Type: String
-    Description: API key for emails-queue-api
-    NoEcho: true
 
 Mappings:
   EnvironmentMap:
@@ -28,17 +20,21 @@ Mappings:
       bucket: emails-service-storage
       corsDomain: https://email.dbowland.com
       domain: dbowland.com
+      emailsApiKeyPath: /emails/emails-api-key
       emailsApiUrl: 'https://emails-email-api-internal.dbowland.com/v1'
       logStreamFunction: log-subscriber
       project: emails-inbound-service
+      queueApiKeyPath: /emails/queue-api-key
       queueApiUrl: 'https://emails-queue-api.dbowland.com/v1'
     test:
       bucket: emails-service-storage-test
       corsDomain: https://email.bowland.link
       domain: bowland.link
+      emailsApiKeyPath: /emails-test/emails-api-key
       emailsApiUrl: 'https://emails-email-api-internal.bowland.link/v1'
       logStreamFunction: log-subscriber-test
       project: emails-inbound-service-test
+      queueApiKeyPath: /emails-test/queue-api-key
       queueApiUrl: 'https://emails-queue-api.bowland.link/v1'
 
 Resources:
@@ -104,18 +100,29 @@ Resources:
         - AWSLambdaBasicExecutionRole
         - S3CrudPolicy:
             BucketName: !Ref EmailBucket
+        - Version: 2012-10-17
+          Statement:
+            - Action: ['ssm:GetParameter']
+              Effect: Allow
+              Resource:
+                - !Sub
+                  - 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${Path}'
+                  - Path: !FindInMap [EnvironmentMap, !Ref Environment, emailsApiKeyPath]
+                - !Sub
+                  - 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${Path}'
+                  - Path: !FindInMap [EnvironmentMap, !Ref Environment, queueApiKeyPath]
       Environment:
         Variables:
           DEFAULT_ACCOUNT_ID: admin
-          EMAILS_API_KEY: !Ref EmailsApiKey
           EMAILS_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, emailsApiUrl]
           EMAIL_BUCKET: !Ref EmailBucket
           EMAIL_FROM: !Sub
             - 'do-not-reply@${Domain}'
             - Domain: !FindInMap [EnvironmentMap, !Ref Environment, domain]
           EMAIL_REGION: us-east-1
-          QUEUE_API_KEY: !Ref QueueApiKey
           QUEUE_API_URL: !FindInMap [EnvironmentMap, !Ref Environment, queueApiUrl]
+          SSM_EMAILS_API_KEY_PATH: !FindInMap [EnvironmentMap, !Ref Environment, emailsApiKeyPath]
+          SSM_QUEUE_API_KEY_PATH: !FindInMap [EnvironmentMap, !Ref Environment, queueApiKeyPath]
       Tags:
         'created-by': 'emails-inbound-service'
         'created-for': 'emails'

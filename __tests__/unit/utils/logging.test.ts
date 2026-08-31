@@ -7,6 +7,18 @@ import { log, logError, logWarn, xrayCapture, xrayCaptureHttps } from '@utils/lo
 jest.mock('aws-xray-sdk-core')
 
 describe('logging', () => {
+  // Shaped like the AxiosError a rejected downstream call produces: the api key sits on enumerable
+  // config.headers, well within console's default inspection depth
+  const axiosError = {
+    config: {
+      headers: { 'x-api-key': 'super-secret-api-key' },
+      url: '/accounts/admin/emails/received/message-id/notify',
+    },
+    isAxiosError: true,
+    message: 'Request failed with status code 403',
+    response: { data: { message: 'Forbidden' }, status: 403 },
+  }
+
   beforeAll(() => {
     console.error = jest.fn()
     console.warn = jest.fn()
@@ -38,6 +50,22 @@ describe('logging', () => {
       await logError(error)
 
       expect(console.error).toHaveBeenCalledWith(error)
+    })
+
+    it('should reduce an axios error to its message, status and url', async () => {
+      await logError(axiosError)
+
+      expect(console.error).toHaveBeenCalledWith({
+        message: 'Request failed with status code 403',
+        status: 403,
+        url: '/accounts/admin/emails/received/message-id/notify',
+      })
+    })
+
+    it('should not log the api key carried by an axios error', async () => {
+      await logError('Failure calling emails-email-api', axiosError)
+
+      expect(JSON.stringify(jest.mocked(console.error).mock.calls)).not.toContain('super-secret-api-key')
     })
   })
 
