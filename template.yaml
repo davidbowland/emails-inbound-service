@@ -94,7 +94,7 @@ Resources:
       Runtime: nodejs24.x
       Architectures:
         - x86_64
-      MemorySize: 512
+      MemorySize: 1024
       Description: Process inbound SES emails
       Policies:
         - AWSLambdaBasicExecutionRole
