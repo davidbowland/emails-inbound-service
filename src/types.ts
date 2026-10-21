@@ -1,11 +1,23 @@
-export * from 'aws-lambda'
-export { AxiosResponse } from 'axios'
-export { AddressObject, AttachmentCommon, EmailAddress as ParsedEmailAddress, ParsedMail } from 'mailparser'
-export { Attachment } from 'nodemailer/lib/mailer'
+// Type-only re-exports: aws-lambda ships no runtime code, so a value re-export would fail at runtime. Runtime
+// constants (such as DEFAULT_SPAM_FILTER) live in utils or config, never here.
+export type * from 'aws-lambda'
+export type { AxiosResponse } from 'axios'
+export type { AddressObject, AttachmentCommon, EmailAddress as ParsedEmailAddress, ParsedMail } from 'mailparser'
+export type { Attachment } from 'nodemailer/lib/mailer'
+
+export type SpamSensitivity = 'low' | 'medium' | 'high'
+
+export interface SpamFilter {
+  blockPhrases: string[]
+  sensitivity: SpamSensitivity
+  trustedSenders: string[]
+}
 
 export interface Account {
   bounceSenders: string[]
   forwardTargets?: string[]
+  // Absent on accounts created before the spam filter; read as DEFAULT_SPAM_FILTER
+  spamFilter?: SpamFilter
 }
 
 export interface EmailAddress {
@@ -45,10 +57,13 @@ export interface EmailAttachment {
   type: string
 }
 
+export type EmailFolder = 'inbox' | 'spam'
+
 export interface EmailReceived {
   attachments?: EmailAttachment[]
   bcc?: string[]
   cc?: string[]
+  folder: EmailFolder
   from: string
   subject: string
   timestamp: number

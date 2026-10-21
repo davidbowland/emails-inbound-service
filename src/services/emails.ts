@@ -1,7 +1,15 @@
 import axios from 'axios'
 
 import { emailsApiKeyPath, emailsApiUrl } from '../config'
-import { Account, AddressObject, AxiosResponse, EmailReceived, ParsedEmailAddress, ParsedMail } from '../types'
+import {
+  Account,
+  AddressObject,
+  AxiosResponse,
+  EmailFolder,
+  EmailReceived,
+  ParsedEmailAddress,
+  ParsedMail,
+} from '../types'
 import { logWarn, xrayCaptureHttps } from '../utils/logging'
 import { getParameter, memoized } from './ssm'
 
@@ -41,7 +49,11 @@ const extractAddresses = (addressObject: AddressObject | AddressObject[] | undef
   )
 }
 
-const convertParsedMailToReceivedEmail = (parsedMail: ParsedMail, address: string): EmailReceived => {
+const convertParsedMailToReceivedEmail = (
+  parsedMail: ParsedMail,
+  address: string,
+  folder: EmailFolder,
+): EmailReceived => {
   const cc = extractAddresses(parsedMail.cc)
   const to = extractAddresses(parsedMail.to)
 
@@ -63,6 +75,7 @@ const convertParsedMailToReceivedEmail = (parsedMail: ParsedMail, address: strin
       type: file.contentType,
     })),
     cc,
+    folder,
     from: parsedMail.from?.text ?? 'unknown',
     subject: parsedMail.subject ?? '',
     timestamp: (parsedMail.date ?? new Date()).getTime(),
@@ -76,12 +89,13 @@ export const registerReceivedEmail = (
   address: string,
   messageId: string,
   parsedMail: ParsedMail,
+  folder: EmailFolder,
 ): Promise<AxiosResponse> =>
   api.put(
     `/accounts/${encodeURIComponent(extractAccountFromAddress(address))}/emails/received/${encodeURIComponent(
       messageId,
     )}`,
-    convertParsedMailToReceivedEmail(parsedMail, address),
+    convertParsedMailToReceivedEmail(parsedMail, address, folder),
   )
 
 /* Bounces */

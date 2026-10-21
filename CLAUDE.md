@@ -21,7 +21,8 @@ values, etc.
   catch exceptions.
 - **src/config.ts** — shared repository configuration. Environment variables should ALWAYS be read through config.
   `jest.setup-test-env.js` also needs to be updated when adding/changing environment variables.
-- **src/types.ts** — all exported types or interfaces.
+- **src/types.ts** — all exported types or interfaces. Types only: re-exports use `export type`, and runtime values
+  (such as `DEFAULT_SPAM_FILTER` in `src/utils/spam-score.ts`) live in utils or config, never here.
 - **template.yaml** — infrastructure unique to this repository (SES receipt rule set, the Lambda function, the
   shared `EmailBucket`). See the file for the Lambda function definition that processes SES events.
 - **.github/workflows/pipeline.yaml** — the GitHub Actions deployment pipeline for this repository.
@@ -31,6 +32,16 @@ values, etc.
 - **\_\_tests\_\_/unit/\*\*/\*** — test files for everything executable in src/, including `config.ts` now that it
   exports `assertRequiredEnv`. Only `types.ts` is untested, and it is excluded from coverage in `jest.config.ts`.
 - **\_\_tests\_\_/tsconfig.json** — update `paths` here when adding a new directory within src/.
+- **\_\_tests\_\_/fixtures/** — `spam/` and `ham/` MIME fixtures for the spam classifier. Real mail may be committed
+  only after it is anonymized (`scripts/anonymize-fixture.ts`); every address and domain must be on the allow-list
+  enforced by `__tests__/unit/utils/spam-fixtures.test.ts`. Never save an S3 object (inbound or received mail) to
+  disk — read it in memory only.
+- **\_\_tests\_\_/unit/phrase-matching-vectors.json** — phrase-matching test vectors shared with sibling repos (e.g.
+  `emails-ui`) by identical copy, each copy pinning the same SHA-256 hash in its tests. Change every copy together
+  and update every pinned hash; never reference another repo's copy by an on-disk path.
+- **scripts/** — developer scripts: deployment helpers, `anonymize-fixture.ts` (reads one raw message from stdin in
+  memory and writes only the anonymized fixture) and `calibrate.ts` (scores one message from stdin in memory, prints
+  only the verdict, score and rule ids, and writes nothing to disk).
 
 ## Rules for Development
 
