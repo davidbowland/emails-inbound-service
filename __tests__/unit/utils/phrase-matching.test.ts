@@ -22,6 +22,19 @@ describe('phrase-matching', () => {
       expect(toWords('e\u200Bx\u200Ca\u200Dm\u2060p\uFEFFle')).toEqual(['example'])
     })
 
+    it('should remove every format character, including the soft hyphen and bidi controls', () => {
+      expect(toWords('What\u00ADsApp ex\u202Eam\u202Cple')).toEqual(['whatsapp', 'example'])
+    })
+
+    it('should keep the combining dot of a lowercased dotted capital I inside the word', () => {
+      expect(toWords('İstanbul')).toHaveLength(1)
+      expect(toWords('Visit İstanbul today')).toEqual(['visit', toWords('İstanbul')[0], 'today'])
+    })
+
+    it('should keep Devanagari vowel signs and viramas inside the word', () => {
+      expect(toWords('नमस्ते दुनिया')).toEqual(['नमस्ते', 'दुनिया'])
+    })
+
     it('should return no words for symbol-only input', () => {
       expect(toWords('!!! ??? ...')).toEqual([])
     })
@@ -45,6 +58,10 @@ describe('phrase-matching', () => {
   describe('containsPhrase', () => {
     it('should match consecutive words', () => {
       expect(containsPhrase(['a', 'quick', 'question', 'here'], ['quick', 'question'])).toBe(true)
+    })
+
+    it('should match a phrase hidden with a soft hyphen', () => {
+      expect(containsPhrase(toWords('Message me on What\u00ADsApp'), toWords('whatsapp'))).toBe(true)
     })
 
     it('should not match a partial word', () => {

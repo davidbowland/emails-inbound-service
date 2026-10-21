@@ -232,5 +232,41 @@
     "phrase": "Grow Your Business",
     "expected": true,
     "note": "phrase spans a line break"
+  },
+  {
+    "text": "Message me on What\u00adsApp",
+    "phrase": "whatsapp",
+    "expected": true,
+    "note": "soft hyphen (format character) is removed"
+  },
+  {
+    "text": "ex\u202eam\u202cple offer",
+    "phrase": "example",
+    "expected": true,
+    "note": "bidi controls (format characters) are removed"
+  },
+  {
+    "text": "Flights to \u0130stanbul",
+    "phrase": "\u0130stanbul",
+    "expected": true,
+    "note": "dotted capital I keeps its combining mark in one word"
+  },
+  {
+    "text": "Flights to \u0130stanbul",
+    "phrase": "stanbul",
+    "expected": false,
+    "note": "combining mark does not split a word"
+  },
+  {
+    "text": "\u0928\u092e\u0938\u094d\u0924\u0947 \u0926\u0941\u0928\u093f\u092f\u093e",
+    "phrase": "\u0928\u092e\u0938\u094d\u0924\u0947",
+    "expected": true,
+    "note": "Devanagari word with vowel signs and virama stays one word"
+  },
+  {
+    "text": "\u0928\u092e\u0938\u094d\u0924\u0947",
+    "phrase": "\u0928\u092e",
+    "expected": false,
+    "note": "Devanagari partial word does not match"
   }
 ]

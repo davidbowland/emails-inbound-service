@@ -1,19 +1,20 @@
-// Normalization per AC-038. Every pattern here is fixed; no regular expression is ever built from user input.
-// U+200D sits last in the class: between two other members it reads as a joined sequence (no-misleading-character-class)
-const ZERO_WIDTH = /[\u200B\u200C\u2060\uFEFF\u200D]/g
+// Normalization per AC-048. Every pattern here is fixed; no regular expression is ever built from user input.
+// Format characters (\p{Cf}) cover the zero-width characters, the soft hyphen and the bidi controls.
+const FORMAT_CHARACTERS = /\p{Cf}/gu
 const SINGLE_QUOTES = /[\u2018\u2019]/g
 const DOUBLE_QUOTES = /[\u201C\u201D]/g
 const DASHES = /[\u2013\u2014]/g
 const ELLIPSIS = /\u2026/g
 const NBSP = /\u00A0/g
 const APOSTROPHES = /'/g
-const NON_WORD = /[^\p{L}\p{N}]+/gu
+// Combining marks stay inside words: "İstanbul" lowercases to i + U+0307, and Devanagari vowel signs are marks
+const NON_WORD = /[^\p{L}\p{M}\p{N}]+/gu
 
 const normalizeText = (text: string): string =>
   text
     .normalize('NFKC')
     .toLowerCase()
-    .replace(ZERO_WIDTH, '')
+    .replace(FORMAT_CHARACTERS, '')
     .replace(SINGLE_QUOTES, "'")
     .replace(DOUBLE_QUOTES, '"')
     .replace(DASHES, '-')

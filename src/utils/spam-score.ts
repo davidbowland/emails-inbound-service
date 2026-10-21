@@ -39,22 +39,26 @@ export const SIGNAL_WEIGHTS = {
 
 export type SignalId = keyof typeof SIGNAL_WEIGHTS
 
-// ReDoS guard: everything scored is capped, and every pattern below is fixed with bounded quantifiers only.
+// ReDoS guard: every input is capped before any processing (AC-048), and every pattern below is fixed with bounded
+// quantifiers only.
 export const MAX_SCORED_TEXT_LENGTH = 65_536
-const MAX_HTML_LENGTH = 4 * MAX_SCORED_TEXT_LENGTH
 const MAX_SUBJECT_LENGTH = 1_024
+const MAX_DISPLAY_NAME_LENGTH = 1_024
 const MAX_PITCH_VOCAB_SCORE = 3
 
+const FORMAT_CHARACTERS = /\p{Cf}/gu
 // U+200D sits last in the class: between two other members it reads as a joined sequence (no-misleading-character-class)
-const ZERO_WIDTH_CHAR = /[\u200B\u200C\u2060\uFEFF\u200D]/g
 const ZERO_WIDTH_RUN = /([\u200B\u200C\u2060\uFEFF\u200D]{1,64})/
 
 const HTML_TAG = /<[^<>]{0,2048}>/g
-const HTML_NAMED_ENTITY = /&(nbsp|amp|lt|gt|quot|apos|zwnj|zwj);/gi
+// Opening and closing <script>/<style> tags only; the blocks between them are cut by position, not by a regex
+const HTML_HIDDEN_BLOCK_TAG = /<(\/?)(script|style)\b[^<>]{0,2048}>/gi
+// &amp; is decoded last, on its own, so "&amp;#8203;" stays literal text instead of becoming a zero-width character
+const HTML_NAMED_ENTITY = /&(nbsp|lt|gt|quot|apos|zwnj|zwj);/gi
+const HTML_AMP_ENTITY = /&amp;/gi
 const HTML_DECIMAL_ENTITY = /&#(\d{1,7});/g
 const HTML_HEX_ENTITY = /&#x([0-9a-f]{1,6});/gi
 const NAMED_ENTITIES: Record<string, string> = {
-  amp: '&',
   apos: "'",
   gt: '>',
   lt: '<',
@@ -119,30 +123,56 @@ interface ScoringContext {
   parsed: ParsedMail
   receipt: SESReceipt
   recipientDomains: string[]
-  // NFKC-normalized subject and body with zero-width characters removed, for the fixed signal patterns
+  // NFKC-normalized subject and body parts with format characters removed, for the fixed signal patterns
   signalText: string
   subject: string
-  // Raw subject and body (zero-width characters intact), for the zero-width signal
+  // Raw subject and body parts (zero-width characters intact), for the zero-width signal
   text: string
 }
 
 const decodeCodePoint = (value: number): string => (value <= 0x10ffff ? String.fromCodePoint(value) : ' ')
 
+// One linear pass over the opening/closing tags: text inside <script> or <style> is dropped, as is everything after
+// an unterminated one. A closing tag only ends the block it matches (</style> does not end a <script>).
+const stripHiddenBlocks = (html: string): string => {
+  const final = Array.from(html.matchAll(HTML_HIDDEN_BLOCK_TAG)).reduce(
+    (state: { inside?: string; kept: string[]; keepFrom: number }, match) => {
+      const [tag, closing, rawName] = match
+      const name = rawName.toLowerCase()
+      const index = Number(match.index)
+      if (state.inside === undefined && !closing) {
+        return { inside: name, kept: [...state.kept, html.slice(state.keepFrom, index)], keepFrom: index }
+      }
+      if (state.inside === name && closing) {
+        return { inside: undefined, kept: state.kept, keepFrom: index + tag.length }
+      }
+      return state
+    },
+    { inside: undefined, kept: [], keepFrom: 0 },
+  )
+  const tail = final.inside === undefined ? [html.slice(final.keepFrom)] : []
+  return [...final.kept, ...tail].join(' ')
+}
+
 const htmlToText = (html: string): string =>
-  html
-    .slice(0, MAX_HTML_LENGTH)
+  stripHiddenBlocks(html)
     .replace(HTML_TAG, ' ')
     .replace(HTML_NAMED_ENTITY, (_, name: string) => NAMED_ENTITIES[name.toLowerCase()])
     .replace(HTML_DECIMAL_ENTITY, (_, digits: string) => decodeCodePoint(parseInt(digits, 10)))
     .replace(HTML_HEX_ENTITY, (_, digits: string) => decodeCodePoint(parseInt(digits, 16)))
-
-const getBodyText = (parsed: ParsedMail): string => {
-  const text = typeof parsed.text === 'string' && parsed.text.length > 0 ? parsed.text : undefined
-  const html = typeof parsed.html === 'string' ? parsed.html : ''
-  return (text ?? htmlToText(html)).slice(0, MAX_SCORED_TEXT_LENGTH)
-}
+    .replace(HTML_AMP_ENTITY, '&')
 
 const isString = (value: unknown): value is string => typeof value === 'string'
+
+// The text part and the HTML part are both scored (AC-048): spam can hide in either. Each raw part is capped at 64 KB
+// before any processing, and the HTML-derived text is capped again.
+const getBodyParts = (parsed: ParsedMail): string[] => {
+  const text = isString(parsed.text) ? parsed.text.slice(0, MAX_SCORED_TEXT_LENGTH) : ''
+  const html = isString(parsed.html)
+    ? htmlToText(parsed.html.slice(0, MAX_SCORED_TEXT_LENGTH)).slice(0, MAX_SCORED_TEXT_LENGTH)
+    : ''
+  return [text, html].filter((part) => part.length > 0)
+}
 
 const stringList = (value: unknown): string[] => (Array.isArray(value) ? value.filter(isString) : [])
 
@@ -193,10 +223,11 @@ const hasDisplayNameMismatch = ({ parsed }: ScoringContext): boolean => {
   const replyTo = parsed.replyTo?.value?.[0]
   const fromAddress = (from?.address ?? '').toLowerCase()
   const replyToAddress = (replyTo?.address ?? '').toLowerCase()
-  if (!from?.name || !replyToAddress || replyToAddress === fromAddress) {
+  const fromName = isString(from?.name) ? from.name.slice(0, MAX_DISPLAY_NAME_LENGTH) : ''
+  if (!fromName || !replyToAddress || replyToAddress === fromAddress) {
     return false
   }
-  const nameTokens = toWords(from.name).filter((token) => token.length >= 2)
+  const nameTokens = toWords(fromName).filter((token) => token.length >= 2)
   const replyToLocalPart = toWords(replyToAddress.split('@')[0]).join('')
   return nameTokens.length > 0 && nameTokens.every((token) => !replyToLocalPart.includes(token))
 }
@@ -238,15 +269,25 @@ const scoreSignals = (context: ScoringContext): { ruleIds: string[]; score: numb
 const isSesFail = (receipt: SESReceipt): boolean =>
   receipt.spamVerdict?.status === 'FAIL' || receipt.virusVerdict?.status === 'FAIL'
 
-// Trust requires authentication: the envelope sender with SPF PASS, or the From address with DMARC PASS. Reply-To
-// is forgeable and never consulted.
+// DMARC aligns only one From, so From-based trust needs exactly one From header holding exactly one address; with
+// duplicate From headers or a multi-address From, which address DMARC checked is ambiguous.
+const getSingleFromAddress = (parsed: ParsedMail): string | undefined => {
+  const fromHeaderCount = (Array.isArray(parsed.headerLines) ? parsed.headerLines : []).filter(
+    (header) => header?.key === 'from',
+  ).length
+  const addresses = parsed.from?.value
+  return fromHeaderCount === 1 && Array.isArray(addresses) && addresses.length === 1 ? addresses[0]?.address : undefined
+}
+
+// Trust requires authentication: the envelope sender with SPF PASS, or the single From address with DMARC PASS.
+// Reply-To is forgeable and never consulted.
 const isTrustedSender = (
   parsed: ParsedMail,
   receipt: SESReceipt,
   envelopeSender: string,
   trustedSenders: string[],
 ): boolean => {
-  const fromAddress = parsed.from?.value?.[0]?.address
+  const fromAddress = getSingleFromAddress(parsed)
   const envelopeTrusted =
     receipt.spfVerdict?.status === 'PASS' &&
     isString(envelopeSender) &&
@@ -275,22 +316,22 @@ export const classifyEmail = (
   }
 
   const subject = (isString(parsed.subject) ? parsed.subject : '').slice(0, MAX_SUBJECT_LENGTH)
-  const body = getBodyText(parsed)
-  // Subject and body are matched separately so a phrase never spans the two
-  const matchesSubject = createPhraseMatcher(toWords(subject))
-  const matchesBody = createPhraseMatcher(toWords(body))
-  const matchesPhrase = (phraseWords: string[]): boolean => matchesSubject(phraseWords) || matchesBody(phraseWords)
+  const bodyParts = getBodyParts(parsed)
+  // The subject and each body part are matched separately so a phrase never spans two of them
+  const matchers = [subject, ...bodyParts].map((part) => createPhraseMatcher(toWords(part)))
+  const matchesPhrase = (phraseWords: string[]): boolean => matchers.some((matches) => matches(phraseWords))
   if (stringList(settings?.blockPhrases).map(toWords).some(matchesPhrase)) {
     return { isSpam: true, ruleIds: ['phrase'], score: 0 }
   }
 
-  const text = `${subject}\n${body}`
+  // Blank lines between parts: no word, domain or single-line signal pattern can join across them
+  const text = [subject, ...bodyParts].join('\n\n')
   const { ruleIds, score } = scoreSignals({
     matchesPhrase,
     parsed,
     receipt,
     recipientDomains: stringList(recipientDomains),
-    signalText: text.replace(ZERO_WIDTH_CHAR, '').normalize('NFKC'),
+    signalText: text.normalize('NFKC').replace(FORMAT_CHARACTERS, ''),
     subject,
     text,
   })
