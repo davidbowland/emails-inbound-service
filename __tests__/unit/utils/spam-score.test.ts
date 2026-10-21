@@ -368,9 +368,12 @@ describe('spam-score', () => {
       })
 
       it.each([
-        'Just reply with "NO" and I will stop.',
+        'Just reply with "NO" in the subject line.',
+        'Reply \u201CNO.\u201D if you\u2019d rather not receive future emails.',
+        'If you\u2019d prefer not to hear from us again, just reply \u201CNO.\u201D',
         'Reply \u201Cstop\u201D to opt out.',
-        'Simply respond with NO.',
+        "Reply 'No' to opt-out.",
+        'Simply respond with STOP.',
         'Reply with Wh\u200Bat\u200Bever? Reply with \u2018remove\u2019',
         'Kindly reply to this email with the subject line "REMOVE" and we will stop.',
         'Don\u2019t want to hear from me again? Please let me know.',
@@ -383,6 +386,11 @@ describe('spam-score', () => {
         'This is a no-reply address. Please do not reply.',
         'Please reply by Friday, no rush otherwise.',
         'We would love to hear from you again soon.',
+        "Potluck on Saturday! Please reply 'no' if you can't make it.",
+        'Reply "no" or "yes" by Friday so we can plan.',
+        'Please reply no later than Friday.',
+        'Reply "nope" if you would rather not hear from us.',
+        'Reply "stopwatch" to get the timer link.',
       ])('should not fire reply-opt-out for %p', (text) => {
         expect(classifyBody(text).ruleIds).toEqual([])
       })
@@ -474,6 +482,20 @@ describe('spam-score', () => {
 
       it('should fire self-addressed for mail sent To its own sender with the recipients hidden', () => {
         const parsed = parsedMail({ to: replyToFrom('Sender@example.org') })
+
+        expect(classifyEmail(parsed, passReceipt, envelopeSender, recipientDomains, DEFAULT_SPAM_FILTER)).toEqual({
+          isSpam: false,
+          ruleIds: ['self-addressed'],
+          score: SIGNAL_WEIGHTS['self-addressed'],
+        })
+      })
+
+      it('should keep a group email sent To its own sender with an RSVP "no" below the default threshold', () => {
+        const parsed = parsedMail({
+          subject: 'Potluck on Saturday',
+          text: "Hi all, potluck at our place on Saturday at 6. Please reply 'no' if you can't make it.",
+          to: replyToFrom('sender@example.org'),
+        })
 
         expect(classifyEmail(parsed, passReceipt, envelopeSender, recipientDomains, DEFAULT_SPAM_FILTER)).toEqual({
           isSpam: false,
@@ -601,7 +623,7 @@ describe('spam-score', () => {
 
       it('should strip tags and decode entities from an html-only body', () => {
         const parsed = parsedMail({
-          html: '<p>Reply&nbsp;with &quot;NO&quot; &amp; <b>hi</b> &lt;{{First&#32;Name}}&gt; &#x110000;</p>',
+          html: '<p>Reply&nbsp;with &quot;NO&quot; to&nbsp;stop &amp; <b>hi</b> &lt;{{First&#32;Name}}&gt; &#x110000;</p>',
           text: '',
         })
 

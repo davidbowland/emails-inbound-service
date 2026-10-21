@@ -76,10 +76,20 @@ const MERGE_TAG_PATTERNS: RegExp[] = [
   // A merge tag filled with the raw address instead of a name: "Hi alex@example.net"
   /\b(?:hi|hello|hey|dear)[ \t,]{1,3}[a-z0-9._%+-]{1,64}@[a-z0-9-]{1,63}\.[a-z]/i,
 ]
+// A quote, then the word as a whole token (trailing punctuation allowed, as in \u201CNO.\u201D), then a closing quote
+const quotedOptOut = (words: string): string =>
+  `["'\u2018\u2019\u201C\u201D](?:${words})[.,!]{0,2}["'\u2018\u2019\u201C\u201D]`
+// Phrasing that makes a quoted "no" an opt-out rather than an RSVP ("reply 'no' if you can't make it")
+const NO_OPT_OUT_CONTEXT =
+  "(?:\\bsubject\\b|(?:\\bnot|n['\u2019]t)[ \\t]{1,3}(?:to[ \\t]{1,3})?(?:hear|receive|be[ \\t]{1,3}contacted|interested|relevant|follow)\\b|\\bno[ \\t]{1,3}longer\\b|\\b(?:future|further)[ \\t]{1,3}emails\\b|\\bto[ \\t]{1,3}(?:stop|opt[ \\t-]{0,1}out|unsubscribe)\\b)"
+const REPLY_VERB = '\\b(?:reply|respond|write back)\\b'
 const REPLY_OPT_OUT_PATTERNS: RegExp[] = [
-  /\b(?:reply|respond|write back)[ \t]{1,5}(?:with[ \t]{1,5})?["'\u2018\u2019\u201C\u201D]?(?:no|stop|remove|unsubscribe)\b/i,
-  // "reply to this email with the subject line "REMOVE"": the opt-out word must be quoted
-  /\b(?:reply|respond)\b[^\n]{0,60}?["'\u2018\u2019\u201C\u201D](?:no|stop|remove|unsubscribe)\b/i,
+  /\b(?:reply|respond|write back)[ \t]{1,5}(?:with[ \t]{1,5})?(?:stop|remove|unsubscribe)\b/i,
+  // "reply to this email with the subject line "REMOVE"": the opt-out word must be a whole quoted token
+  new RegExp(`${REPLY_VERB}[^\\n]{0,60}?${quotedOptOut('stop|remove|unsubscribe')}`, 'i'),
+  // A quoted "no" counts only beside opt-out phrasing on the same line, after it or before it
+  new RegExp(`${REPLY_VERB}[^\\n]{0,60}?${quotedOptOut('no')}[^\\n]{0,60}?${NO_OPT_OUT_CONTEXT}`, 'i'),
+  new RegExp(`${NO_OPT_OUT_CONTEXT}[^\\n]{0,80}?${REPLY_VERB}[^\\n]{0,60}?${quotedOptOut('no')}`, 'i'),
   // A fixed phrase, so a wrapped line inside it is allowed
   /\b(?:don['\u2019]?t|do not)\s{1,3}want\s{1,3}to\s{1,3}hear\s{1,3}from\s{1,3}(?:me|us)\b/i,
 ]

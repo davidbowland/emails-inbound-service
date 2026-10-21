@@ -1,8 +1,14 @@
 /*
  * Anonymize one raw MIME message into a committable spam fixture (spec C-4a, decision D-23).
  *
+ *   export OWNER_DOMAINS=<owner domain>[,<owner domain>...]   # the recipient's own domains
+ *   export OWNER_NAMES=<first name>[,<nickname>...],<surname>  # the recipient's names, surname last
  *   aws --profile claude-read-only s3 cp s3://emails-service-storage/received/<acct>/<id> - \
  *     | npx ts-node scripts/anonymize-fixture.ts __tests__/fixtures/spam/pitch-NN.eml NN
+ *
+ * OWNER_DOMAINS and OWNER_NAMES are comma-separated and required; the script exits with a usage message when either
+ * is unset, so no owner identifier ever needs to live in this file. Owner domains become example.net and owner names
+ * before the last become "Alex" (the last, the surname, becomes "Example"). The Date header is truncated to the day.
  *
  * The raw message is read from stdin and only ever held in memory; the anonymized .eml is the only file written.
  * Output is a fresh, minimal message: a whitelist of headers (everything else, including Received, DKIM-Signature,
@@ -13,13 +19,23 @@
 import { readFileSync, writeFileSync } from 'fs'
 import { AddressObject, EmailAddress, simpleParser } from 'mailparser'
 
-const OWNER_DOMAINS = ['dbowland.com', 'bowland.link']
+const USAGE =
+  'Usage: OWNER_DOMAINS=<domain,...> OWNER_NAMES=<name,...> anonymize-fixture.ts <output.eml> <campaign number>'
+const FAILURE = 'Anonymization failed'
+
+const listFromEnv = (value: string | undefined): string[] =>
+  (value ?? '')
+    .split(',')
+    .map((entry) => entry.trim().toLowerCase())
+    .filter((entry) => entry.length > 0)
+
+const OWNER_DOMAINS = listFromEnv(process.env.OWNER_DOMAINS)
+const OWNER_NAMES = listFromEnv(process.env.OWNER_NAMES)
+if (OWNER_DOMAINS.length === 0 || OWNER_NAMES.length === 0) {
+  console.error(USAGE)
+  process.exit(1)
+}
 const OWNER_REPLACEMENT_DOMAIN = 'example.net'
-const OWNER_NAME_REPLACEMENTS: [RegExp, string][] = [
-  [/\bdavid\b/gi, 'Alex'],
-  [/\bdave\b/gi, 'Alex'],
-  [/\bbowland\b/gi, 'Example'],
-]
 const ROLE_LOCAL_PARTS = ['admin', 'contact', 'hello', 'info', 'sales', 'support', 'webmaster']
 const ALLOWED_DOMAIN = /(?:^|\.)(?:example\.(?:com|net|org)|[a-z0-9-]+\.example)$/i
 
@@ -56,9 +72,17 @@ const BARE_DOMAIN_PATTERN =
 const PHONE_PATTERN = /\+?\d[\d \t().-]{8,18}\d/g
 const INVENTED_PHONE = '+1 555 010 0100'
 
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+// The last owner name (the surname) becomes "Example"; every earlier one (first names, nicknames) becomes "Alex"
+const OWNER_NAME_REPLACEMENTS: [RegExp, string][] = OWNER_NAMES.map((name, index) => [
+  new RegExp(`(?<![\\p{L}\\p{M}])${escapeRegExp(name)}(?![\\p{L}\\p{M}])`, 'giu'),
+  index === OWNER_NAMES.length - 1 && OWNER_NAMES.length > 1 ? 'Example' : 'Alex',
+])
+
 /* Recipient (owner) domains, including zero-width-broken forms */
 
-// "dbowland.com" with any run of zero-width characters between (or around) its characters
+// An owner domain with any run of zero-width characters between (or around) its characters
 const ownerDomainPattern = (domain: string): RegExp =>
   new RegExp(
     domain
@@ -135,9 +159,7 @@ const tokensOf = (name: string): string[] =>
   name
     .split(/[^\p{L}\p{M}]+/u)
     .filter((token) => token.length >= 3)
-    .filter((token) => !/^(?:david|dave|bowland)$/i.test(token))
-
-const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    .filter((token) => !OWNER_NAMES.includes(token.toLowerCase()))
 
 const replaceNameTokens = (text: string, nameTokens: Map<string, string>): string =>
   Array.from(nameTokens.entries()).reduce(
@@ -192,10 +214,17 @@ const addressesOf = (field: AddressObject | AddressObject[] | undefined): EmailA
 const formatAddress = (name: string, address: string): string =>
   name ? `"${name.replace(/["\\]/g, '')}" <${address}>` : address
 
+// Truncated to the day (00:00:00 UTC): the exact send time is not needed and could help identify the message
+const toDayDate = (date: Date | undefined): string =>
+  (date && !Number.isNaN(date.getTime()) ? date : new Date(0))
+    .toUTCString()
+    .replace(/\d{2}:\d{2}:\d{2} GMT$/, '00:00:00 +0000')
+
 const main = async (): Promise<void> => {
   const [outputPath, campaignArg] = process.argv.slice(2)
   if (!outputPath || !/^\d{1,2}$/.test(campaignArg ?? '')) {
-    throw new Error('Usage: anonymize-fixture.ts <output.eml> <campaign number>')
+    console.error(USAGE)
+    process.exit(1)
   }
   const campaign = campaignArg.padStart(2, '0')
   const seed = parseInt(campaign, 10)
@@ -249,7 +278,7 @@ const main = async (): Promise<void> => {
     `To: ${addressesOf(parsed.to).map(formatRecipient).join(', ') || 'alex@example.net'}`,
     parsed.cc ? `Cc: ${addressesOf(parsed.cc).map(formatRecipient).join(', ')}` : '',
     `Subject: ${text(parsed.subject ?? '').replace(/[\r\n]+/g, ' ')}`,
-    `Date: ${(parsed.date ?? new Date(0)).toUTCString().replace('GMT', '+0000')}`,
+    `Date: ${toDayDate(parsed.date)}`,
     parsed.inReplyTo ? `In-Reply-To: <reply-${campaign}@campaign-${campaign}.example>` : '',
     references.length > 0 ? `References: ${references.join(' ')}` : '',
     'MIME-Version: 1.0',
@@ -279,7 +308,8 @@ const main = async (): Promise<void> => {
   writeFileSync(outputPath, message.join('\r\n'))
 }
 
-main().catch((error: unknown) => {
-  console.error(error instanceof Error ? error.message : 'Anonymization failed')
+// A fixed string only: an error message could echo message content
+main().catch(() => {
+  console.error(FAILURE)
   process.exit(1)
 })
