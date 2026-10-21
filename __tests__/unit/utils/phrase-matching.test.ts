@@ -1,3 +1,7 @@
+import { createHash } from 'crypto'
+import { readFileSync } from 'fs'
+import { join } from 'path'
+
 import vectors from '../phrase-matching-vectors.json'
 import { containsPhrase, createPhraseMatcher, toWords } from '@utils/phrase-matching'
 
@@ -74,6 +78,16 @@ describe('phrase-matching', () => {
 
     it('should not match when the phrase is longer than the text', () => {
       expect(containsPhrase(['one'], ['one', 'two'])).toBe(false)
+    })
+
+    // emails-ui keeps an identical copy of this file and pins the same hash, so the two matchers are
+    // tested against the same cases. Change both copies together and update both hashes.
+    it('should match the hash pinned in both repos', () => {
+      const file = readFileSync(join(__dirname, '../phrase-matching-vectors.json'))
+
+      expect(createHash('sha256').update(file).digest('hex')).toEqual(
+        '5dd99f289e03d75e07ab265b3e01dfe204689abce0bbce5368a903ac591ade78',
+      )
     })
 
     it.each(vectors as PhraseVector[])('vector: $note', ({ expected, phrase, text }) => {
