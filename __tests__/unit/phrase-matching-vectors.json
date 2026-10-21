@@ -1,0 +1,236 @@
+[
+  {
+    "text": "Please reply with \"NO\" to stop",
+    "phrase": "reply with \"NO\"",
+    "expected": true,
+    "note": "straight double quotes in text and phrase"
+  },
+  {
+    "text": "Please reply with \u201cNO\u201d to stop",
+    "phrase": "reply with \"NO\"",
+    "expected": true,
+    "note": "curly double quotes in text"
+  },
+  {
+    "text": "Please reply with 'NO' to stop",
+    "phrase": "reply with \"NO\"",
+    "expected": true,
+    "note": "single quotes in text"
+  },
+  {
+    "text": "Please reply with \u2018NO\u2019 to stop",
+    "phrase": "reply with \"NO\"",
+    "expected": true,
+    "note": "curly single quotes in text"
+  },
+  {
+    "text": "Please reply with NO to stop",
+    "phrase": "reply with \u201cNO\u201d",
+    "expected": true,
+    "note": "curly quotes in phrase, none in text"
+  },
+  {
+    "text": "Rate: USD 12/hour",
+    "phrase": "USD 12/hour",
+    "expected": true,
+    "note": "slash form matches itself"
+  },
+  {
+    "text": "Rate: USD 12-hour",
+    "phrase": "USD 12/hour",
+    "expected": true,
+    "note": "hyphen matches slash"
+  },
+  {
+    "text": "Rate: USD 12 hour",
+    "phrase": "USD 12/hour",
+    "expected": true,
+    "note": "space matches slash"
+  },
+  {
+    "text": "Rate: USD 12\u2013hour",
+    "phrase": "USD 12/hour",
+    "expected": true,
+    "note": "en dash matches slash"
+  },
+  {
+    "text": "Rate: USD 12\u2014hour",
+    "phrase": "USD 12/hour",
+    "expected": true,
+    "note": "em dash matches slash"
+  },
+  {
+    "text": "Rate: USD  12   hour",
+    "phrase": "USD 12/hour",
+    "expected": true,
+    "note": "repeated spaces"
+  },
+  {
+    "text": "Rate: USD\n12\r\nhour",
+    "phrase": "USD 12/hour",
+    "expected": true,
+    "note": "line breaks between words"
+  },
+  {
+    "text": "Rate: USD 12hour",
+    "phrase": "USD 12/hour",
+    "expected": false,
+    "note": "joined words do not match separated words"
+  },
+  {
+    "text": "I am so happy today",
+    "phrase": "app",
+    "expected": false,
+    "note": "whole words only: app is not in happy"
+  },
+  {
+    "text": "App: download now",
+    "phrase": "app",
+    "expected": true,
+    "note": "trailing punctuation is a separator"
+  },
+  {
+    "text": "Try our APP today",
+    "phrase": "app",
+    "expected": true,
+    "note": "case-insensitive"
+  },
+  {
+    "text": "We wont stop",
+    "phrase": "won't",
+    "expected": true,
+    "note": "apostrophe deleted in phrase"
+  },
+  {
+    "text": "We won't stop",
+    "phrase": "wont",
+    "expected": true,
+    "note": "apostrophe deleted in text"
+  },
+  {
+    "text": "We won\u2019t stop",
+    "phrase": "won't",
+    "expected": true,
+    "note": "curly apostrophe deleted"
+  },
+  {
+    "text": "We won t stop",
+    "phrase": "won't",
+    "expected": false,
+    "note": "apostrophe is deleted, not a separator"
+  },
+  {
+    "text": "Message me on Whats\u200bApp today",
+    "phrase": "whatsapp",
+    "expected": true,
+    "note": "zero-width space removed"
+  },
+  {
+    "text": "Message me on What\u200csA\u200dpp\u2060 today",
+    "phrase": "whatsapp",
+    "expected": true,
+    "note": "ZWNJ, ZWJ and word joiner removed"
+  },
+  {
+    "text": "\ufeffWhatsApp me",
+    "phrase": "whatsapp",
+    "expected": true,
+    "note": "BOM removed"
+  },
+  {
+    "text": "W.h.a.t.s.A.p.p me",
+    "phrase": "whatsapp",
+    "expected": false,
+    "note": "dotted obfuscation is accepted as a miss (D-19)"
+  },
+  {
+    "text": "Contact\u00a0me now",
+    "phrase": "contact me",
+    "expected": true,
+    "note": "NBSP is whitespace"
+  },
+  {
+    "text": "Wait\u2026 what",
+    "phrase": "wait what",
+    "expected": true,
+    "note": "ellipsis is a separator"
+  },
+  {
+    "text": "\uff37\uff48\uff41\uff54\uff53\uff41\uff50\uff50 me",
+    "phrase": "whatsapp",
+    "expected": true,
+    "note": "NFKC folds fullwidth letters"
+  },
+  {
+    "text": "cafe\u0301 open",
+    "phrase": "caf\u00e9",
+    "expected": true,
+    "note": "NFKC composes combining accents"
+  },
+  {
+    "text": "Sch\u00f6n hier",
+    "phrase": "sch\u00f6n",
+    "expected": true,
+    "note": "non-ASCII letters are word characters"
+  },
+  {
+    "text": "Call +1 (555) 010-0000",
+    "phrase": "555 010 0000",
+    "expected": true,
+    "note": "phone punctuation is a separator"
+  },
+  {
+    "text": "anything at all",
+    "phrase": "!!! ???",
+    "expected": false,
+    "note": "symbol-only phrase has no words and never matches"
+  },
+  {
+    "text": "anything at all",
+    "phrase": "",
+    "expected": false,
+    "note": "empty phrase never matches"
+  },
+  {
+    "text": "",
+    "phrase": "hello",
+    "expected": false,
+    "note": "empty text never matches"
+  },
+  {
+    "text": "quick question for you",
+    "phrase": "question quick",
+    "expected": false,
+    "note": "words must be in order"
+  },
+  {
+    "text": "quick and question",
+    "phrase": "quick question",
+    "expected": false,
+    "note": "words must be consecutive"
+  },
+  {
+    "text": "(a+)+$ literal text",
+    "phrase": "(a+)+$",
+    "expected": true,
+    "note": "regex metacharacters are literal separators"
+  },
+  {
+    "text": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!",
+    "phrase": "(a+)+$",
+    "expected": false,
+    "note": "metacharacter phrase does not behave as a regex"
+  },
+  {
+    "text": "Grow your business with SEO",
+    "phrase": "grow your business",
+    "expected": true,
+    "note": "multi-word phrase inside sentence"
+  },
+  {
+    "text": "grow your\nbusiness",
+    "phrase": "Grow Your Business",
+    "expected": true,
+    "note": "phrase spans a line break"
+  }
+]

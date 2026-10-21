@@ -1,6 +1,38 @@
-import { shouldBounceSender } from '@utils/bounce'
+import { matchesSenderRule, shouldBounceSender } from '@utils/bounce'
+import * as logging from '@utils/logging'
+
+jest.mock('@utils/logging')
 
 describe('bounce', () => {
+  describe('matchesSenderRule', () => {
+    it.each([
+      ['x@domain.com', '@domain.com', true],
+      ['x@sub.domain.com', '@domain.com', true],
+      ['x@notdomain.com', '@domain.com', false],
+      ['X@DOMAIN.COM', '@Domain.Com', true],
+      ['x@domain.com.evil', '@domain.com', false],
+      ['x@domain.com', '@', false],
+      ['x@domain.com', '@x@domain.com', false],
+      ['x@domain.com', 'domain.com', true],
+      ['x@sub.domain.com', 'domain.com', true],
+      ['x@notdomain.com', 'domain.com', false],
+      ['x@domain.com', 'x@domain.com', true],
+      ['y@domain.com', 'x@domain.com', false],
+      ['x@sub.domain.com', 'x@domain.com', false],
+      ['x@domain.com', '*', false],
+      ['x@domain.com', '', false],
+      ['no-at-sign', '', false],
+      ['', '@domain.com', false],
+    ])('matchesSenderRule(%p, %p) is %p', (address, rule, expected) => {
+      expect(matchesSenderRule(address, rule)).toBe(expected)
+    })
+
+    it('should treat regex metacharacters literally', () => {
+      expect(matchesSenderRule('x@aaaa.com', '(a+)+$')).toBe(false)
+      expect(matchesSenderRule('x@a.com', '@.*')).toBe(false)
+    })
+  })
+
   describe('shouldBounceSender', () => {
     it('should return false when no bounce settings', () => {
       const result = shouldBounceSender('test@example.com', [])
@@ -70,6 +102,33 @@ describe('bounce', () => {
 
       expect(shouldBounceSender('any@domain.com', bounceSenders)).toBe(true)
       expect(shouldBounceSender('test@example.com', bounceSenders)).toBe(true)
+    })
+
+    it('should match an @domain rule for the domain and its subdomains only', () => {
+      const bounceSenders: string[] = ['@domain.com']
+
+      expect(shouldBounceSender('x@domain.com', bounceSenders)).toBe(true)
+      expect(shouldBounceSender('x@sub.domain.com', bounceSenders)).toBe(true)
+      expect(shouldBounceSender('x@notdomain.com', bounceSenders)).toBe(false)
+    })
+
+    it('should skip non-string settings', () => {
+      const bounceSenders = [42, null, { domain: 'example.com' }, 'example.com'] as unknown as string[]
+
+      expect(shouldBounceSender('test@example.com', bounceSenders)).toBe(true)
+      expect(shouldBounceSender('test@other.com', bounceSenders)).toBe(false)
+    })
+
+    it('should log only the matching rule index', () => {
+      shouldBounceSender('test@sub.example.com', ['spam@bad.com', '@example.com'])
+
+      expect(jest.mocked(logging).log).toHaveBeenCalledWith('Bouncing sender match', { ruleIndex: 1 })
+    })
+
+    it('should not log when no rule matches', () => {
+      shouldBounceSender('test@example.com', ['other.com'])
+
+      expect(jest.mocked(logging).log).not.toHaveBeenCalled()
     })
   })
 })
