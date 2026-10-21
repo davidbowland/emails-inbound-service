@@ -5,7 +5,7 @@ import { shouldBounceSender } from '../utils/bounce'
 import { forwardEmail } from '../utils/forwarding'
 import { log, logWarn } from '../utils/logging'
 import { convertParsedContentsToEmail, getParsedMail } from '../utils/parser'
-import { classifyEmail, DEFAULT_SPAM_FILTER } from '../utils/spam-score'
+import { classifyEmail, DEFAULT_SPAM_FILTER, SpamClassification } from '../utils/spam-score'
 import {
   bounceReceivedEmail,
   extractAccountFromAddress,
@@ -45,13 +45,27 @@ const getRecipientDomains = (recipients: string[]): string[] => [
   ),
 ]
 
-// Only the lookup is guarded: an unknown address falls back to the default account, but a classification error
-// must propagate so the handler logs it and nothing is forwarded
+// An unknown address falls back to the default account
 const getAccountOrUndefined = async (accountId: string): Promise<Account | undefined> => {
   try {
     return await getAccount(accountId)
   } catch {
     return undefined
+  }
+}
+
+// A classifier failure must not lose mail: the copy is filed to Spam, which also withholds the forward and the
+// notification. Only the error name is logged -- the message could echo message content.
+const classifyOrSpam = (
+  messageId: string,
+  accountId: string,
+  ...args: Parameters<typeof classifyEmail>
+): SpamClassification => {
+  try {
+    return classifyEmail(...args)
+  } catch (error: any) {
+    logWarn('Spam classification failed', { accountId, error: error?.name, messageId })
+    return { isSpam: true, ruleIds: ['classifier-error'], score: 0 }
   }
 }
 
@@ -65,6 +79,9 @@ const processRecipients = async (
   const forwardTargets = new Set<string>()
   const bouncedRecipients = new Set<string>()
   const notifyAccounts = new Set<string>()
+  // Targets of every account that classified this message as spam. They are withheld even when a non-spam account
+  // also lists them (AC-002): relaying spam to an address its owner filtered it for costs SES reputation (P-3).
+  const spamForwardTargets = new Set<string>()
   const spamRecipients = new Set<string>()
   const validRecipients = new Set<string>()
 
@@ -86,7 +103,9 @@ const processRecipients = async (
     if (!sesFail && shouldBounceSender(envelopeSender, target.account.bounceSenders)) {
       bouncedRecipients.add(recipient)
     } else {
-      const { isSpam, ruleIds, score } = classifyEmail(
+      const { isSpam, ruleIds, score } = classifyOrSpam(
+        messageId,
+        target.accountId,
         parsedMail,
         receipt,
         envelopeSender,
@@ -97,6 +116,7 @@ const processRecipients = async (
       log('Classified email', { accountId: target.accountId, isSpam: filedAsSpam, messageId, ruleIds, score })
       if (filedAsSpam) {
         spamRecipients.add(target.storedAs)
+        target.account.forwardTargets?.forEach((forwardTarget) => spamForwardTargets.add(forwardTarget))
       } else {
         notifyAccounts.add(target.accountId)
         target.account.forwardTargets?.forEach((forwardTarget) => forwardTargets.add(forwardTarget))
@@ -106,7 +126,7 @@ const processRecipients = async (
 
   return {
     bouncedRecipients,
-    forwardTargets,
+    forwardTargets: new Set([...forwardTargets].filter((forwardTarget) => !spamForwardTargets.has(forwardTarget))),
     notifyAccounts,
     spamRecipients,
     validRecipients,

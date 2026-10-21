@@ -484,30 +484,111 @@ describe('incoming-email service', () => {
         expect(forwarding.forwardEmail).toHaveBeenCalledWith(['forward-f@example.com'], email, [attachment])
       })
 
-      it('should forward nothing and register nothing when classification throws', async () => {
-        jest.mocked(emails).getAccount.mockResolvedValue({ bounceSenders: [], forwardTargets: ['forward@example.com'] })
-        jest.mocked(spamScore).classifyEmail.mockImplementationOnce(() => {
-          throw new Error('classification failed')
-        })
+      it('should never forward to a target a spam account lists, even when a non-spam account also lists it', async () => {
+        jest
+          .mocked(emails)
+          .getAccount.mockResolvedValueOnce({ bounceSenders: [] }) // admin
+          .mockResolvedValueOnce({ bounceSenders: [], forwardTargets: ['shared@example.com'] }) // e: spam
+          .mockResolvedValueOnce({ bounceSenders: [], forwardTargets: ['shared@example.com', 'only-f@example.com'] }) // f
+        jest.mocked(spamScore).classifyEmail.mockReturnValueOnce(spam).mockReturnValueOnce(notSpam)
 
-        await expect(processReceivedEmail(messageId, receiptFor(recipients), senderEmail)).rejects.toThrow(
-          'classification failed',
-        )
+        await processReceivedEmail(messageId, receiptFor(recipients), senderEmail)
 
-        expect(forwarding.forwardEmail).not.toHaveBeenCalled()
-        expect(emails.notifyReceivedEmail).not.toHaveBeenCalled()
-        expect(emails.registerReceivedEmail).not.toHaveBeenCalled()
+        expect(forwarding.forwardEmail).toHaveBeenCalledTimes(1)
+        expect(forwarding.forwardEmail).toHaveBeenCalledWith(['only-f@example.com'], email, [attachment])
       })
 
-      it('should not fall back to the default account when classification throws', async () => {
-        jest.mocked(emails).getAccount.mockResolvedValue({ bounceSenders: [] })
+      it('should withhold a shared target regardless of whether the spam account is processed first or last', async () => {
+        jest
+          .mocked(emails)
+          .getAccount.mockResolvedValueOnce({ bounceSenders: [] }) // admin
+          .mockResolvedValueOnce({ bounceSenders: [], forwardTargets: ['shared@example.com', 'only-e@example.com'] }) // e
+          .mockResolvedValueOnce({ bounceSenders: [], forwardTargets: ['shared@example.com'] }) // f: spam
+        jest.mocked(spamScore).classifyEmail.mockReturnValueOnce(notSpam).mockReturnValueOnce(spam)
+
+        await processReceivedEmail(messageId, receiptFor(recipients), senderEmail)
+
+        expect(forwarding.forwardEmail).toHaveBeenCalledWith(['only-e@example.com'], email, [attachment])
+      })
+
+      it('should not forward at all when every target belongs to a spam account', async () => {
+        jest.mocked(emails).getAccount.mockResolvedValue({ bounceSenders: [], forwardTargets: ['shared@example.com'] })
+        jest.mocked(spamScore).classifyEmail.mockReturnValueOnce(spam).mockReturnValueOnce(notSpam)
+
+        await processReceivedEmail(messageId, receiptFor(recipients), senderEmail)
+
+        expect(forwarding.forwardEmail).not.toHaveBeenCalled()
+        expect(emails.notifyReceivedEmail).toHaveBeenCalledWith('f', messageId)
+      })
+
+      it('should file a resolved account to spam and keep processing others when classification throws', async () => {
+        jest
+          .mocked(emails)
+          .getAccount.mockResolvedValueOnce({ bounceSenders: [] }) // admin
+          .mockResolvedValueOnce({ bounceSenders: [], forwardTargets: ['forward-e@example.com'] })
+          .mockResolvedValueOnce({ bounceSenders: [], forwardTargets: ['forward-f@example.com'] })
+        jest.mocked(spamScore).classifyEmail.mockImplementationOnce(() => {
+          throw new TypeError('classification failed')
+        })
+
+        await expect(processReceivedEmail(messageId, receiptFor(recipients), senderEmail)).resolves.toBeUndefined()
+
+        expect(logging.logWarn).toHaveBeenCalledWith('Spam classification failed', {
+          accountId: 'e',
+          error: 'TypeError',
+          messageId,
+        })
+        expect(logging.log).toHaveBeenCalledWith('Classified email', {
+          accountId: 'e',
+          isSpam: true,
+          messageId,
+          ruleIds: ['classifier-error'],
+          score: 0,
+        })
+        expect(emails.registerReceivedEmail).toHaveBeenCalledWith(recipients[0], messageId, parsedContents, 'spam')
+        expect(emails.registerReceivedEmail).toHaveBeenCalledWith(recipients[1], messageId, parsedContents, 'inbox')
+        expect(emails.notifyReceivedEmail).toHaveBeenCalledTimes(1)
+        expect(emails.notifyReceivedEmail).toHaveBeenCalledWith('f', messageId)
+        expect(forwarding.forwardEmail).toHaveBeenCalledWith(['forward-f@example.com'], email, [attachment])
+        expect(s3.deleteS3Object).toHaveBeenCalledWith(`inbound/${messageId}`)
+      })
+
+      it('should file an unresolvable recipient to the default account spam folder when classification throws', async () => {
+        jest
+          .mocked(emails)
+          .getAccount.mockResolvedValueOnce({ bounceSenders: [], forwardTargets: ['admin@example.com'] }) // admin
+          .mockRejectedValueOnce(new Error('Account not found'))
         jest.mocked(spamScore).classifyEmail.mockImplementationOnce(() => {
           throw new Error('classification failed')
         })
 
-        await expect(processReceivedEmail(messageId, receiptFor(['e@mail.address']), senderEmail)).rejects.toThrow()
+        await expect(
+          processReceivedEmail(messageId, receiptFor(['ghost@mail.address']), senderEmail),
+        ).resolves.toBeUndefined()
 
-        expect(spamScore.classifyEmail).toHaveBeenCalledTimes(1)
+        expect(logging.logWarn).toHaveBeenCalledWith('Spam classification failed', {
+          accountId: 'admin',
+          error: 'Error',
+          messageId,
+        })
+        expect(emails.registerReceivedEmail).toHaveBeenCalledTimes(1)
+        expect(emails.registerReceivedEmail).toHaveBeenCalledWith('admin', messageId, parsedContents, 'spam')
+        expect(s3.copyS3Object).toHaveBeenCalledWith(`inbound/${messageId}`, `received/admin/${messageId}`)
+        expect(forwarding.forwardEmail).not.toHaveBeenCalled()
+        expect(emails.notifyReceivedEmail).not.toHaveBeenCalled()
+      })
+
+      it('should log only the error name when classification throws', async () => {
+        jest.mocked(emails).getAccount.mockResolvedValue({ bounceSenders: [] })
+        jest.mocked(spamScore).classifyEmail.mockImplementationOnce(() => {
+          throw new Error(`classification failed on ${parsedContents.subject} from sender@example.com`)
+        })
+
+        await processReceivedEmail(messageId, receiptFor(['e@mail.address']), senderEmail)
+
+        const logged = JSON.stringify(jest.mocked(logging.logWarn).mock.calls)
+        expect(logged).not.toContain('@')
+        expect(logged).not.toContain(parsedContents.subject as string)
       })
 
       it('should log only the message id, account id, score, rule ids and verdict', async () => {

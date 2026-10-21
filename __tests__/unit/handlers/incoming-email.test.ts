@@ -55,15 +55,6 @@ describe('incoming-email handler', () => {
       expect(loggingUtil.logError).toHaveBeenCalledWith(error)
     })
 
-    it('should log a classification error rather than let it escape the handler', async () => {
-      const error = new Error('classification failed')
-      jest.mocked(incomingEmailService).processReceivedEmail.mockRejectedValueOnce(error)
-
-      await expect(handleIncomingEmail(spamVerdictEventJson as unknown as SESEvent)).resolves.toBeUndefined()
-
-      expect(loggingUtil.logError).toHaveBeenCalledWith(error)
-    })
-
     it('should throw when a required environment variable is missing', async () => {
       // The restore sits in a finally because a failed expectation skips an inline one, and every test that
       // runs afterwards would then see an environment this test deleted
