@@ -1,16 +1,6 @@
-import type { ParsedMail, SESReceipt } from '../types'
+import type { ParsedMail, SESReceipt, SpamFilter, SpamSensitivity } from '../types'
 import { matchesSenderRule } from './bounce'
 import { createPhraseMatcher, toWords } from './phrase-matching'
-
-// Declared here until the inbound flow (spec C-5) adds the shared type to types.ts. IN's types.ts re-exports the
-// types-only aws-lambda package, so runtime constants such as DEFAULT_SPAM_FILTER live here, never there.
-export type SpamSensitivity = 'low' | 'medium' | 'high'
-
-export interface SpamFilter {
-  blockPhrases: string[]
-  sensitivity: SpamSensitivity
-  trustedSenders: string[]
-}
 
 export interface SpamClassification {
   isSpam: boolean
@@ -18,6 +8,7 @@ export interface SpamClassification {
   score: number
 }
 
+// types.ts holds only types, so the runtime default for an account with no spamFilter lives here
 export const DEFAULT_SPAM_FILTER: SpamFilter = { blockPhrases: [], sensitivity: 'medium', trustedSenders: [] }
 
 // Spam when the weighted score reaches the threshold. Low sensitivity needs the most evidence (fewest catches).

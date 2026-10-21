@@ -122,7 +122,7 @@ describe('emails', () => {
     })
 
     it('should invoke endpoint with email', async () => {
-      await registerReceivedEmail(address, messageId, parsedContents)
+      await registerReceivedEmail(address, messageId, parsedContents, 'inbox')
 
       expect(mockPut).toHaveBeenCalledWith(
         '/accounts/account1/emails/received/message-id',
@@ -135,11 +135,21 @@ describe('emails', () => {
               type: 'text/plain',
             },
           ],
+          folder: 'inbox',
           from: 'Person A <a@person.email>',
           subject: 'P G Wodehouse',
           to: ['b@person.email'],
           viewed: false,
         }),
+      )
+    })
+
+    it('should file the email to the folder it is given', async () => {
+      await registerReceivedEmail(address, messageId, parsedContents, 'spam')
+
+      expect(mockPut).toHaveBeenCalledWith(
+        '/accounts/account1/emails/received/message-id',
+        expect.objectContaining({ folder: 'spam' }),
       )
     })
 
@@ -152,7 +162,7 @@ describe('emails', () => {
         ],
       } as unknown as ParsedMail
 
-      await registerReceivedEmail(address, messageId, parsedContentsWithMissingFilename)
+      await registerReceivedEmail(address, messageId, parsedContentsWithMissingFilename, 'inbox')
 
       expect(mockPut).toHaveBeenCalledWith(
         '/accounts/account1/emails/received/message-id',
@@ -179,7 +189,7 @@ describe('emails', () => {
         ],
       } as unknown as ParsedMail
 
-      await registerReceivedEmail(address, messageId, parsedContentsWithEmptyFilename)
+      await registerReceivedEmail(address, messageId, parsedContentsWithEmptyFilename, 'inbox')
 
       expect(mockPut).toHaveBeenCalledWith(
         '/accounts/account1/emails/received/message-id',
@@ -202,7 +212,7 @@ describe('emails', () => {
         attachments: [],
       } as unknown as ParsedMail
 
-      await registerReceivedEmail(address, messageId, parsedContentsWithNoAttachments)
+      await registerReceivedEmail(address, messageId, parsedContentsWithNoAttachments, 'inbox')
 
       expect(mockPut).toHaveBeenCalledWith(
         '/accounts/account1/emails/received/message-id',
@@ -230,7 +240,7 @@ describe('emails', () => {
         subject: undefined,
         to: undefined,
       } as unknown as ParsedMail
-      await registerReceivedEmail(address, messageId, parsedContentsWithMissingParts)
+      await registerReceivedEmail(address, messageId, parsedContentsWithMissingParts, 'inbox')
 
       expect(mockPut).toHaveBeenCalledWith(
         '/accounts/account1/emails/received/message-id',
@@ -250,7 +260,7 @@ describe('emails', () => {
         to: { html: '', text: '', value: [] },
       } as unknown as ParsedMail
 
-      await registerReceivedEmail(address, messageId, parsedContentsWithEmptyTo)
+      await registerReceivedEmail(address, messageId, parsedContentsWithEmptyTo, 'inbox')
 
       expect(mockPut).toHaveBeenCalledWith(
         '/accounts/account1/emails/received/message-id',
@@ -267,7 +277,7 @@ describe('emails', () => {
         to: { html: '', text: '', value: [{ group: [], name: 'undisclosed-recipients' }] },
       } as unknown as ParsedMail
 
-      await registerReceivedEmail(address, messageId, parsedContentsWithGroupTo)
+      await registerReceivedEmail(address, messageId, parsedContentsWithGroupTo, 'inbox')
 
       expect(mockPut).toHaveBeenCalledWith(
         '/accounts/account1/emails/received/message-id',
@@ -288,7 +298,7 @@ describe('emails', () => {
         ],
       } as unknown as ParsedMail
 
-      await registerReceivedEmail(address, messageId, parsedContentsWithArrayTo)
+      await registerReceivedEmail(address, messageId, parsedContentsWithArrayTo, 'inbox')
 
       expect(mockPut).toHaveBeenCalledWith(
         '/accounts/account1/emails/received/message-id',

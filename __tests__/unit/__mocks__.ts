@@ -1,4 +1,4 @@
-import { AttachmentCommon, Email, ParsedMail, SESEvent } from '@types'
+import { AttachmentCommon, Email, ParsedMail, SESEvent, SESReceipt } from '@types'
 
 export const messageId = 'aaaaa-uuuuu-uuuuu-iiiii-ddddd'
 
@@ -194,6 +194,9 @@ export const request = {
           dkimVerdict: {
             status: 'PASS',
           },
+          dmarcVerdict: {
+            status: 'PASS',
+          },
           processingTimeMillis: 574,
           recipients: ['johndoe@example.com'],
           spamVerdict: {
@@ -211,3 +214,9 @@ export const request = {
     },
   ],
 } as SESEvent
+
+export const receipt: SESReceipt = request.Records[0].ses.receipt
+
+export const spamVerdictReceipt: SESReceipt = { ...receipt, spamVerdict: { status: 'FAIL' } }
+
+export const virusVerdictReceipt: SESReceipt = { ...receipt, virusVerdict: { status: 'FAIL' } }

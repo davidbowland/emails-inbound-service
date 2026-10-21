@@ -1,14 +1,13 @@
 import { performance } from 'perf_hooks'
 
 import event from '@events/receive-email.json'
-import { ParsedMail, SESReceipt } from '@types'
+import { ParsedMail, SESReceipt, SpamFilter } from '@types'
 import {
   classifyEmail,
   DEFAULT_SPAM_FILTER,
   MAX_SCORED_TEXT_LENGTH,
   SENSITIVITY_THRESHOLDS,
   SIGNAL_WEIGHTS,
-  SpamFilter,
 } from '@utils/spam-score'
 
 const passReceipt = {
