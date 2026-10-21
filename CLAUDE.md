@@ -3,8 +3,9 @@
 **Always commit changes** after completing work unless explicitly told not to.
 
 This service is part of the `emails` project. It processes inbound emails received via AWS SES: parses the raw
-message, saves the contents to S3, looks up the recipient account via `emails-email-api`, records the received
-email, and forwards attachments to `emails-queue-api` for outbound relay when configured. Infrastructure shared
+message, saves the contents to S3, looks up the recipient account via `emails-email-api`, classifies the message
+against that account's spam filter, records the received email in the `inbox` or `spam` folder, and forwards
+non-spam mail with attachments to `emails-queue-api` for outbound relay when configured. Infrastructure shared
 across the `emails` project lives in a separate `emails-infrastructure` repo; most infrastructure here is
 domain-specific to this service (SES receipt rule, Lambda, the shared storage bucket).
 
