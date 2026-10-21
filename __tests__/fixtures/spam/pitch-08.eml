@@ -1,0 +1,32 @@
+From: "Jordan Reyes" <jordan@campaign-08.example>
+Reply-To: desk@campaign-08b.example
+To: alex@example.net
+Subject: AI App Idea? | Alex
+Date: Sun, 18 Oct 2026 13:54:57 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="fixture-08-boundary"
+
+--fixture-08-boundary
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Hello Alex
+
+Are you currently planning to develop a mobile application? www.​example​.net
+
+If yes, we would be happy to understand your idea and requirements. Please share the key features, functionality, and any specific requirements you have in mind.
+
+Our team will review your requirements and suggest a suitable solution based on your needs.
+
+Looking forward to hearing from you.
+
+Best regards,
+Jordan
+
+P.S. Prefer not to hear from us again? Just reply with "NO" in the subject line.
+--fixture-08-boundary
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<p>Hello Alex</p><p>Are you currently planning to develop a mobile application? www.​example​.net</p><p>If yes, we would be happy to understand your <strong>idea and requirements</strong>. Please share the key features, functionality, and any specific requirements you have in mind.</p><p>Our team will review your requirements and suggest a suitable solution based on your needs.</p><p>Looking forward to hearing from you.</p><p><strong>Best regards,</strong><br>Jordan</p><p>P.S. Prefer not to hear from us again? Just reply with <strong>"NO"</strong> in the subject line.</p>
+--fixture-08-boundary--

@@ -1,0 +1,38 @@
+From: Example Air <itinerary@air.travel.example>
+To: Alex Example <alex@example.net>
+Subject: Your trip confirmation: Springfield to Lakeside (QX7P2M)
+Date: Thu, 15 Oct 2026 03:22:10 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="legit-11-alt"
+
+--legit-11-alt
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Your trip is booked, Alex.
+
+Confirmation #: QX7P2M
+
+OUTBOUND - Friday, November 13, 2026
+Flight 1482   Springfield (SPX) 7:05 AM  ->  Lakeside (LKX) 9:40 AM
+Nonstop. Seat 14C. Economy.
+
+RETURN - Monday, November 16, 2026
+Flight 1907   Lakeside (LKX) 6:15 PM  ->  Springfield (SPX) 10:55 PM
+Nonstop. Seat 12A. Economy.
+
+Passenger: ALEX EXAMPLE
+Ticket #: 0000000000001
+
+Total paid: $312.40 (Visa ending 0042)
+
+Check in online starting 24 hours before departure at https://example.com/checkin or in our mobile app.
+Bags: 1 personal item and 1 carry-on included.
+
+Manage your trip: https://example.com/trips/QX7P2M
+--legit-11-alt
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html><body><h1>Your trip is booked, Alex.</h1><p>Confirmation #: <strong>QX7P2M</strong></p><h3>OUTBOUND - Friday, November 13, 2026</h3><p>Flight 1482 &nbsp; Springfield (SPX) 7:05 AM &rarr; Lakeside (LKX) 9:40 AM<br>Nonstop. Seat 14C. Economy.</p><h3>RETURN - Monday, November 16, 2026</h3><p>Flight 1907 &nbsp; Lakeside (LKX) 6:15 PM &rarr; Springfield (SPX) 10:55 PM<br>Nonstop. Seat 12A. Economy.</p><p>Passenger: ALEX EXAMPLE<br>Ticket #: 0000000000001</p><p>Total paid: $312.40 (Visa ending 0042)</p><p><a href="https://example.com/checkin">Check in online</a> starting 24 hours before departure or in our mobile app.<br>Bags: 1 personal item and 1 carry-on included.</p><p><a href="https://example.com/trips/QX7P2M">Manage your trip</a></p></body></html>
+--legit-11-alt--

@@ -1,0 +1,30 @@
+From: "Quinn Moreau" <quinn@campaign-15.example>
+To: alex@example.net
+Subject: Reminder - Propsoal - www.example.net
+Date: Wed, 23 Sep 2026 11:51:18 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="fixture-15-boundary"
+
+--fixture-15-boundary
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Hi,
+
+I was checking your website www.example.net and see you have a good design, and
+it looks great, but it’s not ranking on Google and other major search engines.
+Do you want more targeted visitors on your website?
+
+We can place your website on Google's 1st page. Yahoo, Bing etc.
+
+May I send you a quote, SEO Packages? If interested.
+
+Thanks & Regards
+
+Quinn,
+--fixture-15-boundary
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<p>Hi, </p><p>I was checking your website www.example.net and see you have a good design, and it looks great, but it’s not ranking on Google and other major search engines. Do you want more targeted visitors on your website? </p><p>We can place your website on Google's 1st page. Yahoo, Bing etc. </p><p>May I send you a quote, SEO Packages? If interested. </p><p>Thanks &amp; Regards</p><p>Quinn,</p>
+--fixture-15-boundary--

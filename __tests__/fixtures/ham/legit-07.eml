@@ -1,0 +1,30 @@
+From: Springfield Power & Light <billing@power.utility.example>
+To: alex@example.net
+Subject: Your Springfield Power & Light Payment Received
+Date: Fri, 16 Oct 2026 11:20:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="legit-07-alt"
+
+--legit-07-alt
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Thank you for your payment.
+
+Account ending in: 4417
+Payment amount: $86.23
+Payment date: October 16, 2026
+Confirmation number: PL-20261016-55810
+Payment method: Checking account ending in 9001
+
+Your next bill will be available on or about November 9, 2026. You can view your billing history any time by signing in to your account at https://example.com/account.
+
+Questions? Call Customer Service at 555-0187, Monday through Friday, 7 a.m. to 7 p.m.
+
+Please do not reply to this message; this mailbox is not monitored.
+--legit-07-alt
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html><body><p>Thank you for your payment.</p><table><tr><td>Account ending in:</td><td>4417</td></tr><tr><td>Payment amount:</td><td>$86.23</td></tr><tr><td>Payment date:</td><td>October 16, 2026</td></tr><tr><td>Confirmation number:</td><td>PL-20261016-55810</td></tr><tr><td>Payment method:</td><td>Checking account ending in 9001</td></tr></table><p>Your next bill will be available on or about November 9, 2026. You can view your billing history any time by <a href="https://example.com/account">signing in to your account</a>.</p><p>Questions? Call Customer Service at 555-0187, Monday through Friday, 7 a.m. to 7 p.m.</p><p><small>Please do not reply to this message; this mailbox is not monitored.</small></p></body></html>
+--legit-07-alt--

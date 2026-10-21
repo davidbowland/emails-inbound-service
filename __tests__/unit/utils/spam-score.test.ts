@@ -355,24 +355,36 @@ describe('spam-score', () => {
         expect(result.ruleIds).toEqual([])
       })
 
-      it.each(['Hi {{First Name}},', 'Hi {{ first_name }},', 'Hi [First Name],', 'Hi %FIRSTNAME%,', 'Hi *|FNAME|*,'])(
-        'should fire merge-tag for %p',
-        (text) => {
-          expect(classifyBody(text).ruleIds).toEqual(['merge-tag'])
-        },
-      )
+      it.each([
+        'Hi {{First Name}},',
+        'Hi {{ first_name }},',
+        'Hi [First Name],',
+        'Hi %FIRSTNAME%,',
+        'Hi *|FNAME|*,',
+        'Hi alex@example.net',
+        'Hello, team@example.net',
+      ])('should fire merge-tag for %p', (text) => {
+        expect(classifyBody(text).ruleIds).toEqual(['merge-tag'])
+      })
 
       it.each([
         'Just reply with "NO" and I will stop.',
         'Reply \u201Cstop\u201D to opt out.',
         'Simply respond with NO.',
         'Reply with Wh\u200Bat\u200Bever? Reply with \u2018remove\u2019',
+        'Kindly reply to this email with the subject line "REMOVE" and we will stop.',
+        'Don\u2019t want to hear from me again? Please let me know.',
+        'Don\u2019t\nwant to hear from us again? Let me know.',
       ])('should fire reply-opt-out for %p', (text) => {
         expect(classifyBody(text).ruleIds).toEqual(['reply-opt-out'])
       })
 
-      it('should not fire reply-opt-out for a no-reply notice', () => {
-        expect(classifyBody('This is a no-reply address. Please do not reply.').ruleIds).toEqual([])
+      it.each([
+        'This is a no-reply address. Please do not reply.',
+        'Please reply by Friday, no rush otherwise.',
+        'We would love to hear from you again soon.',
+      ])('should not fire reply-opt-out for %p', (text) => {
+        expect(classifyBody(text).ruleIds).toEqual([])
       })
 
       it.each([
@@ -381,6 +393,7 @@ describe('spam-score', () => {
         'Drop me a line on Whats\u200BApp',
         'Drop me a line on Whats\u00ADApp',
         'What is your Whats App number',
+        'If it is easier to talk over WhatsApp, simply share your number.',
       ])('should fire whatsapp for %p', (text) => {
         expect(classifyBody(text).ruleIds).toEqual(['whatsapp'])
       })
@@ -457,6 +470,37 @@ describe('spam-score', () => {
         expect(
           classifyEmail(parsed, passReceipt, envelopeSender, recipientDomains, DEFAULT_SPAM_FILTER).ruleIds,
         ).toEqual([])
+      })
+
+      it('should fire self-addressed for mail sent To its own sender with the recipients hidden', () => {
+        const parsed = parsedMail({ to: replyToFrom('Sender@example.org') })
+
+        expect(classifyEmail(parsed, passReceipt, envelopeSender, recipientDomains, DEFAULT_SPAM_FILTER)).toEqual({
+          isSpam: false,
+          ruleIds: ['self-addressed'],
+          score: SIGNAL_WEIGHTS['self-addressed'],
+        })
+      })
+
+      it.each([
+        ['the To is another address', { to: replyToFrom('alex@example.net') }],
+        ['there is no To', { to: undefined }],
+        ['a Cc names someone', { cc: replyToFrom('alex@example.net'), to: replyToFrom('sender@example.org') }],
+        [
+          'the To lists the sender and someone else',
+          { to: [replyToFrom('sender@example.org'), replyToFrom('alex@example.net')] },
+        ],
+        [
+          'the owner mails themselves',
+          { from: replyToFrom('alex@example.net', 'Alex'), to: replyToFrom('alex@example.net') },
+        ],
+        ['there is no From address', { from: undefined, to: replyToFrom('sender@example.org') }],
+        [
+          'the To is an empty group',
+          { to: { html: '', text: '', value: [{ group: [], name: 'undisclosed-recipients' }] } },
+        ],
+      ])('should not fire self-addressed when %s', (_, overrides) => {
+        expect(classifyParsed(overrides).ruleIds).toEqual([])
       })
 
       it('should score pitch vocabulary per distinct phrase', () => {

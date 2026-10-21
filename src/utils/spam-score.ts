@@ -31,6 +31,7 @@ export const SIGNAL_WEIGHTS = {
   'merge-tag': 3,
   'pitch-vocab': 1, // per distinct phrase, capped at MAX_PITCH_VOCAB_SCORE
   'reply-opt-out': 3,
+  'self-addressed': 2,
   'ses-gray': 2,
   'spf-fail': 1,
   whatsapp: 3,
@@ -72,13 +73,21 @@ const MERGE_TAG_PATTERNS: RegExp[] = [
   /\{\{[ \t]{0,3}[a-z][a-z0-9_. \t-]{0,40}\}\}/i,
   /\*\|[a-z_]{1,24}\|\*/i,
   /[[{%][ \t]{0,3}(?:first|last|full|company|business|contact)[ _-]{0,2}name[ \t]{0,3}[\]}%]/i,
+  // A merge tag filled with the raw address instead of a name: "Hi alex@example.net"
+  /\b(?:hi|hello|hey|dear)[ \t,]{1,3}[a-z0-9._%+-]{1,64}@[a-z0-9-]{1,63}\.[a-z]/i,
 ]
-const REPLY_OPT_OUT_PATTERN =
-  /\b(?:reply|respond|write back)[ \t]{1,5}(?:with[ \t]{1,5})?["'\u2018\u2019\u201C\u201D]?(?:no|stop|remove|unsubscribe)\b/i
+const REPLY_OPT_OUT_PATTERNS: RegExp[] = [
+  /\b(?:reply|respond|write back)[ \t]{1,5}(?:with[ \t]{1,5})?["'\u2018\u2019\u201C\u201D]?(?:no|stop|remove|unsubscribe)\b/i,
+  // "reply to this email with the subject line "REMOVE"": the opt-out word must be quoted
+  /\b(?:reply|respond)\b[^\n]{0,60}?["'\u2018\u2019\u201C\u201D](?:no|stop|remove|unsubscribe)\b/i,
+  // A fixed phrase, so a wrapped line inside it is allowed
+  /\b(?:don['\u2019]?t|do not)\s{1,3}want\s{1,3}to\s{1,3}hear\s{1,3}from\s{1,3}(?:me|us)\b/i,
+]
 const WHATSAPP_PATTERNS: RegExp[] = [
   /\bwhats[ \t]{0,2}app\b[^\n]{0,80}?\+?\d[\d \t().-]{6,18}\d/i,
   /\bwhats[ \t]{0,2}app[ \t]{1,3}(?:number|no\b|contact)/i,
   /\b(?:your|share|send|drop|text|message)\b[^\n]{0,40}\bwhats[ \t]{0,2}app\b/i,
+  /\bwhats[ \t]{0,2}app\b[^\n]{0,60}\b(?:share|send|drop)\b[^\n]{0,30}\bnumber\b/i,
 ]
 const FAKE_REPLY_SUBJECT = /^[ \t]{0,10}(?:re[ \t]{0,3}:|reminder\b)/i
 
@@ -116,6 +125,21 @@ const PITCH_VOCABULARY: string[][] = [
   'circle back',
   'partnership opportunity',
   'business proposal',
+  // Section 4 calibration (D-26): phrasing from the analyzed campaigns
+  'mobile app',
+  'your website',
+  'your audience',
+  'guest post',
+  'work samples',
+  'some samples',
+  'samples and pricing',
+  'affordable pricing',
+  'competitive rates',
+  'seo packages',
+  'search engines',
+  'search visibility',
+  'targeted visitors',
+  'india based',
 ].map(toWords)
 
 interface ScoringContext {
@@ -212,7 +236,8 @@ const hasZeroWidthDomain = ({ recipientDomains, text }: ScoringContext): boolean
 const hasMergeTag = ({ signalText }: ScoringContext): boolean =>
   MERGE_TAG_PATTERNS.some((pattern) => pattern.test(signalText))
 
-const hasReplyOptOut = ({ signalText }: ScoringContext): boolean => REPLY_OPT_OUT_PATTERN.test(signalText)
+const hasReplyOptOut = ({ signalText }: ScoringContext): boolean =>
+  REPLY_OPT_OUT_PATTERNS.some((pattern) => pattern.test(signalText))
 
 const hasWhatsAppAsk = ({ signalText }: ScoringContext): boolean =>
   WHATSAPP_PATTERNS.some((pattern) => pattern.test(signalText))
@@ -232,6 +257,27 @@ const hasDisplayNameMismatch = ({ parsed }: ScoringContext): boolean => {
   return nameTokens.length > 0 && nameTokens.every((token) => !replyToLocalPart.includes(token))
 }
 
+const addressList = (field: unknown): string[] =>
+  (Array.isArray(field) ? field : [field])
+    .flatMap((group) => (Array.isArray(group?.value) ? group.value : []))
+    .map((entry) => (isString(entry?.address) ? entry.address.toLowerCase() : ''))
+
+// Sent To the sender's own address with the actual recipients hidden (Bcc), from outside the recipient domains: a
+// bulk-mailing pattern. The owner mailing themselves is excluded.
+const hasSelfAddressed = ({ parsed, recipientDomains }: ScoringContext): boolean => {
+  const fromAddress = addressList(parsed.from)[0] ?? ''
+  const fromDomain = fromAddress.split('@')[1] ?? ''
+  const toAddresses = addressList(parsed.to)
+  const ccAddresses = addressList(parsed.cc)
+  return (
+    fromAddress.length > 0 &&
+    !recipientDomains.some((domain) => domain.toLowerCase() === fromDomain) &&
+    toAddresses.length > 0 &&
+    ccAddresses.length === 0 &&
+    toAddresses.every((address) => address === fromAddress)
+  )
+}
+
 const hasFakeReply = ({ parsed, subject }: ScoringContext): boolean =>
   FAKE_REPLY_SUBJECT.test(subject) && !parsed.inReplyTo
 
@@ -247,6 +293,7 @@ const SIGNALS: { fires: (context: ScoringContext) => boolean; id: SignalId }[] =
   { fires: hasWhatsAppAsk, id: 'whatsapp' },
   { fires: hasDisplayNameMismatch, id: 'display-name-mismatch' },
   { fires: hasFakeReply, id: 'fake-reply' },
+  { fires: hasSelfAddressed, id: 'self-addressed' },
   { fires: ({ receipt }) => receipt.spfVerdict?.status === 'FAIL', id: 'spf-fail' },
   { fires: ({ receipt }) => receipt.dkimVerdict?.status === 'FAIL', id: 'dkim-fail' },
   { fires: ({ receipt }) => receipt.dmarcVerdict?.status === 'FAIL', id: 'dmarc-fail' },

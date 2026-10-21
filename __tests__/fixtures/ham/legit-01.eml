@@ -1,0 +1,12 @@
+From: Alex Example <alex.personal@example.org>
+To: alex@example.net
+Subject: Test
+Date: Tue, 6 Oct 2026 18:02:11 +0000
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Testing the inbound pipeline after the deploy. If this shows up in the inbox, the receipt rule and the Lambda are both fine.
+
+-- 
+Alex

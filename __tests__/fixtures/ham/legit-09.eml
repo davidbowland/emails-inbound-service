@@ -1,0 +1,27 @@
+From: Parcel Express <tracking@parcels.delivery.example>
+To: alex@example.net
+Subject: Your package is out for delivery
+Date: Mon, 19 Oct 2026 12:31:07 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="legit-09-alt"
+
+--legit-09-alt
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Your package is out for delivery today.
+
+Estimated delivery: Monday, October 19, by 8:00 PM
+Tracking number: PX0000000000123456
+Shipped by: Example Outfitters
+Delivering to: Springfield
+
+Want it left somewhere specific? Add delivery instructions at https://example.com/track/PX0000000000123456
+
+This email was sent to alex@example.net because a shipper provided it for delivery updates.
+--legit-09-alt
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html><body><h2>Your package is out for delivery today.</h2><p>Estimated delivery: <strong>Monday, October 19, by 8:00 PM</strong></p><p>Tracking number: PX0000000000123456<br>Shipped by: Example Outfitters<br>Delivering to: Springfield</p><p>Want it left somewhere specific? <a href="https://example.com/track/PX0000000000123456">Add delivery instructions</a>.</p><p><small>This email was sent to alex@example.net because a shipper provided it for delivery updates.</small></p></body></html>
+--legit-09-alt--

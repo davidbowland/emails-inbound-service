@@ -1,0 +1,32 @@
+From: "Casey Okafor" <casey@campaign-01.example>
+Reply-To: casey@campaign-01.example
+To: alex@example.net
+Subject: Add AI Capabilities to Your Mobile App | www.example.net
+Date: Tue, 20 Oct 2026 22:58:08 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="fixture-01-boundary"
+
+--fixture-01-boundary
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Hello  www.​example​.net
+
+Are you currently planning to develop a mobile application? 
+
+If yes, we would be happy to understand your idea and requirements. Please share the key features, functionality, and any specific requirements you have in mind.
+
+Our team will review your requirements and suggest a suitable solution based on your needs.
+
+Looking forward to hearing from you.
+
+Best regards,
+Casey
+
+P.S. Prefer not to hear from us again? Just reply with "NO" in the subject line.
+--fixture-01-boundary
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<p>Hello www.​example​.net</p><p>Are you currently planning to develop a mobile application? </p><p>If yes, we would be happy to understand your <strong><em>idea and requirements</em></strong>. Please share the key features, functionality, and any specific requirements you have in mind.</p><p>Our team will review your requirements and suggest a suitable solution based on your needs.</p><p>Looking forward to hearing from you.</p><p><strong>Best regards,</strong><br>Casey</p><p>P.S. Prefer not to hear from us again? Just reply with <strong>"NO"</strong> in the subject line.</p>
+--fixture-01-boundary--

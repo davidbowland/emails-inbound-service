@@ -1,0 +1,30 @@
+From: "Jamie Silva" <jamie@campaign-13.example>
+Reply-To: studio@campaign-13b.example
+To: alex@example.net
+Subject: Have an app idea? | Alex
+Date: Fri, 16 Oct 2026 05:04:58 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="fixture-13-boundary"
+
+--fixture-13-boundary
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Hi 
+
+Got an app idea but not sure where to start?
+
+We help businesses turn ideas into Android & iOS apps, with rates starting at USD 12/hour.
+
+Happy to discuss your idea and give you a quick estimate.
+
+Best,
+Jamie Silva
+
+P.S. Reply “NO” in the subject if you’d prefer not to hear from us.
+--fixture-13-boundary
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<p>Hi </p><p>Got an app idea but not sure where to start?</p><p>We help businesses turn ideas into Android &amp; iOS apps, with rates starting at <strong>USD 12/hour</strong>.</p><p>Happy to discuss your idea and give you a quick estimate.</p><p>Best,<br>Jamie Silva</p><p>P.S. Reply “NO” in the subject if you’d prefer not to hear from us.</p>
+--fixture-13-boundary--
