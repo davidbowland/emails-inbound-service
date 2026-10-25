@@ -81,6 +81,36 @@ Each value is memoized per warm Lambda container and the cache never expires, so
 
 Retiring the old value first leaves warm containers authenticating with a key that no longer works.
 
+## Spam Filter
+
+Each recipient account classifies every inbound message with its own `spamFilter` settings (sensitivity, block
+phrases, trusted senders), falling back to the default filter (medium sensitivity, no phrases, no trusted senders)
+for accounts that have none. Classification lives in `src/utils/spam-score.ts`; block-phrase matching lives in
+`src/utils/phrase-matching.ts`.
+
+- A copy classified as spam is recorded in the account's `spam` folder instead of `inbox`, raises no notification,
+  and is never forwarded. A forward target listed by any account that classified the message as spam is withheld
+  even when another account also lists it.
+- Mail that SES marks as spam or virus `FAIL` is always filed to Spam, never forwarded and never bounced.
+- Trusted senders count only when authenticated: the envelope sender with SPF `PASS`, or a single From address with
+  DMARC `PASS`.
+- If classification throws, the copy is filed to Spam rather than lost.
+
+`emails-email-api` must be deployed before this service (it stores the `folder` field and the account `spamFilter`
+settings), and this service before `emails-ui`.
+
+### Fixture Scripts
+
+Spam fixtures in `__tests__/fixtures/spam/` are anonymized real mail; ham fixtures in `__tests__/fixtures/ham/` are
+synthetic. Both scripts read one raw message from stdin, hold it in memory only, and never write message content
+anywhere else:
+
+- `scripts/anonymize-fixture.ts <output.eml> <campaign number>` — writes an anonymized fixture. Requires
+  `OWNER_DOMAINS` (comma-separated owner domains) and `OWNER_NAMES` (comma-separated owner names, surname last).
+  Always review the output by eye before committing it.
+- `scripts/calibrate.ts [recipient domain ...]` — prints only the verdict, score and rule ids as one JSON line.
+  Recipient domains come from the arguments, or from `OWNER_DOMAINS` when none are given.
+
 ## Developing Locally
 
 ### Unit Tests

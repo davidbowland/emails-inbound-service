@@ -1,0 +1,31 @@
+From: "Riley Tanaka" <riley@campaign-10.example>
+Reply-To: outreach@campaign-10b.example
+To: alex@example.net
+Subject: 3
+Date: Sat, 17 Oct 2026 00:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="fixture-10-boundary"
+
+--fixture-10-boundary
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Hi Alex,
+
+I’m reaching out because small improvements to a website can sometimes remove friction for potential customers.
+
+Our team can help with landing pages, responsive layouts, speed improvements, bug fixes, and new functionality for www.​example​.net.
+
+Would you be open to a brief reply with the area you’d most like to improve? I can then share relevant work.
+
+Regards,
+
+Riley Tanaka
+
+P.S. If this isn’t relevant, reply with “No” in the subject line and I won’t follow up.
+--fixture-10-boundary
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<p>Hi Alex,</p><p>I’m reaching out because small improvements to a website can sometimes remove friction for potential customers.</p><p>Our team can help with <strong>landing pages, responsive layouts, speed improvements, bug fixes, and new functionality</strong> for www.​example​.net.</p><p>Would you be open to a <strong>brief reply</strong> with the area you’d most like to improve? I can then share relevant work.</p><p>Regards,</p><p>Riley Tanaka</p><p>P.S. If this isn’t relevant, reply with “No” in the subject line and I won’t follow up.</p>
+--fixture-10-boundary--

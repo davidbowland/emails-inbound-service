@@ -1,0 +1,29 @@
+From: team@campaign-06.example
+Reply-To: team@campaign-06.example
+To: alex@example.net
+Subject: Modern Website Design
+Date: Mon, 19 Oct 2026 00:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="fixture-06-boundary"
+
+--fixture-06-boundary
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Hi,
+
+Would you like to give your current website a more modern and professional appearance?
+
+We create clean, responsive and creative website designs based on your business needs.
+
+Let me know if I can share some samples and pricing.
+
+Best regards,
+
+P.S. You can share your WhatsApp number if you’d prefer to discuss the project there.
+--fixture-06-boundary
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<p>Hi,</p><p>Would you like to give your current website a more modern and professional appearance?</p><p>We create clean, responsive and creative website designs based on your business needs.</p><p>Let me know if I can share some samples and pricing.</p><p>Best regards,</p><p><strong>P.S.</strong> You can share your WhatsApp number if you’d prefer to discuss the project there.</p>
+--fixture-06-boundary--

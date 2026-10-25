@@ -1,0 +1,31 @@
+From: Alex Example <alex.personal@example.org>
+To: alex@example.net
+Subject: Testing attachments
+Date: Wed, 7 Oct 2026 09:15:42 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="legit-02-mixed"
+
+--legit-02-mixed
+Content-Type: multipart/alternative; boundary="legit-02-alt"
+
+--legit-02-alt
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Second test, this time with a small text file attached. It should be saved next to the message and listed in the viewer.
+
+Alex
+--legit-02-alt
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<div dir="ltr"><div>Second test, this time with a small text file attached. It should be saved next to the message and listed in the viewer.</div><div><br></div><div>Alex</div></div>
+--legit-02-alt--
+
+--legit-02-mixed
+Content-Type: text/plain; charset=utf-8; name="notes.txt"
+Content-Disposition: attachment; filename="notes.txt"
+Content-Transfer-Encoding: base64
+
+U2hvcHBpbmcgbGlzdDogZWdncywgYnJlYWQsIGNvZmZlZS4K
+--legit-02-mixed--

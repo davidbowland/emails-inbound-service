@@ -1,0 +1,30 @@
+From: "Taylor Lindqvist" <taylor@campaign-12.example>
+Reply-To: growth@campaign-12b.example
+To: alex@example.net
+Subject: Looking to improve your app? | Alex
+Date: Fri, 16 Oct 2026 00:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="fixture-12-boundary"
+
+--fixture-12-boundary
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Hi 
+
+Got an app idea but not sure where to start?
+
+We help businesses turn ideas into Android & iOS apps, with rates starting at USD 12/hour.
+
+Happy to discuss your idea and give you a quick estimate.
+
+Best,
+Taylor Lindqvist
+
+P.S. Reply “NO” in the subject if you’d prefer not to hear from us.
+--fixture-12-boundary
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<p>Hi </p><p>Got an app idea but not sure where to start?</p><p>We help businesses turn ideas into Android &amp; iOS apps, with rates starting at <strong>USD 12/hour</strong>.</p><p>Happy to discuss your idea and give you a quick estimate.</p><p>Best,<br>Taylor Lindqvist</p><p>P.S. Reply “NO” in the subject if you’d prefer not to hear from us.</p>
+--fixture-12-boundary--

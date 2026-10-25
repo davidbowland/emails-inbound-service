@@ -1,0 +1,41 @@
+From: Example Eats <receipts@eats.shop.example>
+Reply-To: Example Eats Support <help@eats.shop.example>
+To: alex@example.net
+Subject: Your Tuesday evening order with Example Eats
+Date: Wed, 14 Oct 2026 00:41:09 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="legit-06-alt"
+
+--legit-06-alt
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Thanks for ordering, Alex
+
+Here's your receipt for Lakeside Noodle House.
+
+Total  $31.84
+
+1  Pad See Ew                 $14.50
+1  Spring Rolls (4)            $6.95
+   Subtotal                   $21.45
+   Delivery Fee                $2.99
+   Service Fee                 $3.22
+   Taxes                       $1.68
+   Tip                         $2.50
+
+Payments
+Visa ••••0042   10/13/26 7:12 PM   $31.84
+
+Delivered to 4000 Sample Avenue, Springfield
+Order ID: EE-7J2K-1093
+
+Rate your order or get help with it in the Example Eats mobile app, or at https://example.com/orders/EE-7J2K-1093
+
+Example Eats, 100 Placeholder Street, Springfield
+--legit-06-alt
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html><body><h1>Thanks for ordering, Alex</h1><p>Here's your receipt for Lakeside Noodle House.</p><table><tr><td><strong>Total</strong></td><td><strong>$31.84</strong></td></tr><tr><td>1 Pad See Ew</td><td>$14.50</td></tr><tr><td>1 Spring Rolls (4)</td><td>$6.95</td></tr><tr><td>Subtotal</td><td>$21.45</td></tr><tr><td>Delivery Fee</td><td>$2.99</td></tr><tr><td>Service Fee</td><td>$3.22</td></tr><tr><td>Taxes</td><td>$1.68</td></tr><tr><td>Tip</td><td>$2.50</td></tr></table><p>Payments<br>Visa &bull;&bull;&bull;&bull;0042 &nbsp; 10/13/26 7:12 PM &nbsp; $31.84</p><p>Delivered to 4000 Sample Avenue, Springfield<br>Order ID: EE-7J2K-1093</p><p>Rate your order or get help with it in the Example Eats mobile app, or <a href="https://example.com/orders/EE-7J2K-1093">online</a>.</p><p style="color:#888">Example Eats, 100 Placeholder Street, Springfield</p></body></html>
+--legit-06-alt--

@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 import { emailFrom, queueApiKeyPath, queueApiUrl } from '../config'
-import { Attachment, AttachmentCommon, AxiosResponse, Email } from '../types'
+import { Attachment, AxiosResponse, Email, UploadedAttachment } from '../types'
 import { xrayCaptureHttps } from '../utils/logging'
 import { getParameter, memoized } from './ssm'
 
@@ -19,7 +19,7 @@ api.interceptors.request.use(async (config) => {
 
 /* Emails */
 
-const convertEmailToJson = (target: string, email: Email, attachments: AttachmentCommon[]): unknown => ({
+const convertEmailToJson = (target: string, email: Email, attachments: UploadedAttachment[]): unknown => ({
   attachments: attachments as unknown as Attachment[],
   from: `"${email.fromAddress.value[0].name}" <${emailFrom}>`,
   headers: email.headers,
@@ -33,5 +33,5 @@ const convertEmailToJson = (target: string, email: Email, attachments: Attachmen
   to: [target],
 })
 
-export const sendEmail = (target: string, email: Email, attachments: AttachmentCommon[]): Promise<AxiosResponse> =>
+export const sendEmail = (target: string, email: Email, attachments: UploadedAttachment[]): Promise<AxiosResponse> =>
   api.post('/emails', convertEmailToJson(target, email, attachments), {})

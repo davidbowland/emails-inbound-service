@@ -1,0 +1,37 @@
+From: AWS Notifications <no-reply@sns.notifications.example>
+To: alex@example.net
+Subject: OK: "emails-inbound-service-errors" in US East (N. Virginia)
+Date: Tue, 13 Oct 2026 17:03:30 +0000
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+You are receiving this email because your Amazon CloudWatch Alarm "emails-inbound-service-errors" in the US East (N. Virginia) region has entered the OK state, because "Threshold Crossed: 1 out of the last 1 datapoints [0.0 (13/10/26 16:58:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition)." at "Tuesday 13 October, 2026 17:03:30 UTC".
+
+View this alarm in the AWS Management Console:
+https://example.com/cloudwatch/alarms/emails-inbound-service-errors
+
+Alarm Details:
+- Name:                       emails-inbound-service-errors
+- Description:                Errors in the inbound email Lambda
+- State Change:               ALARM -> OK
+- Reason for State Change:    Threshold Crossed: 1 out of the last 1 datapoints [0.0 (13/10/26 16:58:00)] was not greater than or equal to the threshold (1.0) (minimum 1 datapoint for ALARM -> OK transition).
+- Timestamp:                  Tuesday 13 October, 2026 17:03:30 UTC
+- AWS Account:                123456789012
+- Alarm Arn:                  arn:aws:cloudwatch:us-east-1:123456789012:alarm:emails-inbound-service-errors
+
+Monitored Metric:
+- MetricNamespace:                     AWS/Lambda
+- MetricName:                          Errors
+- Dimensions:                          [FunctionName = emails-inbound-service-test]
+- Period:                              300 seconds
+- Statistic:                           Sum
+
+Most recent log event (emails-inbound-service-test):
+2026-10-13T16:43:12.481Z	3f1c2a7e-0000-4000-8000-000000000001	ERROR	{"message":"Error processing email","error":{"message":"Request failed with status code 503","status":503}}
+
+--
+If you wish to stop receiving notifications from this topic, please click or visit the link below to unsubscribe:
+https://example.com/sns/unsubscribe
+
+Please do not reply directly to this email. If you have any questions or comments regarding this email, please contact us at https://example.com/support

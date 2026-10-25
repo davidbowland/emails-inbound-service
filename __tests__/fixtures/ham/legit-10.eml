@@ -1,0 +1,33 @@
+From: Example Kitchen Box <hello@kitchenbox.shop.example>
+Reply-To: Example Kitchen Box <support@kitchenbox.shop.example>
+To: alex@example.net
+Subject: Your box has been delivered!
+Date: Tue, 20 Oct 2026 21:14:33 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="legit-10-alt"
+
+--legit-10-alt
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Hi Alex,
+
+Your box was delivered at 4:12 PM and left at the front door.
+
+Please refrigerate the ingredients as soon as possible. The ice packs and liners can go in your regular recycling.
+
+This week's recipes:
+- Roasted Half Chicken & Caesar Salad
+- Tan Tan Ramen with Ground Pork
+- Sheet-Pan Gnocchi with Peppers
+
+Something missing or damaged? Let us know within 7 days at https://example.com/help and we'll make it right.
+
+Happy cooking!
+The Example Kitchen Box team
+--legit-10-alt
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html><body><p>Hi Alex,</p><p>Your box was delivered at 4:12 PM and left at the front door.</p><p>Please refrigerate the ingredients as soon as possible. The ice packs and liners can go in your regular recycling.</p><p><strong>This week's recipes:</strong></p><ul><li>Roasted Half Chicken &amp; Caesar Salad</li><li>Tan Tan Ramen with Ground Pork</li><li>Sheet-Pan Gnocchi with Peppers</li></ul><p>Something missing or damaged? <a href="https://example.com/help">Let us know within 7 days</a> and we'll make it right.</p><p>Happy cooking!<br>The Example Kitchen Box team</p></body></html>
+--legit-10-alt--

@@ -1,0 +1,33 @@
+From: County Board of Elections <noreply@elections.county.example>
+Reply-To: voterinfo@elections.county.example
+To: alex@example.net
+Subject: Your polling place for the November 3 general election
+Date: Mon, 19 Oct 2026 14:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="legit-03-alt"
+
+--legit-03-alt
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Dear Voter,
+
+Your polling place for the General Election on Tuesday, November 3, 2026 is:
+
+  Lakeside Community Center, Room B
+  4000 Sample Avenue
+  Springfield
+
+Polls are open from 6:00 a.m. to 7:00 p.m. Bring an acceptable form of photo identification.
+
+Your precinct is 14-B. Sample ballots and accessibility information are available at https://example.com/elections/sample-ballot or by calling 555-0142.
+
+This is an automated message. Please do not reply to this email.
+
+County Board of Elections
+--legit-03-alt
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html><body><p>Dear Voter,</p><p>Your polling place for the General Election on <strong>Tuesday, November 3, 2026</strong> is:</p><p>Lakeside Community Center, Room B<br>4000 Sample Avenue<br>Springfield</p><p>Polls are open from 6:00 a.m. to 7:00 p.m. Bring an acceptable form of photo identification.</p><p>Your precinct is 14-B. Sample ballots and accessibility information are available at <a href="https://example.com/elections/sample-ballot">the county elections site</a> or by calling 555-0142.</p><p><em>This is an automated message. Please do not reply to this email.</em></p><p>County Board of Elections</p></body></html>
+--legit-03-alt--

@@ -1,0 +1,36 @@
+From: "Jordan Reyes" <jordan@campaign-16.example>
+To: alex@example.net
+Subject: A quick thought on www.example.net
+Date: Sat, 12 Sep 2026 00:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="fixture-16-boundary"
+
+--fixture-16-boundary
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Hi,
+
+I had a quick look at www.example.net and noticed there’s a good opportunity to
+improve its visibility on Google and attract more relevant traffic.
+
+We’re an India-based digital marketing agency specializing in SEO, AEO, and
+website optimization. We help businesses improve search visibility and turn
+organic traffic into targeted leads.
+
+Would you like me to send over our SEO packages and pricing?
+
+If it’s easier to discuss over WhatsApp, simply share your number and I’ll reach
+out.
+
+Thanks & Regards,
+
+Jordan Reyes
+
+P.S. If you’d prefer not to receive further emails, just reply “NO.”
+--fixture-16-boundary
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<p>Hi,</p><p>I had a quick look at www.example.net and noticed there’s a good opportunity to improve its visibility on Google and attract more relevant traffic.</p><p>We’re an India-based digital marketing agency specializing in SEO, AEO, and website optimization. We help businesses improve search visibility and turn organic traffic into targeted leads.</p><p>Would you like me to send over our SEO packages and pricing?</p><p>If it’s easier to discuss over WhatsApp, simply share your number and I’ll reach out.</p><p>Thanks &amp; Regards,</p><p>Jordan Reyes</p><p>P.S. If you’d prefer not to receive further emails, just reply “NO.”</p>
+--fixture-16-boundary--

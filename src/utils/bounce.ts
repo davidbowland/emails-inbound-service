@@ -2,45 +2,37 @@ import { log } from './logging'
 
 const extractDomainFromEmail = (email: string): string => {
   const match = email.match(/@([^@]+)$/)
-  return match ? match[1].toLowerCase() : ''
+  return match ? match[1] : ''
 }
 
-const doesSenderMatchSetting = (senderEmail: string, setting: string): boolean => {
-  const normalizedSender = senderEmail.toLowerCase()
-  const normalizedSetting = setting.toLowerCase()
+const matchesDomain = (senderDomain: string, domain: string): boolean =>
+  domain.length > 0 && (senderDomain === domain || senderDomain.endsWith(`.${domain}`))
 
-  // Exact email match
-  if (normalizedSender === normalizedSetting) {
-    log('Bouncing exact sender match')
+// Rules: `user@domain.com` matches that address exactly; `domain.com` and `@domain.com` match the domain and every
+// subdomain, never a partial name (`notdomain.com`). The `*` wildcard is a bounce-only setting, handled by the caller.
+export const matchesSenderRule = (address: string, rule: string): boolean => {
+  const normalizedAddress = address.toLowerCase()
+  const normalizedRule = rule.toLowerCase()
+  const senderDomain = extractDomainFromEmail(normalizedAddress)
+
+  if (normalizedRule.length > 0 && normalizedAddress === normalizedRule) {
     return true
+  } else if (normalizedRule.startsWith('@')) {
+    const ruleDomain = normalizedRule.slice(1)
+    return !ruleDomain.includes('@') && matchesDomain(senderDomain, ruleDomain)
+  } else if (!normalizedRule.includes('@')) {
+    return matchesDomain(senderDomain, normalizedRule)
   }
-
-  // Domain matching - setting should match all subdomains but not partial matches
-  if (!normalizedSetting.includes('@')) {
-    const senderDomain = extractDomainFromEmail(normalizedSender)
-
-    // Exact domain match
-    if (senderDomain === normalizedSetting) {
-      log('Bouncing exact domain match', { senderDomain })
-      return true
-    }
-
-    // Subdomain match - sender domain should end with .setting
-    if (senderDomain.endsWith(`.${normalizedSetting}`)) {
-      log('Bouncing domain match with subdomain', { normalizedSetting })
-      return true
-    }
-  }
-
   return false
 }
 
 export const shouldBounceSender = (senderEmail: string, bounceSenders: string[]): boolean => {
-  for (const sender of bounceSenders) {
-    if (sender === '*' || doesSenderMatchSetting(senderEmail, sender)) {
-      return true
-    }
+  const ruleIndex = bounceSenders.findIndex(
+    (rule: unknown) => typeof rule === 'string' && (rule === '*' || matchesSenderRule(senderEmail, rule)),
+  )
+  if (ruleIndex >= 0) {
+    log('Bouncing sender match', { ruleIndex })
+    return true
   }
-
   return false
 }

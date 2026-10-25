@@ -1,0 +1,29 @@
+From: Sam Rivera <sam.rivera@friends.example>
+To: Alex Example <alex@example.net>
+Subject: Re: Saturday dinner
+Date: Thu, 15 Oct 2026 22:47:19 +0000
+In-Reply-To: <alex-dinner-1@example.net>
+References: <alex-dinner-1@example.net>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="legit-12-alt"
+
+--legit-12-alt
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Saturday works! 7 is good for us. We'll bring dessert, and I'll text you when we're on the way.
+
+Do you still have the big salad bowl, or should I bring ours?
+
+Sam
+
+On Thu, Oct 15, 2026 at 3:10 PM Alex Example <alex@example.net> wrote:
+> Want to come over Saturday? Thinking around 7. Nothing fancy, just pasta.
+>
+> Alex
+--legit-12-alt
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<div dir="ltr">Saturday works! 7 is good for us. We'll bring dessert, and I'll text you when we're on the way.<div><br></div><div>Do you still have the big salad bowl, or should I bring ours?</div><div><br></div><div>Sam</div></div><br><div class="gmail_quote"><div dir="ltr" class="gmail_attr">On Thu, Oct 15, 2026 at 3:10 PM Alex Example &lt;alex@example.net&gt; wrote:<br></div><blockquote class="gmail_quote">Want to come over Saturday? Thinking around 7. Nothing fancy, just pasta.<br><br>Alex</blockquote></div>
+--legit-12-alt--

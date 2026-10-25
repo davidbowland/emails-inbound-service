@@ -1,0 +1,92 @@
+From: "Riley Tanaka" <riley@campaign-02.example>
+To: "Riley Tanaka" <riley@campaign-02.example>
+Subject: Re: Ref
+Date: Tue, 20 Oct 2026 00:00:00 +0000
+In-Reply-To: <reply-02@campaign-02.example>
+References: <ref-02-1@campaign-02.example>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="fixture-02-boundary"
+
+--fixture-02-boundary
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Hello,
+
+I wanted to check if you’re interested in converting your business website into a mobile app.
+
+I can share our work samples and affordable pricing if you’d like to take a look.
+
+Thank you!
+________________________________
+From: Riley Tanaka
+Sent: Monday, October 19, 2026 7:02 AM
+To: Riley Tanaka <riley@campaign-02.example>
+Subject: Mobile app
+
+Hi,
+
+Every business has unique needs. That's why we build custom mobile apps designed specifically for your industry and workflow.
+
+If you're considering a mobile app, we'd be happy to discuss your requirements.
+
+Best regards,
+@Riley<mailto:riley@campaign-02.example>
+App Developer
+--fixture-02-boundary
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html>
+<body>
+<div>
+Hello,</div>
+<div>
+<br>
+</div>
+<div>
+I wanted to check if you’re interested in converting your business website into a mobile app.</div>
+<div>
+<br>
+</div>
+<div>
+I can share our work samples and affordable pricing if you’d like to take a look.</div>
+<div>
+<br>
+</div>
+<div>
+Thank you!</div>
+<div></div>
+<hr>
+<div><font><b>From:</b> Riley Tanaka<br>
+<b>Sent:</b> Monday, October 19, 2026 7:02 AM<br>
+<b>To:</b> Riley Tanaka &lt;riley@campaign-02.example&gt;<br>
+<b>Subject:</b> Mobile app</font>
+<div>&nbsp;</div>
+</div>
+<div>
+<div>
+Hi,</div>
+<div>
+&nbsp;</div>
+<div>
+Every business has unique needs. That's why we build custom mobile apps designed specifically for your industry and workflow.</div>
+<div>
+&nbsp;</div>
+<div>
+If you're considering a mobile app, we'd be happy to discuss your requirements.</div>
+<div>
+&nbsp;</div>
+<div>
+Best regards,</div>
+<div>
+<a>@Riley</a></div>
+<div>
+App Developer</div>
+<div>
+<br>
+</div>
+</div>
+</body>
+</html>
+--fixture-02-boundary--

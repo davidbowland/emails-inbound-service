@@ -1,0 +1,43 @@
+From: Example Outfitters <orders@outfitters.shop.example>
+Reply-To: Customer Care <care@outfitters.shop.example>
+To: Alex Example <alex@example.net>
+Subject: Success, we got your order.
+Date: Sat, 17 Oct 2026 20:05:51 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="legit-08-alt"
+
+--legit-08-alt
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Hi Alex,
+
+Thanks for your order! We'll send another email when it ships.
+
+Order number: EO-448210
+Order date: October 17, 2026
+
+Trail Running Jacket, Slate, M      1 x $89.00
+Merino Crew Socks, 3-pack           1 x $24.00
+
+Subtotal:    $113.00
+Shipping:      $0.00
+Tax:           $9.04
+Total:       $122.04
+
+Shipping to:
+Alex Example
+4000 Sample Avenue
+Springfield
+
+Track or change your order: https://example.com/orders/EO-448210
+
+Need help? Reply to this email or visit https://example.com/help. Returns are free within 60 days.
+
+Example Outfitters
+--legit-08-alt
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html><body><p>Hi Alex,</p><p>Thanks for your order! We'll send another email when it ships.</p><p><strong>Order number:</strong> EO-448210<br><strong>Order date:</strong> October 17, 2026</p><table><tr><td>Trail Running Jacket, Slate, M</td><td>1 x $89.00</td></tr><tr><td>Merino Crew Socks, 3-pack</td><td>1 x $24.00</td></tr></table><p>Subtotal: $113.00<br>Shipping: $0.00<br>Tax: $9.04<br><strong>Total: $122.04</strong></p><p>Shipping to:<br>Alex Example<br>4000 Sample Avenue<br>Springfield</p><p><a href="https://example.com/orders/EO-448210">Track or change your order</a></p><p>Need help? Reply to this email or visit our <a href="https://example.com/help">help center</a>. Returns are free within 60 days.</p><p>Example Outfitters</p></body></html>
+--legit-08-alt--
