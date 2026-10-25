@@ -1,8 +1,11 @@
+import type { Attachment as ParsedAttachment } from 'mailparser'
+
 // Type-only re-exports: aws-lambda ships no runtime code, so a value re-export would fail at runtime. Runtime
 // constants (such as DEFAULT_SPAM_FILTER) live in utils or config, never here.
 export type * from 'aws-lambda'
 export type { AxiosResponse } from 'axios'
-export type { AddressObject, AttachmentCommon, EmailAddress as ParsedEmailAddress, ParsedMail } from 'mailparser'
+export type { AddressObject, EmailAddress as ParsedEmailAddress, ParsedMail } from 'mailparser'
+export type { ParsedAttachment }
 export type { Attachment } from 'nodemailer/lib/mailer'
 
 export type SpamSensitivity = 'low' | 'medium' | 'high'
@@ -49,6 +52,9 @@ export interface Email {
   subject?: string
   toAddress?: EmailAddress
 }
+
+// A parsed attachment once uploaded to S3: `content` holds its S3 key in place of the bytes
+export type UploadedAttachment = Omit<ParsedAttachment, 'content'> & { content: string }
 
 export interface EmailAttachment {
   filename: string

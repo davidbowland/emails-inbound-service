@@ -2,10 +2,14 @@ import { v1 as uuidv1 } from 'uuid'
 
 import { sendEmail } from '../services/queue'
 import { copyS3Object } from '../services/s3'
-import { AttachmentCommon, Email } from '../types'
+import { Email, UploadedAttachment } from '../types'
 import { getAttachmentId } from './attachments'
 
-export const forwardEmail = async (targets: string[], email: Email, attachments: AttachmentCommon[]): Promise<void> => {
+export const forwardEmail = async (
+  targets: string[],
+  email: Email,
+  attachments: UploadedAttachment[],
+): Promise<void> => {
   for (const target of targets) {
     const uuid = uuidv1()
     const attachmentsOnS3 = attachments.map(async (attachment) => {

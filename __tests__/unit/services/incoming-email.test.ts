@@ -5,6 +5,7 @@ import {
   parsedContents,
   receipt,
   spamVerdictReceipt,
+  uploadedAttachment,
   virusVerdictReceipt,
 } from '../__mocks__'
 import * as emails from '@services/emails'
@@ -39,7 +40,7 @@ describe('incoming-email service', () => {
 
     beforeAll(() => {
       jest.mocked(attachments).getAttachmentId.mockImplementation((attachment) => attachment.contentId)
-      jest.mocked(attachments).uploadAttachments.mockResolvedValue([attachment])
+      jest.mocked(attachments).uploadAttachments.mockResolvedValue([uploadedAttachment])
       jest.mocked(bounce).shouldBounceSender.mockReturnValue(false)
       // Mirrors the real implementation, which lowercases (src/services/emails.ts)
       jest.mocked(emails).extractAccountFromAddress.mockImplementation((email) => email.split('@')[0].toLowerCase())
@@ -242,7 +243,7 @@ describe('incoming-email service', () => {
           const isolatedSpamScore = await import('@utils/spam-score')
           const { processReceivedEmail: isolatedProcess } = await import('@services/incoming-email')
           jest.mocked(isolatedAttachments).getAttachmentId.mockImplementation((attachment) => attachment.contentId)
-          jest.mocked(isolatedAttachments).uploadAttachments.mockResolvedValue([attachment])
+          jest.mocked(isolatedAttachments).uploadAttachments.mockResolvedValue([uploadedAttachment])
           jest.mocked(isolatedBounce).shouldBounceSender.mockReturnValue(false)
           jest
             .mocked(isolatedEmails)

@@ -1,4 +1,4 @@
-import { attachment, email } from '../__mocks__'
+import { email, uploadedAttachment } from '../__mocks__'
 import { queueApiKeyPath } from '@config'
 import { sendEmail } from '@services/queue'
 
@@ -80,12 +80,12 @@ describe('queue', () => {
     })
 
     it('should pass email contents to the endpoint', async () => {
-      await sendEmail(target, email, [attachment])
+      await sendEmail(target, email, [uploadedAttachment])
 
       expect(mockPost).toHaveBeenCalledWith(
         '/emails',
         {
-          attachments: [attachment],
+          attachments: [uploadedAttachment],
           from: '"Person A" <do-not@reply.com>',
           headers: {},
           html: '<a href="http://www.gutenberg.org/files/8164/8164-h/8164-h.htm">http://www.gutenberg.org/files/8164/8164-h/8164-h.htm</a>\n',

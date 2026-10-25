@@ -1,4 +1,4 @@
-import { AttachmentCommon, Email, ParsedMail, SESEvent, SESReceipt } from '@types'
+import { Email, ParsedAttachment, ParsedMail, SESEvent, SESReceipt, UploadedAttachment } from '@types'
 
 export const messageId = 'aaaaa-uuuuu-uuuuu-iiiii-ddddd'
 
@@ -30,7 +30,9 @@ export const attachment = {
   },
   related: false,
   size: 32_000,
-} as unknown as AttachmentCommon
+} as unknown as ParsedAttachment
+
+export const uploadedAttachment: UploadedAttachment = { ...attachment, content: 'A big file' }
 
 export const email: Email = {
   attachments: ['ytghji87ytgbhj'],
